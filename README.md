@@ -36,16 +36,14 @@ The vision is to help users manage their finances wisely and transparently based
 - **External APIs**: Integration with Yahoo Finance, Google Finance, etc.
 
 ## Team Members
-- Rom Matzki (325385599) - romm0109@gmail.com - 0548181384
-- Noam Shemoni (213785298) - noamsh9103@gmail.com - 0534305031
-- Yahav Minikes (324199496) - yahavminikes@gmail.com - 0545333396
-- Stav Bareli (212946529) - stavbarel2003@gmai.com - 0508720071
-- Ben Bashvitz (324228139) - bashvitzben@gmail.com - 0548870046
-- Aylon Golanski (326283058) - aylongo10@gmail.com - 0532852959
+- Rom Matetzki - romm0109@gmail.com - 0548181384
+- Noam Shimoni - noamsh9103@gmail.com - 0534305031
+- Yahav Minikes - yahavminikes@gmail.com - 0545333396
+- Stav Barel - stavbarel2003@gmai.com - 0508720071
+- Ben Bashvitz - bashvitzben@gmail.com - 0548870046
+- Aylon Golanski - aylongo10@gmail.com - 0532852959
 
 Specialization: FSD (Full Stack Development)
-
-Approved by: Tal Zion Workshop 18/11
 
 ## Links
 - [Monday Board](https://marketmind.monday.com/)
