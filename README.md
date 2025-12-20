@@ -36,7 +36,7 @@ The vision is to help users manage their finances wisely and transparently based
 - **External APIs**: Integration with Yahoo Finance, Google Finance, etc.
 
 ## Team Members
-- Rom Matetzki - romm0109@gmail.com - 0548181384
+- Rom Matetzky - romm0109@gmail.com - 0548181384
 - Noam Shimoni - noamsh9103@gmail.com - 0534305031
 - Yahav Minikes - yahavminikes@gmail.com - 0545333396
 - Stav Barel - stavbarel2003@gmai.com - 0508720071
