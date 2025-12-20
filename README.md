@@ -55,3 +55,4 @@ Specialization: FSD (Full Stack Development)
 
 - [Monday Board](https://marketmind.monday.com/)
 - [Supabase Dashboard](https://supabase.com/dashboard/project/wrkamqqxkauhnmplacwm)
+- [Figma](https://www.figma.com/design/Hz5CMfqUiRhuULWQ2hMGEg/Market-Mind?node-id=1-6&p=f&t=efuuGLiF6ELiOW6x-0)
