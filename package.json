@@ -1,0 +1,38 @@
+{
+  "name": "@market-mind/source",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {
+    "start:frontend": "nx serve frontend",
+    "build:frontend": "nx build frontend",
+    "start:api": "nx serve backend-api",
+    "build:api": "nx build backend-api"
+  },
+  "private": true,
+  "devDependencies": {
+    "@eslint/js": "^9.8.0",
+    "@nx/eslint": "22.5.2",
+    "@nx/eslint-plugin": "22.5.2",
+    "@nx/js": "22.5.2",
+    "@nx/nest": "^22.5.2",
+    "@nx/node": "22.5.2",
+    "@nx/react": "^22.5.2",
+    "@nx/vite": "22.5.2",
+    "@nx/web": "22.5.2",
+    "@nx/webpack": "22.5.2",
+    "@types/node": "20.19.9",
+    "eslint": "^9.8.0",
+    "eslint-config-prettier": "^10.0.0",
+    "eslint-plugin-import": "2.31.0",
+    "jiti": "2.4.2",
+    "nx": "22.5.2",
+    "prettier": "~3.6.2",
+    "tslib": "^2.3.0",
+    "typescript": "~5.9.2",
+    "typescript-eslint": "^8.40.0"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ]
+}
