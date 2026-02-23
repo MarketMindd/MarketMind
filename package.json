@@ -6,7 +6,11 @@
     "start:frontend": "nx serve frontend",
     "build:frontend": "nx build frontend",
     "start:api": "nx serve backend-api",
-    "build:api": "nx build backend-api"
+    "build:api": "nx build backend-api",
+    "db:migrate": "npm run db:migrate -w @market-mind/database",
+    "db:migration:revert": "npm run db:migration:revert -w @market-mind/database",
+    "db:migration:show": "npm run db:migration:show -w @market-mind/database",
+    "db:migration:generate": "npm run db:migration:generate -w @market-mind/database"
   },
   "private": true,
   "devDependencies": {
@@ -20,11 +24,15 @@
     "@nx/vite": "22.5.2",
     "@nx/web": "22.5.2",
     "@nx/webpack": "22.5.2",
+    "@swc-node/register": "~1.11.1",
+    "@swc/core": "~1.15.5",
+    "@swc/helpers": "~0.5.18",
     "@types/node": "20.19.9",
     "eslint": "^9.8.0",
     "eslint-config-prettier": "^10.0.0",
     "eslint-plugin-import": "2.31.0",
     "jiti": "2.4.2",
+    "jsonc-eslint-parser": "^2.1.0",
     "nx": "22.5.2",
     "prettier": "~3.6.2",
     "tslib": "^2.3.0",
@@ -34,5 +42,6 @@
   "workspaces": [
     "packages/*",
     "apps/*"
-  ]
+  ],
+  "dependencies": {}
 }
