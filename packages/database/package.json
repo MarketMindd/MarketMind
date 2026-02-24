@@ -4,10 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "db:migrate": "node ./scripts/run-typeorm.mjs migration:run",
-    "db:migration:revert": "node ./scripts/run-typeorm.mjs migration:revert",
-    "db:migration:show": "node ./scripts/run-typeorm.mjs migration:show",
-    "db:migration:generate": "node ./scripts/run-typeorm.mjs migration:generate"
+    "db:migrate": "npx typeorm-ts-node-esm migration:run -d ./src/datasource/datasource.ts",
+    "db:migration:revert": "npx typeorm-ts-node-esm migration:revert -d ./src/datasource/datasource.ts",
+    "db:migration:generate": "npx typeorm-ts-node-esm migration:generate -d ./src/datasource/datasource.ts ./src/migrations/generated-migration",
+    "db:migration:create": "npx typeorm-ts-node-esm migration:create ./src/migrations/empty-migration ",
+    "db:migration:show": "npx typeorm-ts-node-esm migration:show -d ./src/datasource/datasource.ts"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -22,14 +23,8 @@
     }
   },
   "dependencies": {
-    "dotenv": "^16.4.7",
-    "pg": "^8.13.1",
-    "reflect-metadata": "^0.1.14",
+
     "tslib": "^2.3.0",
     "typeorm": "^0.3.22"
-  },
-  "devDependencies": {
-    "ts-node": "^10.9.2",
-    "typeorm-ts-node-esm": "^0.3.20"
   }
 }

@@ -45,3 +45,5 @@ vite.config.*.timestamp*
 
 .vscode
 .github
+
+.env*

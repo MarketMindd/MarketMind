@@ -10,7 +10,8 @@
     "db:migrate": "npm run db:migrate -w @market-mind/database",
     "db:migration:revert": "npm run db:migration:revert -w @market-mind/database",
     "db:migration:show": "npm run db:migration:show -w @market-mind/database",
-    "db:migration:generate": "npm run db:migration:generate -w @market-mind/database"
+    "db:migration:generate": "npm run db:migration:generate -w @market-mind/database",
+    "db:migration:create": "npm run db:migration:create -w @market-mind/database --"
   },
   "private": true,
   "devDependencies": {
