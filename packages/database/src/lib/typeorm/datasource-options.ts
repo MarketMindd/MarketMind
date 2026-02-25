@@ -1,7 +1,10 @@
 import { config } from 'dotenv';
 import { DataSourceOptions } from 'typeorm';
+import { PortfolioHoldingEntity } from '../entities/portfolio-holding.entity.js';
+import { PortfolioEntity } from '../entities/portfolio.entity.js';
 import { UserProfileEntity } from '../entities/user-profile.entity.js';
 import { InitialSchema1739000000000 } from './migrations/1739000000000-initial-schema.js';
+import { PortfolioSchema1739200000000 } from './migrations/1739200000000-portfolio-schema.js';
 
 config();
 
@@ -56,8 +59,8 @@ export const createTypeOrmOptions = (): DataSourceOptions => {
     ssl: dbEnv.ssl ? { rejectUnauthorized: false } : false,
     synchronize: false,
     logging: false,
-    entities: [UserProfileEntity],
-    migrations: [InitialSchema1739000000000],
+    entities: [UserProfileEntity, PortfolioEntity, PortfolioHoldingEntity],
+    migrations: [InitialSchema1739000000000, PortfolioSchema1739200000000],
     migrationsTableName: 'typeorm_migrations',
   };
 };
