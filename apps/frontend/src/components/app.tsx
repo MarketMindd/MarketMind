@@ -1,6 +1,6 @@
 import { Route, Routes } from 'react-router-dom';
-import { SignIn } from './views/signIn';
-import { SignUp } from './views/signUp';
+import { SignIn } from './views/auth/signIn';
+import { SignUp } from './views/auth/signUp';
 
 export const App = () => {
   return (

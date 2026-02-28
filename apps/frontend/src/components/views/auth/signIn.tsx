@@ -1,10 +1,11 @@
 import React from 'react';
+import { AuthForm } from './authForm';
 
 export const SignIn: React.FC = () => {
   return (
     <div>
       <h1>Sign In</h1>
-      {/* TODO: add form fields and logic */}
+      <AuthForm onAuth={() => console.log('Sign in successful')} />
     </div>
   );
 };
