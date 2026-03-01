@@ -1,11 +1,24 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { AuthBranding } from './authBranding';
 import { AuthForm } from './authForm';
 
 export const SignIn: React.FC = () => {
+  const navigate = useNavigate();
+
+  const handleModeSwitch = () => {
+    navigate('/signup');
+  };
+
+  const handleAuth = () => {
+    console.log('Sign in successful');
+    // proceed with post-auth actions or navigate to dashboard, etc.
+  };
+
   return (
-    <div>
-      <h1>Sign In</h1>
-      <AuthForm onAuth={() => console.log('Sign in successful')} />
+    <div className="min-h-screen flex">
+      <AuthBranding />
+      <AuthForm isSignIn onAuth={handleAuth} onModeSwitch={handleModeSwitch} />
     </div>
   );
 };
