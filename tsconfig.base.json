@@ -15,6 +15,10 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "es2022",
-    "customConditions": ["@market-mind/source"]
+    "baseUrl": ".",
+    "paths": {
+      "@market-mind/common": ["packages/common/src/index.ts"],
+      "@market-mind/database": ["packages/database/src/index.ts"]
+    }
   }
 }

@@ -1,15 +1,8 @@
-import type { UserProfile } from './auth';
+import { SignInPayload, SignUpPayload, UserProfile } from "@market-mind/common";
 
 export interface iDataProvider {
   auth: {
-    signin: (payload: {
-      email: string;
-      password: string;
-    }) => Promise<UserProfile>;
-    signup: (payload: {
-      email: string;
-      password: string;
-      fullName: string;
-    }) => Promise<UserProfile>;
+    signin: (payload: SignInPayload) => Promise<UserProfile>;
+    signup: (payload: SignUpPayload) => Promise<UserProfile>;
   };
 }

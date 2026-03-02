@@ -27,7 +27,7 @@
     "tslib": "^2.3.0",
     "typeorm": "^0.3.22"
   },
-    "devDependencies": {
+  "devDependencies": {
     "ts-node": "^10.9.2"
   }
 }

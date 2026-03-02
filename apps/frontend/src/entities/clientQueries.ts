@@ -1,4 +1,8 @@
-import type { UserProfile } from './auth';
+import type {
+  SignInPayload,
+  SignUpPayload,
+  UserProfile,
+} from '@market-mind/common';
 import type {
   UseMutationOptions,
   UseMutationResult,
@@ -7,26 +11,10 @@ import type {
 export type iClientQueriesProvider = {
   auth: {
     useSignIn: (
-      options?: UseMutationOptions<
-        UserProfile,
-        Error,
-        { email: string; password: string }
-      >,
-    ) => UseMutationResult<
-      UserProfile,
-      Error,
-      { email: string; password: string }
-    >;
+      options?: UseMutationOptions<UserProfile, Error, SignInPayload>,
+    ) => UseMutationResult<UserProfile, Error, SignInPayload>;
     useSignUp: (
-      options?: UseMutationOptions<
-        UserProfile,
-        Error,
-        { email: string; password: string; fullName: string }
-      >,
-    ) => UseMutationResult<
-      UserProfile,
-      Error,
-      { email: string; password: string; fullName: string }
-    >;
+      options?: UseMutationOptions<UserProfile, Error, SignUpPayload>,
+    ) => UseMutationResult<UserProfile, Error, SignUpPayload>;
   };
 };

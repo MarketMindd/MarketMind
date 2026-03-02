@@ -1,9 +1,10 @@
 import { iDataProvider } from '@/entities/dataProvider';
+import { SignInPayload } from '@market-mind/common';
 
 export const createFetchDataProvider = (): iDataProvider => {
   const baseUrl = 'http://localhost:3000/api';
 
-  const signin = async (payload: { email: string; password: string }) => {
+  const signin = async (payload: SignInPayload) => {
     const res = await fetch(`${baseUrl}/auth/signin`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
