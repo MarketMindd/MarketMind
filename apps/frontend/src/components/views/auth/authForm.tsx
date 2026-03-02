@@ -5,18 +5,22 @@ import { Mail, Lock, User, ArrowRight } from 'lucide-react';
 
 interface AuthFormProps {
   isSignIn: boolean;
-  onAuth: () => void;
+  onAuth: (payload: any) => void | Promise<any>;
   onModeSwitch: () => void;
 }
 
 export const AuthForm = ({ isSignIn, onAuth, onModeSwitch }: AuthFormProps) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
+  const [fullName, setFullName] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onAuth();
+    if (isSignIn) {
+      onAuth({ email, password });
+    } else {
+      onAuth({ email, password, fullName });
+    }
   };
 
   return (
@@ -40,8 +44,8 @@ export const AuthForm = ({ isSignIn, onAuth, onModeSwitch }: AuthFormProps) => {
               <Input
                 type="text"
                 placeholder="Full name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
                 className="pl-10"
               />
             </div>
