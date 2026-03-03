@@ -12,13 +12,11 @@ export class AuthController {
   async signup(
     @Body(new ZodValidationPipe(signUpPayloadSchema)) body: SignUpPayload,
   ) {
-    const user = await this.authService.signup(
+    return await this.authService.signup(
       body.email,
       body.password,
       body.fullName,
     );
-    const { password, ...rest } = user;
-    return rest;
   }
 
   @Post('signin')

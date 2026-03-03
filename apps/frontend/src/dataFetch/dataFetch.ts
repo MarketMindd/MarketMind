@@ -1,5 +1,5 @@
 import { iDataProvider } from '@/entities/dataProvider';
-import { SignInPayload } from '@market-mind/common';
+import { SignInPayload, SignUpPayload } from '@market-mind/common';
 
 export const createFetchDataProvider = (): iDataProvider => {
   const baseUrl = 'http://localhost:3000/api';
@@ -17,11 +17,7 @@ export const createFetchDataProvider = (): iDataProvider => {
     return res.json();
   };
 
-  const signup = async (payload: {
-    email: string;
-    password: string;
-    fullName: string;
-  }) => {
+  const signup = async (payload: SignUpPayload) => {
     const res = await fetch(`${baseUrl}/auth/signup`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

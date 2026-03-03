@@ -1,8 +1,13 @@
-import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
+import { SignInPayload, SignUpPayload } from '@market-mind/common';
 import { UserProfileEntity } from '@market-mind/database';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcryptjs';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class AuthService {
@@ -11,7 +16,11 @@ export class AuthService {
     private readonly usersRepo: Repository<UserProfileEntity>,
   ) {}
 
-  async signup(email: string, password: string, fullName = '') {
+  async signup(
+    email: SignUpPayload['email'],
+    password: SignUpPayload['password'],
+    fullName: SignUpPayload['fullName'],
+  ) {
     const existing = await this.usersRepo.findOne({ where: { email } });
     if (existing) {
       throw new ConflictException('Email already in use');
@@ -25,10 +34,15 @@ export class AuthService {
       fullName,
     });
 
-    return this.usersRepo.save(user);
+    const saved = await this.usersRepo.save(user);
+    const { password: _p, createdAt, updatedAt, ...profile } = saved;
+    return profile;
   }
 
-  async signin(email: string, password: string) {
+  async signin(
+    email: SignInPayload['email'],
+    password: SignInPayload['password'],
+  ) {
     const user = await this.usersRepo.findOne({ where: { email } });
     if (!user) {
       throw new NotFoundException('Invalid credentials');
@@ -39,8 +53,7 @@ export class AuthService {
       throw new NotFoundException('Invalid credentials');
     }
 
-    // For now return basic profile (do not include password)
-    const { password: _p, ...profile } = user;
+    const { password: _p, createdAt, updatedAt, ...profile } = user;
     return profile;
   }
 }

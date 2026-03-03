@@ -2,14 +2,27 @@ import { useState } from 'react';
 import { Button } from '@/components/elements/button';
 import { Input } from '@/components/elements/input';
 import { Mail, Lock, User, ArrowRight } from 'lucide-react';
+import { SignInPayload, SignUpPayload } from '@market-mind/common';
 
-interface AuthFormProps {
-  isSignIn: boolean;
-  onAuth: (payload: any) => void | Promise<any>;
+interface AuthFormSignInProps {
+  isSignIn: true;
+  onAuth: (payload: SignInPayload) => void;
   onModeSwitch: () => void;
 }
 
-export const AuthForm = ({ isSignIn, onAuth, onModeSwitch }: AuthFormProps) => {
+interface AuthFormSignUpProps {
+  isSignIn: false;
+  onAuth: (payload: SignUpPayload) => void;
+  onModeSwitch: () => void;
+}
+
+type AuthFormProps = AuthFormSignInProps | AuthFormSignUpProps;
+
+export const AuthForm: React.FC<AuthFormProps> = ({
+  isSignIn,
+  onAuth,
+  onModeSwitch,
+}) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
