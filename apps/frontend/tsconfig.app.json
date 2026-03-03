@@ -14,9 +14,6 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"]
-    }
   },
   "exclude": [
     "out-tsc",
