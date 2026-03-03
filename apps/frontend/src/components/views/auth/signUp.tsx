@@ -1,4 +1,5 @@
 import { useClientQueries } from '@/hooks/useClientQueries';
+import { useToast } from '@/hooks/useToast';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthBranding } from './authBranding';
@@ -6,6 +7,7 @@ import { AuthForm } from './authForm';
 
 export const SignUp: React.FC = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleModeSwitch = () => {
     navigate('/signin');
@@ -19,7 +21,12 @@ export const SignUp: React.FC = () => {
       console.log('Sign up successful', data);
       // navigate to sign-in or dashboard
     },
-    onError: (err: Error) => console.error('Sign up failed', err.message),
+    onError: (err: Error) =>
+      toast({
+        title: 'Sign up failed',
+        description: err.message,
+        variant: 'destructive',
+      }),
   });
 
   return (
@@ -27,7 +34,7 @@ export const SignUp: React.FC = () => {
       <AuthBranding />
       <AuthForm
         isSignIn={false}
-        onAuth={(payload) => signUp.mutate(payload as any)}
+        onAuth={(payload) => signUp.mutate(payload)}
         onModeSwitch={handleModeSwitch}
       />
     </div>
