@@ -1,9 +1,8 @@
-import {
+import type {
   SignInPayload,
   SignUpPayload,
-  UserProfile,
   AuthResponse,
-} from "@market-mind/common";
+} from '@market-mind/common';
 
 export interface iDataProvider {
   auth: {

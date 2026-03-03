@@ -18,10 +18,9 @@ export const SignUp: React.FC = () => {
   } = useClientQueries();
   const signUp = useSignUp({
     onSuccess: (data) => {
-      console.log('Sign up successful', data);
       // after signup we also get token so store and go to dashboard
       localStorage.setItem('accessToken', data.accessToken);
-      navigate('/');
+      navigate('/dashboard');
     },
     onError: (err: Error) =>
       toast({

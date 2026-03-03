@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import {
   QueryClient,
   QueryClientProvider,
@@ -30,7 +30,7 @@ export const ClientQueriesProvider = ({
   children: React.ReactNode;
   queryClient?: QueryClient;
 }) => {
-  const client = queryClient ?? new QueryClient();
+  const [client] = useState(queryClient ?? new QueryClient());
   return (
     <ClientQueriesDataContext.Provider value={{ dataProvider }}>
       <QueryClientProvider client={client}>{children}</QueryClientProvider>

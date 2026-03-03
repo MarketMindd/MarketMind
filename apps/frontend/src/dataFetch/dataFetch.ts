@@ -1,8 +1,9 @@
+import { appConfig } from '@/config/appConfig';
 import { iDataProvider } from '@/entities/dataProvider';
 import { SignInPayload, SignUpPayload } from '@market-mind/common';
 
 export const createFetchDataProvider = (): iDataProvider => {
-  const baseUrl = 'http://localhost:3000/api';
+  const baseUrl = appConfig.apiBaseUrl;
 
   const getHeaders = () => {
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
