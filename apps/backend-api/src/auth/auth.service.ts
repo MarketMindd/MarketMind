@@ -1,10 +1,17 @@
-import { SignInPayload, SignUpPayload } from '@market-mind/common';
+import {
+  AuthResponse,
+  SignInPayload,
+  SignUpPayload,
+  UserProfile,
+} from '@market-mind/common';
 import { UserProfileEntity } from '@market-mind/database';
 import {
   ConflictException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcryptjs';
 import { Repository } from 'typeorm';
@@ -14,7 +21,13 @@ export class AuthService {
   constructor(
     @InjectRepository(UserProfileEntity)
     private readonly usersRepo: Repository<UserProfileEntity>,
+    private readonly jwtService: JwtService,
   ) {}
+
+  private createAuthResponse(profile: UserProfile): AuthResponse {
+    const accessToken = this.jwtService.sign(profile);
+    return { accessToken, user: profile };
+  }
 
   async signup(
     email: SignUpPayload['email'],
@@ -36,24 +49,24 @@ export class AuthService {
 
     const saved = await this.usersRepo.save(user);
     const { password: _p, createdAt, updatedAt, ...profile } = saved;
-    return profile;
+    return this.createAuthResponse(profile);
   }
 
   async signin(
     email: SignInPayload['email'],
     password: SignInPayload['password'],
-  ) {
+  ): Promise<AuthResponse> {
     const user = await this.usersRepo.findOne({ where: { email } });
     if (!user) {
-      throw new NotFoundException('Invalid credentials');
+      throw new NotFoundException('User not found');
     }
 
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
-      throw new NotFoundException('Invalid credentials');
+      throw new UnauthorizedException('Invalid credentials');
     }
 
     const { password: _p, createdAt, updatedAt, ...profile } = user;
-    return profile;
+    return this.createAuthResponse(profile);
   }
 }

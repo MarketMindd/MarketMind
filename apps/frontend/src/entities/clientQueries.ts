@@ -1,7 +1,7 @@
 import type {
   SignInPayload,
   SignUpPayload,
-  UserProfile,
+  AuthResponse,
 } from '@market-mind/common';
 import type {
   UseMutationOptions,
@@ -11,10 +11,10 @@ import type {
 export type iClientQueriesProvider = {
   auth: {
     useSignIn: (
-      options?: UseMutationOptions<UserProfile, Error, SignInPayload>,
-    ) => UseMutationResult<UserProfile, Error, SignInPayload>;
+      options?: UseMutationOptions<AuthResponse, Error, SignInPayload>,
+    ) => UseMutationResult<AuthResponse, Error, SignInPayload>;
     useSignUp: (
-      options?: UseMutationOptions<UserProfile, Error, SignUpPayload>,
-    ) => UseMutationResult<UserProfile, Error, SignUpPayload>;
+      options?: UseMutationOptions<AuthResponse, Error, SignUpPayload>,
+    ) => UseMutationResult<AuthResponse, Error, SignUpPayload>;
   };
 };

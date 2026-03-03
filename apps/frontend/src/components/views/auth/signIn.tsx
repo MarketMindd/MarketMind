@@ -19,7 +19,9 @@ export const SignIn: React.FC = () => {
   const signIn = useSignIn({
     onSuccess: (data) => {
       console.log('Sign in successful', data);
-      // navigate to app dashboard or similar
+      // store token and move on
+      localStorage.setItem('accessToken', data.accessToken);
+      navigate('/');
     },
     onError: (err: Error) => {
       toast({

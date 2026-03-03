@@ -1,5 +1,9 @@
 import { Body, Controller, Post } from '@nestjs/common';
-import { signInPayloadSchema, signUpPayloadSchema } from '@market-mind/common';
+import {
+  signInPayloadSchema,
+  signUpPayloadSchema,
+  AuthResponse,
+} from '@market-mind/common';
 import type { SignInPayload, SignUpPayload } from '@market-mind/common';
 import { AuthService } from './auth.service';
 import { ZodValidationPipe } from '../pipes/zodValidatorPipe';
@@ -11,7 +15,7 @@ export class AuthController {
   @Post('signup')
   async signup(
     @Body(new ZodValidationPipe(signUpPayloadSchema)) body: SignUpPayload,
-  ) {
+  ): Promise<AuthResponse> {
     return await this.authService.signup(
       body.email,
       body.password,
@@ -22,7 +26,7 @@ export class AuthController {
   @Post('signin')
   async signin(
     @Body(new ZodValidationPipe(signInPayloadSchema)) body: SignInPayload,
-  ) {
+  ): Promise<AuthResponse> {
     return this.authService.signin(body.email, body.password);
   }
 }

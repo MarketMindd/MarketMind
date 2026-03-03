@@ -13,7 +13,7 @@
     ],
     "module": "esnext",
     "moduleResolution": "bundler",
-    "baseUrl": ".",
+    "baseUrl": "."
   },
   "exclude": [
     "out-tsc",
@@ -31,5 +31,9 @@
     "eslint.config.mjs"
   ],
   "include": ["src/**/*.js", "src/**/*.jsx", "src/**/*.ts", "src/**/*.tsx"],
-  "references": [{ "path": "../../packages/common/tsconfig.lib.json" }]
+  "references": [
+    {
+      "path": "../../packages/common/tsconfig.lib.json"
+    }
+  ]
 }

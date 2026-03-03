@@ -9,7 +9,7 @@ import type { iDataProvider } from '@/entities/dataProvider';
 import type {
   SignInPayload,
   SignUpPayload,
-  UserProfile,
+  AuthResponse,
 } from '@market-mind/common';
 import type { iClientQueriesProvider } from '@/entities/clientQueries';
 
@@ -46,18 +46,18 @@ export const useClientQueries = (): iClientQueriesProvider => {
     );
 
   const useSignIn = (
-    options?: UseMutationOptions<UserProfile, Error, SignInPayload>,
+    options?: UseMutationOptions<AuthResponse, Error, SignInPayload>,
   ) => {
-    return useMutation<UserProfile, Error, SignInPayload>({
+    return useMutation<AuthResponse, Error, SignInPayload>({
       mutationFn: (payload) => ctx.dataProvider.auth.signin(payload),
       ...options,
     });
   };
 
   const useSignUp = (
-    options?: UseMutationOptions<UserProfile, Error, SignUpPayload>,
+    options?: UseMutationOptions<AuthResponse, Error, SignUpPayload>,
   ) => {
-    return useMutation<UserProfile, Error, SignUpPayload>({
+    return useMutation<AuthResponse, Error, SignUpPayload>({
       mutationFn: (payload) => ctx.dataProvider.auth.signup(payload),
       ...options,
     });
