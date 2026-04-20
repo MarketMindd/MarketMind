@@ -5,6 +5,7 @@ import { SignIn } from './views/auth/signIn';
 import { SignUp } from './views/auth/signUp';
 import { Dashboard } from './views/dashboard/dashboard';
 import { NotFound } from './views/notFound/notFound';
+import StockDetails from './views/stockDetails/stockDetails';
 
 export const App = () => {
   return (
@@ -34,6 +35,7 @@ export const App = () => {
           </PublicRoute>
         }
       />
+      <Route path="/stock/:id" element={<StockDetails />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
