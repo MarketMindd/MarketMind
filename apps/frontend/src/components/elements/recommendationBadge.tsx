@@ -1,5 +1,6 @@
 import { iconSizes, sizeClasses } from '@/consts/recommendationBadge';
 import { Size } from '@/enums/recommendationBadge';
+import { RecommendationBadgeConfig } from '@/types/recommendationBadge';
 import { cn } from '@/utils/tailwindUtils';
 import { StockRecommendation } from '@market-mind/common';
 import { TrendingUp, Minus, TrendingDown } from 'lucide-react';
@@ -11,14 +12,7 @@ interface RecommendationBadgeProps {
   showConfidence?: boolean;
 }
 
-const config: Record<
-  StockRecommendation,
-  {
-    label: string;
-    icon: React.ComponentType<{ size?: number }>;
-    className: string;
-  }
-> = {
+const config: Record<StockRecommendation, RecommendationBadgeConfig> = {
   [StockRecommendation.INVEST]: {
     label: 'Invest',
     icon: TrendingUp,
