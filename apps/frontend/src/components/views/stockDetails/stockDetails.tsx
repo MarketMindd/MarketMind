@@ -2,6 +2,7 @@ import { Button } from '@/components/elements/button';
 import RecommendationBadge from '@/components/elements/recommendationBadge';
 import StockChart from '@/components/elements/stockChart';
 import { mockStocks } from '@/data/mockData';
+import { Size } from '@/enums/recommendationBadge';
 import { cn } from '@/utils/tailwindUtils';
 import {
   ArrowDownRight,
@@ -63,7 +64,7 @@ const StockDetails = () => {
             <RecommendationBadge
               recommendation={stock.recommendation}
               confidence={stock.confidence}
-              size="lg"
+              size={Size.LG}
               showConfidence
             />
           </div>
@@ -140,7 +141,7 @@ const StockDetails = () => {
             </h2>
           </div>
           <p className="text-muted-foreground leading-relaxed">
-            {stock.longExplanation}
+            {stock.explanation}
           </p>
         </div>
       </div>
