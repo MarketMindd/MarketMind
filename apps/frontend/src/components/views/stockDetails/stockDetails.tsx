@@ -37,8 +37,7 @@ const StockDetails = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <main className="pt-28 sm:pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
-        {/* Back button */}
+      <div className="pt-28 sm:pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
         <Link to="/dashboard">
           <Button variant="ghost" className="mb-6 animate-fade-in">
             <ArrowLeft size={18} />
@@ -46,7 +45,6 @@ const StockDetails = () => {
           </Button>
         </Link>
 
-        {/* Header */}
         <div className="glass-card p-6 mb-6 animate-fade-in stagger-1">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
@@ -145,7 +143,7 @@ const StockDetails = () => {
             {stock.longExplanation}
           </p>
         </div>
-      </main>
+      </div>
     </div>
   );
 };
