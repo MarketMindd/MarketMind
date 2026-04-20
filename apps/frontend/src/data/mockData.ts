@@ -11,7 +11,7 @@ export const mockStocks: Stock[] = [
     changePercent: 1.33,
     recommendation: StockRecommendation.INVEST,
     confidence: 87,
-    shortExplanation:
+    explanation:
       'Strong services growth and AI integration potential make this a solid long-term play.',
     longExplanation:
       'Apple continues to demonstrate exceptional execution across its ecosystem. The Services segment shows consistent 15%+ YoY growth, while the upcoming AI features in iOS 18 position the company for a significant upgrade cycle. Supply chain diversification efforts reduce geopolitical risks.',
@@ -31,7 +31,7 @@ export const mockStocks: Stock[] = [
     changePercent: -1.4,
     recommendation: StockRecommendation.HOLD,
     confidence: 72,
-    shortExplanation:
+    explanation:
       'Already priced for perfection. Wait for a better entry point.',
     longExplanation:
       'While NVIDIA dominates the AI chip market with 80%+ market share, current valuations reflect much of the growth potential. Competition from AMD and custom chips from major tech companies could pressure margins in 2025.',
@@ -51,7 +51,7 @@ export const mockStocks: Stock[] = [
     changePercent: 0.57,
     recommendation: StockRecommendation.INVEST,
     confidence: 81,
-    shortExplanation:
+    explanation:
       'Defensive healthcare play with strong dividend yield and pipeline potential.',
     longExplanation:
       'Post-Kenvue spinoff, J&J is now a focused pharmaceutical and medtech company. The oncology and immunology pipelines show promise, while the 3%+ dividend provides downside protection in volatile markets.',
@@ -71,7 +71,7 @@ export const mockStocks: Stock[] = [
     changePercent: -3.2,
     recommendation: StockRecommendation.EXIT,
     confidence: 68,
-    shortExplanation:
+    explanation:
       'Margin compression and increased competition warrant caution.',
     longExplanation:
       'Tesla faces significant headwinds: aggressive price cuts have compressed margins to historic lows, Chinese EV makers are gaining market share, and the Cybertruck rollout has been slower than expected. FSD progress remains uncertain.',
@@ -89,7 +89,7 @@ export const mockStocks: Stock[] = [
     changePercent: 1.52,
     recommendation: StockRecommendation.INVEST,
     confidence: 91,
-    shortExplanation:
+    explanation:
       'Azure + Copilot AI integration creates a powerful growth engine.',
     longExplanation:
       "Microsoft's strategic partnership with OpenAI and rapid Copilot integration across products positions it as the enterprise AI leader. Azure growth remains strong at 29% YoY, and the gaming segment adds diversification.",
@@ -108,7 +108,7 @@ export const mockStocks: Stock[] = [
     changePercent: -1.16,
     recommendation: StockRecommendation.HOLD,
     confidence: 65,
-    shortExplanation:
+    explanation:
       'Energy transition uncertainty but strong cash flows support dividend.',
     longExplanation:
       'Exxon benefits from elevated oil prices and the Pioneer acquisition strengthens Permian Basin assets. However, long-term demand uncertainty and ESG pressures create headwinds for multiple expansion.',

@@ -10,10 +10,6 @@ export interface Stock {
   changePercent: number;
   recommendation: StockRecommendation;
   confidence: number;
-  shortExplanation: string;
-  longExplanation: string;
-  shortTermInsight: string;
-  longTermInsight: string;
-  performanceIndicator: string;
+  explanation: string;
   isPortfolioStock?: boolean;
 }
