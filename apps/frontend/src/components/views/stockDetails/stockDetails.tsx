@@ -10,7 +10,7 @@ import {
   Brain,
   LineChart,
 } from 'lucide-react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 
 const StockDetails = () => {
   const { id } = useParams();
@@ -39,14 +39,12 @@ const StockDetails = () => {
     <div className="min-h-screen bg-background">
       <main className="pt-28 sm:pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
         {/* Back button */}
-        <Button
-          variant="ghost"
-          onClick={() => navigate('/dashboard')}
-          className="mb-6 animate-fade-in"
-        >
-          <ArrowLeft size={18} />
-          Back to Dashboard
-        </Button>
+        <Link to="/dashboard">
+          <Button variant="ghost" className="mb-6 animate-fade-in">
+            <ArrowLeft size={18} />
+            Back to Dashboard
+          </Button>
+        </Link>
 
         {/* Header */}
         <div className="glass-card p-6 mb-6 animate-fade-in stagger-1">
