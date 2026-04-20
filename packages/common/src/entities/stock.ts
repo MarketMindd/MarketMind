@@ -11,5 +11,5 @@ export interface Stock {
   recommendation: StockRecommendation;
   confidence: number;
   explanation: string;
-  isPortfolioStock?: boolean;
+  isPortfolioStock: boolean;
 }
