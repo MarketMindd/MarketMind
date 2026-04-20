@@ -11,11 +11,10 @@ import {
   Brain,
   LineChart,
 } from 'lucide-react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 
 const StockDetails = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
 
   const stock = mockStocks.find((s) => s.id === id);
 
@@ -26,9 +25,9 @@ const StockDetails = () => {
           <h2 className="text-xl font-semibold text-foreground mb-2">
             Stock not found
           </h2>
-          <Button onClick={() => navigate('/dashboard')}>
-            Return to Dashboard
-          </Button>
+          <Link to="/dashboard">
+            <Button>Return to Dashboard</Button>
+          </Link>
         </div>
       </div>
     );
