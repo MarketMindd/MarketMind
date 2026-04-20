@@ -1,3 +1,4 @@
+import type { ChartDataPoint } from '@/types/stockChart';
 import { Stock } from '@market-mind/common';
 import { useMemo } from 'react';
 import {
@@ -14,7 +15,6 @@ interface StockChartProps {
 }
 
 const StockChart = ({ stock }: StockChartProps) => {
-  // Generate mock historical data based on current price
   const chartData = useMemo(() => {
     const basePrice = stock.price;
     const volatility =
@@ -24,32 +24,35 @@ const StockChart = ({ stock }: StockChartProps) => {
           ? 0.02
           : 0.015;
 
-    const data = [];
     const days = 30;
-    let price = basePrice * (1 - (stock.changePercent / 100) * 5); // Start lower if positive trend
+    let currentPrice = basePrice * (1 - (stock.changePercent / 100) * 5); // Start lower if positive trend
 
-    for (let i = 0; i < days; i++) {
-      const change = (Math.random() - 0.45) * volatility * price;
-      price = Math.max(price + change, price * 0.9);
+    const data = Array.from({ length: days }).reduce<ChartDataPoint[]>(
+      (acc, _, i) => {
+        const change = (Math.random() - 0.45) * volatility * currentPrice;
+        currentPrice = Math.max(currentPrice + change, currentPrice * 0.9);
 
-      // Trend toward current price
-      const trendFactor = i / days;
-      price = price * (1 - trendFactor * 0.1) + basePrice * (trendFactor * 0.1);
+        const trendFactor = i / days;
+        currentPrice =
+          currentPrice * (1 - trendFactor * 0.1) +
+          basePrice * (trendFactor * 0.1);
 
-      const date = new Date();
-      date.setDate(date.getDate() - (days - i));
+        const date = new Date();
+        date.setDate(date.getDate() - (days - i));
 
-      data.push({
-        date: date.toLocaleDateString('en-US', {
-          month: 'short',
-          day: 'numeric',
-        }),
-        price: Number(price.toFixed(2)),
-        fullDate: date.toLocaleDateString(),
-      });
-    }
+        acc.push({
+          date: date.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+          }),
+          price: Number(currentPrice.toFixed(2)),
+          fullDate: date.toLocaleDateString(),
+        });
+        return acc;
+      },
+      [],
+    );
 
-    // Ensure last point is current price
     data[data.length - 1].price = stock.price;
 
     return data;
