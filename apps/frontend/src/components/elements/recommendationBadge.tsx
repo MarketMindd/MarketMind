@@ -1,3 +1,5 @@
+import { iconSizes, sizeClasses } from '@/consts/recommendationBadge';
+import { Size } from '@/enums/recommendationBadge';
 import { cn } from '@/utils/tailwindUtils';
 import { StockRecommendation } from '@market-mind/common';
 import { TrendingUp, Minus, TrendingDown } from 'lucide-react';
@@ -5,7 +7,7 @@ import { TrendingUp, Minus, TrendingDown } from 'lucide-react';
 interface RecommendationBadgeProps {
   recommendation: StockRecommendation;
   confidence?: number;
-  size?: 'sm' | 'md' | 'lg';
+  size?: Size;
   showConfidence?: boolean;
 }
 
@@ -34,22 +36,10 @@ const config: Record<
   },
 };
 
-const sizeClasses = {
-  sm: 'text-xs px-2 py-1 gap-1',
-  md: 'text-sm px-3 py-1.5 gap-1.5',
-  lg: 'text-base px-4 py-2 gap-2',
-};
-
-const iconSizes = {
-  sm: 12,
-  md: 14,
-  lg: 16,
-};
-
 const RecommendationBadge = ({
   recommendation,
   confidence,
-  size = 'md',
+  size = Size.MD,
   showConfidence = false,
 }: RecommendationBadgeProps) => {
   const { label, icon: Icon, className } = config[recommendation];
