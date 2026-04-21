@@ -13,12 +13,11 @@ export class UserProfileEntity {
 
   @Column({ type: 'varchar', length: 255, unique: true })
   email!: string;
+  @Column({ type: 'varchar', length: 255 })
+  fullName!: string;
 
-  @Column({ type: 'varchar', length: 120 })
-  displayName!: string;
-
-  @Column({ type: 'varchar', length: 120 })
-  firstName!: string;
+  @Column({ type: 'varchar', length: 255 })
+  password!: string;
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt!: Date;

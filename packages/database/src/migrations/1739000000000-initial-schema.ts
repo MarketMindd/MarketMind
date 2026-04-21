@@ -4,6 +4,7 @@ export class InitialSchema1739000000000 implements MigrationInterface {
   name = 'InitialSchema1739000000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query('CREATE EXTENSION IF NOT EXISTS "pgcrypto"');
     await queryRunner.query(`
       CREATE TABLE IF NOT EXISTS "user_profiles" (
         "id" uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -19,5 +20,6 @@ export class InitialSchema1739000000000 implements MigrationInterface {
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query('DROP TABLE IF EXISTS "user_profiles"');
+    await queryRunner.query('DROP EXTENSION IF EXISTS "pgcrypto"');
   }
 }

@@ -1,0 +1,88 @@
+import { Stock, StockRecommendation } from '@market-mind/common';
+
+export const mockStocks: Stock[] = [
+  {
+    id: '1',
+    name: 'Apple Inc.',
+    ticker: 'AAPL',
+    sector: 'Technology',
+    price: 178.52,
+    change: 2.34,
+    changePercent: 1.33,
+    recommendation: StockRecommendation.INVEST,
+    confidence: 87,
+    explanation:
+      'Strong services growth and AI integration potential make this a solid long-term play.',
+    isPortfolioStock: false,
+  },
+  {
+    id: '2',
+    name: 'NVIDIA Corporation',
+    ticker: 'NVDA',
+    sector: 'Technology',
+    price: 875.28,
+    change: -12.45,
+    changePercent: -1.4,
+    recommendation: StockRecommendation.HOLD,
+    confidence: 72,
+    explanation:
+      'Already priced for perfection. Wait for a better entry point.',
+    isPortfolioStock: false,
+  },
+  {
+    id: '3',
+    name: 'Johnson & Johnson',
+    ticker: 'JNJ',
+    sector: 'Healthcare',
+    price: 156.78,
+    change: 0.89,
+    changePercent: 0.57,
+    recommendation: StockRecommendation.INVEST,
+    confidence: 81,
+    explanation:
+      'Defensive healthcare play with strong dividend yield and pipeline potential.',
+    isPortfolioStock: false,
+  },
+  {
+    id: '4',
+    name: 'Tesla Inc.',
+    ticker: 'TSLA',
+    sector: 'Consumer',
+    price: 248.92,
+    change: -8.23,
+    changePercent: -3.2,
+    recommendation: StockRecommendation.EXIT,
+    confidence: 68,
+    explanation:
+      'Margin compression and increased competition warrant caution.',
+    isPortfolioStock: false,
+  },
+  {
+    id: '5',
+    name: 'Microsoft Corporation',
+    ticker: 'MSFT',
+    sector: 'Technology',
+    price: 378.91,
+    change: 5.67,
+    changePercent: 1.52,
+    recommendation: StockRecommendation.INVEST,
+    confidence: 91,
+    explanation:
+      'Azure + Copilot AI integration creates a powerful growth engine.',
+    isPortfolioStock: false,
+  },
+  {
+    id: '6',
+    name: 'Exxon Mobil',
+    ticker: 'XOM',
+    sector: 'Energy',
+    price: 104.56,
+    change: -1.23,
+    changePercent: -1.16,
+    recommendation: StockRecommendation.HOLD,
+    confidence: 65,
+    explanation:
+      'Energy transition uncertainty but strong cash flows support dividend.',
+    isPortfolioStock: false,
+  },
+];
