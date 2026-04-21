@@ -10,6 +10,6 @@ export interface Stock {
   changePercent: number;
   recommendation: StockRecommendation;
   confidence: number;
-  explanation: string;
   isPortfolioStock: boolean;
+  explanation: string;
 }

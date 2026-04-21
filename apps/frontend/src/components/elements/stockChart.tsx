@@ -1,5 +1,5 @@
 import type { ChartDataPoint } from '@/types/stockChart';
-import { Stock } from '@market-mind/common';
+import { Stock, StockRecommendation } from '@market-mind/common';
 import { useMemo } from 'react';
 import {
   Area,
@@ -18,9 +18,9 @@ const StockChart = ({ stock }: StockChartProps) => {
   const chartData = useMemo(() => {
     const basePrice = stock.price;
     const volatility =
-      stock.recommendation === 'exit'
+      stock.recommendation === StockRecommendation.EXIT
         ? 0.03
-        : stock.recommendation === 'hold'
+        : stock.recommendation === StockRecommendation.HOLD
           ? 0.02
           : 0.015;
 
