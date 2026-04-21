@@ -13,7 +13,10 @@
     ],
     "module": "esnext",
     "moduleResolution": "bundler",
-    "baseUrl": "."
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
   },
   "exclude": [
     "out-tsc",
