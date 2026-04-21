@@ -5,6 +5,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { RiskTolerance } from '@market-mind/common';
 
 @Entity({ name: 'user_profiles' })
 export class UserProfileEntity {
@@ -18,6 +19,13 @@ export class UserProfileEntity {
 
   @Column({ type: 'varchar', length: 255 })
   password!: string;
+
+  @Column({
+    type: 'enum',
+    enum: RiskTolerance,
+    default: RiskTolerance.MEDIUM,
+  })
+  riskTolerance!: RiskTolerance;
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt!: Date;

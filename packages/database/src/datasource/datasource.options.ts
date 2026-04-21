@@ -1,5 +1,8 @@
 import { DataSourceOptions } from 'typeorm';
 import { UserProfileEntity } from '../entities/user-profile.entity.js';
+import { StockEntity } from '../entities/stock.entity.js';
+import { PortfolioEntity } from '../entities/portfolio.entity.js';
+import { MarketDataEntity } from '../entities/market-data.entity.js';
 import { getDatabaseConfig } from '../config/database.config.js';
 
 export const createDataSourceOptions = (): DataSourceOptions => {
@@ -15,9 +18,13 @@ export const createDataSourceOptions = (): DataSourceOptions => {
     ssl: dbEnv.ssl,
     synchronize: false,
     logging: false,
-    entities: [UserProfileEntity],
+    entities: [
+      UserProfileEntity,
+      StockEntity,
+      PortfolioEntity,
+      MarketDataEntity,
+    ],
     migrations: ['./src/migrations/*.ts'],
     migrationsTableName: 'migrations',
   };
 };
-

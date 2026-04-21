@@ -84,14 +84,17 @@
     "@nestjs/jwt": "^11.0.2",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.0",
+    "@nestjs/schedule": "^6.0.1",
     "@nestjs/typeorm": "^11.0.0",
     "bcryptjs": "^3.0.3",
+    "cron": "^4.3.3",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.0",
     "tslib": "^2.3.0",
     "typeorm": "^0.3.28",
+    "yahoo-finance2": "^3.13.3",
     "zod": "^4.3.6"
   },
   "devDependencies": {

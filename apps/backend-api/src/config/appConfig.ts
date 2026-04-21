@@ -18,4 +18,6 @@ export const appConfig = {
     secret: getJwtSecret('supersecret_default'),
     expiresIn: parseInt(process.env.JWT_EXPIRES_IN || '3600', 10),
   },
+  newsApiKey: process.env.NEWSAPI_KEY ?? '',
+  geminiApiKey: process.env.GEMINI_API_KEY ?? '',
 } as const;

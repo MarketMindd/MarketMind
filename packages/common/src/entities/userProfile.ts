@@ -1,9 +1,11 @@
 import { z } from 'zod';
+import { RiskTolerance } from '../enums/risk-tolerance.js';
 
 export const userProfileSchema = z.object({
   id: z.uuid(),
   email: z.email(),
   fullName: z.string(),
+  riskTolerance: z.nativeEnum(RiskTolerance),
 });
 
 export const signUpPayloadSchema = z.object({

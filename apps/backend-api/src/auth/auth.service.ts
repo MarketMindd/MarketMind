@@ -1,5 +1,6 @@
 import {
   AuthResponse,
+  RiskTolerance,
   SignInPayload,
   SignUpPayload,
   UserProfile,
@@ -45,6 +46,7 @@ export class AuthService {
       email,
       password: hashed,
       fullName,
+      riskTolerance: RiskTolerance.MEDIUM,
     });
 
     const saved = await this.usersRepo.save(user);
