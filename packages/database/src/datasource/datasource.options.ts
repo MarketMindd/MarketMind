@@ -4,6 +4,7 @@ import { StockEntity } from '../entities/stock.entity.js';
 import { PortfolioEntity } from '../entities/portfolio.entity.js';
 import { MarketDataEntity } from '../entities/market-data.entity.js';
 import { SymbolFilterStateEntity } from '../entities/symbol-filter-state.entity.js';
+import { RecommendationEntity } from '../entities/recommendation.entity.js';
 import { getDatabaseConfig } from '../config/database.config.js';
 
 export const createDataSourceOptions = (): DataSourceOptions => {
@@ -25,6 +26,7 @@ export const createDataSourceOptions = (): DataSourceOptions => {
       PortfolioEntity,
       MarketDataEntity,
       SymbolFilterStateEntity,
+      RecommendationEntity,
     ],
     migrations: ['./src/migrations/*.ts'],
     migrationsTableName: 'migrations',
