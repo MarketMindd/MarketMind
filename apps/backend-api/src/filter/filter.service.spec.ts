@@ -1,7 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { FilterService } from './filter.service.js';
-import { PortfolioEntity, SymbolFilterStateEntity, UserProfileEntity } from '@market-mind/database';
+import {
+  PortfolioEntity,
+  RecommendationEntity,
+  SymbolFilterStateEntity,
+  UserProfileEntity,
+} from '@market-mind/database';
 import { RiskTolerance } from '@market-mind/common';
 import type { MarketSnapshot } from '../market/market.types.js';
 
@@ -11,8 +16,6 @@ jest.mock('newsapi', () => ({
     v2: { everything: jest.fn() },
   })),
 }));
-
-import NewsAPI from 'newsapi';
 
 const makeSnapshot = (priceChange: number, fetchedAt = new Date()): MarketSnapshot => ({
   symbol: 'AAPL',
@@ -25,6 +28,7 @@ const makeSnapshot = (priceChange: number, fetchedAt = new Date()): MarketSnapsh
 const mockUser = { id: 'user-1', riskTolerance: RiskTolerance.MEDIUM };
 const mockPortfolio = { userId: 'user-1' };
 const noNewsResponse = { status: 'ok', articles: [] };
+const noRecommendations: Pick<RecommendationEntity, 'riskTolerance'>[] = [];
 
 // Builds a SymbolFilterStateEntity-shaped row with a recent updatedAt by default
 const makeStateRow = (lastForwardedPriceChange: number, ageMs = 15 * 60 * 1000) => ({
@@ -56,11 +60,16 @@ describe('FilterService', () => {
     createQueryBuilder: jest.fn(),
   };
 
+  const mockRecommendationRepo = {
+    find: jest.fn().mockResolvedValue(noRecommendations),
+  };
+
   beforeEach(async () => {
     jest.clearAllMocks();
 
     mockFilterStateRepo.findOne.mockResolvedValue(null);
     mockUserProfileRepo.createQueryBuilder.mockReturnValue(buildUserProfileQb());
+    mockRecommendationRepo.find.mockResolvedValue(noRecommendations);
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -68,6 +77,7 @@ describe('FilterService', () => {
         { provide: getRepositoryToken(SymbolFilterStateEntity), useValue: mockFilterStateRepo },
         { provide: getRepositoryToken(PortfolioEntity), useValue: mockPortfolioRepo },
         { provide: getRepositoryToken(UserProfileEntity), useValue: mockUserProfileRepo },
+        { provide: getRepositoryToken(RecommendationEntity), useValue: mockRecommendationRepo },
       ],
     }).compile();
 
@@ -95,15 +105,18 @@ describe('FilterService', () => {
     // After forwarding at 2%, the next forward resets the baseline.
     // Simulate: lastForwarded=2%, current=2.4% → delta=0.4 → skip
     mockFilterStateRepo.findOne.mockResolvedValue(makeStateRow(2));
+    mockRecommendationRepo.find.mockResolvedValue([{ riskTolerance: RiskTolerance.MEDIUM }]);
     expect(await service.filter(makeSnapshot(2.4))).toBeNull();
 
     // State NOT updated (no forward) → baseline stays at 2%.
     // current=2.8% → delta=0.8 → skip
     mockFilterStateRepo.findOne.mockResolvedValue(makeStateRow(2));
+    mockRecommendationRepo.find.mockResolvedValue([{ riskTolerance: RiskTolerance.MEDIUM }]);
     expect(await service.filter(makeSnapshot(2.8))).toBeNull();
 
     // current=3.1% → delta=1.1 >= 1% → triggers
     mockFilterStateRepo.findOne.mockResolvedValue(makeStateRow(2));
+    mockRecommendationRepo.find.mockResolvedValue([{ riskTolerance: RiskTolerance.MEDIUM }]);
     const result = await service.filter(makeSnapshot(3.1));
     expect(result).not.toBeNull();
   });
@@ -116,6 +129,7 @@ describe('FilterService', () => {
 
     // Confirmed forward — upsert called
     mockFilterStateRepo.findOne.mockResolvedValue(makeStateRow(2));
+    mockRecommendationRepo.find.mockResolvedValue([{ riskTolerance: RiskTolerance.MEDIUM }]);
     await service.filter(makeSnapshot(3.1));
     expect(mockFilterStateRepo.upsert).toHaveBeenCalledTimes(1);
     expect(mockFilterStateRepo.upsert).toHaveBeenCalledWith(
@@ -124,15 +138,14 @@ describe('FilterService', () => {
     );
   });
 
-  it('stale state (last forward > 1 day ago) treated as cold start', async () => {
+  it('stale state bypasses significance when tracked risk coverage is missing', async () => {
     const oneDayPlusMs = 25 * 60 * 60 * 1000;
     // Old lastForwardedPriceChange of 1.8% — would block if treated as fresh
     mockFilterStateRepo.findOne.mockResolvedValue(makeStateRow(1.8, oneDayPlusMs));
-    // delta vs 0 (cold start baseline) = 0.3%, which is < 1% significance
-    // But still passes dedup (null baseline), and fails significance → null
+    // delta vs 0 (cold start baseline) = 0.3%, which is < 1% significance,
+    // but missing recommendation coverage should still forward.
     const result = await service.filter(makeSnapshot(0.3));
-    expect(result).toBeNull(); // significance skip, not dedup skip
-    // Confirm it was NOT a dedup skip: delta from 0 = 0.3, below significance
+    expect(result).not.toBeNull();
   });
 
   it('news-only trigger: delta between 0.5-1% with recent articles', async () => {
@@ -152,6 +165,80 @@ describe('FilterService', () => {
 
   it('significance skip: delta between 0.5-1% with no recent news', async () => {
     mockFilterStateRepo.findOne.mockResolvedValue(makeStateRow(2));
+    mockRecommendationRepo.find.mockResolvedValue([{ riskTolerance: RiskTolerance.MEDIUM }]);
+    const oldArticle = {
+      title: 'Old Apple news',
+      description: null,
+      publishedAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+      source: { id: null, name: 'Reuters' },
+    };
+    mockNewsEverything.mockResolvedValue({ status: 'ok', articles: [oldArticle] });
+
+    const result = await service.filter(makeSnapshot(2.6));
+    expect(result).toBeNull();
+  });
+
+  it('bypasses significance when a tracked risk tolerance has no recommendation yet', async () => {
+    mockFilterStateRepo.findOne.mockResolvedValue(makeStateRow(2));
+    mockRecommendationRepo.find.mockResolvedValue([]);
+
+    const oldArticle = {
+      title: 'Old Apple news',
+      description: null,
+      publishedAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+      source: { id: null, name: 'Reuters' },
+    };
+    mockNewsEverything.mockResolvedValue({ status: 'ok', articles: [oldArticle] });
+
+    const result = await service.filter(makeSnapshot(2.6));
+    expect(result).not.toBeNull();
+    expect(mockRecommendationRepo.find).toHaveBeenCalledWith({
+      where: { stockSymbol: 'AAPL' },
+      select: ['riskTolerance'],
+    });
+  });
+
+  it('bypasses significance when recommendation coverage is incomplete across tracked risks', async () => {
+    mockFilterStateRepo.findOne.mockResolvedValue(makeStateRow(2));
+    mockPortfolioRepo.find.mockResolvedValueOnce([{ userId: 'user-1' }, { userId: 'user-2' }]);
+
+    const userProfileQb = buildUserProfileQb();
+    userProfileQb.getMany.mockResolvedValueOnce([
+      { id: 'user-1', riskTolerance: RiskTolerance.LOW },
+      { id: 'user-2', riskTolerance: RiskTolerance.HIGH },
+    ]);
+    mockUserProfileRepo.createQueryBuilder.mockReturnValueOnce(userProfileQb);
+
+    mockRecommendationRepo.find.mockResolvedValueOnce([{ riskTolerance: RiskTolerance.LOW }]);
+
+    const oldArticle = {
+      title: 'Old Apple news',
+      description: null,
+      publishedAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+      source: { id: null, name: 'Reuters' },
+    };
+    mockNewsEverything.mockResolvedValue({ status: 'ok', articles: [oldArticle] });
+
+    const result = await service.filter(makeSnapshot(2.6));
+    expect(result).not.toBeNull();
+  });
+
+  it('still skips significance when all tracked risks already have recommendation coverage', async () => {
+    mockFilterStateRepo.findOne.mockResolvedValue(makeStateRow(2));
+    mockPortfolioRepo.find.mockResolvedValueOnce([{ userId: 'user-1' }, { userId: 'user-2' }]);
+
+    const userProfileQb = buildUserProfileQb();
+    userProfileQb.getMany.mockResolvedValueOnce([
+      { id: 'user-1', riskTolerance: RiskTolerance.LOW },
+      { id: 'user-2', riskTolerance: RiskTolerance.HIGH },
+    ]);
+    mockUserProfileRepo.createQueryBuilder.mockReturnValueOnce(userProfileQb);
+
+    mockRecommendationRepo.find.mockResolvedValueOnce([
+      { riskTolerance: RiskTolerance.LOW },
+      { riskTolerance: RiskTolerance.HIGH },
+    ]);
+
     const oldArticle = {
       title: 'Old Apple news',
       description: null,
