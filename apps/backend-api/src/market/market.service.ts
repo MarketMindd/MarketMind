@@ -6,7 +6,8 @@ import { MarketDataEntity, PortfolioEntity } from '@market-mind/database';
 import { CronJob } from 'cron';
 import YahooFinance from 'yahoo-finance2';
 import { Repository } from 'typeorm';
-import { MarketSnapshot } from './market.types';
+import { MarketSnapshot } from './market.types.js';
+import { PipelineService } from '../pipeline/pipeline.service.js';
 
 const CRON_JOB_NAME = 'market-poll';
 const MARKET_POLL_SCHEDULE = '*/15 * * * *';
@@ -25,6 +26,7 @@ export class MarketService implements OnModuleInit {
 
   constructor(
     private readonly schedulerRegistry: SchedulerRegistry,
+    private readonly pipelineService: PipelineService,
     @InjectRepository(PortfolioEntity)
     private readonly portfolioRepo: Repository<PortfolioEntity>,
     @InjectRepository(MarketDataEntity)
@@ -79,7 +81,7 @@ export class MarketService implements OnModuleInit {
 
         const snapshot = this.createSnapshot(symbol, quote, fetchedAt);
         await this.persistSnapshot(snapshot);
-        this.emitSnapshot(snapshot);
+        await this.pipelineService.process(snapshot);
       } catch (error) {
         this.logger.error(
           `Failed to process symbol ${symbol}`,
@@ -138,12 +140,7 @@ export class MarketService implements OnModuleInit {
       stockSymbol: snapshot.symbol,
       price: snapshot.price,
       volume: snapshot.volume,
+      priceChange: snapshot.priceChange,
     });
-  }
-
-  private emitSnapshot(snapshot: MarketSnapshot): void {
-    this.logger.debug(
-      `Snapshot ready for filter module: ${snapshot.symbol} @ ${snapshot.price}`,
-    );
   }
 }

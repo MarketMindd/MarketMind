@@ -13,4 +13,7 @@ export class MarketDataEntity {
 
   @Column({ type: 'bigint' })
   volume!: number;
+
+  @Column({ type: 'decimal', precision: 8, scale: 4, default: 0 })
+  priceChange!: number;
 }

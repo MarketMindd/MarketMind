@@ -1,0 +1,157 @@
+import { Injectable, Logger } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import NewsAPI from 'newsapi';
+import { retry, RiskTolerance } from '@market-mind/common';
+import { PortfolioEntity, SymbolFilterStateEntity, UserProfileEntity } from '@market-mind/database';
+import { appConfig } from '../config/appConfig.js';
+import { MarketSnapshot } from '../market/market.types.js';
+import { NewsArticle, UserContext, FilteredSnapshot } from './filter.types.js';
+
+// Gate 1 — noise floor: ignore moves smaller than this vs the last AI-triggered priceChange.
+// Prevents redundant processing when price barely changes.
+const DEDUP_THRESHOLD = 0.5;
+
+// Gate 2 — significance: forward on price alone only when the cumulative drift is this large.
+// Below this, we still forward if there are recent news articles.
+const SIGNIFICANCE_THRESHOLD = 1;
+
+// Articles published within this window are considered "recent" (one cron interval + buffer).
+const RECENT_NEWS_WINDOW_MS = 20 * 60 * 1000;
+
+// regularMarketChangePercent resets at market close each day, so a lastForwardedPriceChange
+// from a previous trading day is a different baseline. Treat it as stale after 1 day.
+const STALE_FORWARD_THRESHOLD_MS = 24 * 60 * 60 * 1000;
+
+const NEWS_RETRY_DELAYS_MS = [1000, 2000] as const;
+
+@Injectable()
+export class FilterService {
+  private readonly logger = new Logger(FilterService.name);
+  private readonly newsApi = new NewsAPI(appConfig.newsApiKey);
+
+  constructor(
+    @InjectRepository(SymbolFilterStateEntity)
+    private readonly filterStateRepo: Repository<SymbolFilterStateEntity>,
+    @InjectRepository(PortfolioEntity)
+    private readonly portfolioRepo: Repository<PortfolioEntity>,
+    @InjectRepository(UserProfileEntity)
+    private readonly userProfileRepo: Repository<UserProfileEntity>,
+  ) {}
+
+  async filter(snapshot: MarketSnapshot): Promise<FilteredSnapshot | null> {
+    const stateRow = await this.filterStateRepo.findOne({
+      where: { stockSymbol: snapshot.symbol },
+    });
+
+    // Treat as cold start if: no prior forward, or last forward was from a previous trading day.
+    const isStale =
+      stateRow !== null &&
+      snapshot.fetchedAt.getTime() - stateRow.updatedAt.getTime() > STALE_FORWARD_THRESHOLD_MS;
+
+    const lastForwardedPriceChange =
+      stateRow !== null && !isStale ? Number(stateRow.lastForwardedPriceChange) : null;
+
+    const delta = Math.abs(snapshot.priceChange - (lastForwardedPriceChange ?? 0));
+
+    // Gate 1 — dedup: skip if cumulative drift from last AI trigger is still below threshold.
+    // null means cold start (new or dormant symbol) — always passes.
+    if (lastForwardedPriceChange !== null && delta < DEDUP_THRESHOLD) {
+      this.logger.debug(
+        `Dedup skip ${snapshot.symbol}: delta ${delta.toFixed(2)}% < ${DEDUP_THRESHOLD}%`,
+      );
+      return null;
+    }
+
+    // Check users before hitting the news API — no point fetching news if nobody is tracking.
+    const users = await this.loadUserContexts(snapshot.symbol);
+    if (users.length === 0) {
+      this.logger.debug(`No users tracking ${snapshot.symbol}`);
+      return null;
+    }
+
+    // Lazy news fetch — only runs for symbols that passed dedup AND have users.
+    const news = await this.fetchNews(snapshot.symbol);
+
+    const recentCutoff = new Date(snapshot.fetchedAt.getTime() - RECENT_NEWS_WINDOW_MS);
+    const hasRecentNews = news.some((a) => a.publishedAt >= recentCutoff);
+
+    // Gate 2 — significance: forward if cumulative drift is large enough OR recent news exists.
+    const isPriceSignificant = delta >= SIGNIFICANCE_THRESHOLD;
+    if (!isPriceSignificant && !hasRecentNews) {
+      this.logger.debug(
+        `Significance skip ${snapshot.symbol}: delta ${delta.toFixed(2)}%, no recent articles`,
+      );
+      return null;
+    }
+
+    // Persist the new lastForwardedPriceChange so cumulative drift resets from this point.
+    await this.filterStateRepo.upsert(
+      { stockSymbol: snapshot.symbol, lastForwardedPriceChange: snapshot.priceChange },
+      ['stockSymbol'],
+    );
+
+    this.logger.log(
+      `${snapshot.symbol} passed filter: delta=${delta.toFixed(2)}%, ` +
+        `recentNews=${hasRecentNews}, users=${users.length}`,
+    );
+
+    return { snapshot, news, users };
+  }
+
+  private async fetchNews(symbol: string): Promise<NewsArticle[]> {
+    try {
+      const response = await retry(
+        () =>
+          this.newsApi.v2.everything({
+            q: symbol,
+            pageSize: 5,
+            sortBy: 'publishedAt',
+            language: 'en',
+          }),
+        {
+          delaysMs: NEWS_RETRY_DELAYS_MS,
+          onRetry: (attempt, delayMs) => {
+            this.logger.warn(
+              `News fetch for ${symbol} failed (attempt ${attempt}); retrying in ${delayMs}ms`,
+            );
+          },
+        },
+      );
+
+      return (response.articles ?? []).map((a) => ({
+        title: a.title,
+        description: a.description ?? null,
+        publishedAt: new Date(a.publishedAt),
+        source: a.source?.name ?? 'Unknown',
+      }));
+    } catch (error) {
+      this.logger.warn(
+        `News fetch failed for ${symbol}: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      return [];
+    }
+  }
+
+  private async loadUserContexts(symbol: string): Promise<UserContext[]> {
+    const portfolioRows = await this.portfolioRepo.find({
+      where: { stockSymbol: symbol },
+      select: ['userId'],
+    });
+
+    if (portfolioRows.length === 0) return [];
+
+    const userIds = [...new Set(portfolioRows.map((p) => p.userId))];
+
+    const profiles = await this.userProfileRepo
+      .createQueryBuilder('u')
+      .select(['u.id', 'u.riskTolerance'])
+      .where('u.id IN (:...userIds)', { userIds })
+      .getMany();
+
+    return profiles.map((p) => ({
+      userId: p.id,
+      riskTolerance: p.riskTolerance as RiskTolerance,
+    }));
+  }
+}
