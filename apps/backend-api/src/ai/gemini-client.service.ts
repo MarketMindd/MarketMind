@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { aiResponseSchema, retry } from '@market-mind/common';
 import { appConfig } from '../config/appConfig.js';
 
-const GEMINI_MODEL = 'gemini-2.5-flash';
+const GEMINI_MODEL = 'gemini-2.5-flash-lite';
 const GEMINI_RETRY_DELAYS_MS = [1000, 2000] as const;
 
 @Injectable()
