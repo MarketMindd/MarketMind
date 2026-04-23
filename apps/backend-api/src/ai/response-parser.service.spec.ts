@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ResponseParserService } from './response-parser.service.js';
+
 import { RiskTolerance } from '@market-mind/common';
+
+import { ResponseParserService } from './response-parser.service';
 
 describe('ResponseParserService', () => {
   let service: ResponseParserService;
@@ -39,37 +41,27 @@ describe('ResponseParserService', () => {
   });
 
   it('throws on malformed JSON', () => {
-    expect(() => service.parse('not json', 'AAPL', RiskTolerance.LOW)).toThrow(
-      /invalid JSON/,
-    );
+    expect(() => service.parse('not json', 'AAPL', RiskTolerance.LOW)).toThrow(/invalid JSON/);
   });
 
   it('throws when status is not a valid enum value', () => {
     const bad = JSON.stringify({ status: 'UNKNOWN', confidence: 0.5, rationale: 'test' });
-    expect(() => service.parse(bad, 'AAPL', RiskTolerance.MEDIUM)).toThrow(
-      /schema validation/,
-    );
+    expect(() => service.parse(bad, 'AAPL', RiskTolerance.MEDIUM)).toThrow(/schema validation/);
   });
 
   it('throws when confidence is above 1', () => {
     const bad = JSON.stringify({ status: 'Hold', confidence: 1.5, rationale: 'test' });
-    expect(() => service.parse(bad, 'AAPL', RiskTolerance.MEDIUM)).toThrow(
-      /schema validation/,
-    );
+    expect(() => service.parse(bad, 'AAPL', RiskTolerance.MEDIUM)).toThrow(/schema validation/);
   });
 
   it('throws when confidence is below 0', () => {
     const bad = JSON.stringify({ status: 'Exit', confidence: -0.1, rationale: 'test' });
-    expect(() => service.parse(bad, 'AAPL', RiskTolerance.HIGH)).toThrow(
-      /schema validation/,
-    );
+    expect(() => service.parse(bad, 'AAPL', RiskTolerance.HIGH)).toThrow(/schema validation/);
   });
 
   it('throws when rationale is empty', () => {
     const bad = JSON.stringify({ status: 'Hold', confidence: 0.5, rationale: '' });
-    expect(() => service.parse(bad, 'AAPL', RiskTolerance.MEDIUM)).toThrow(
-      /schema validation/,
-    );
+    expect(() => service.parse(bad, 'AAPL', RiskTolerance.MEDIUM)).toThrow(/schema validation/);
   });
 
   it('trims surrounding whitespace before parsing', () => {

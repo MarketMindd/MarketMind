@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
-import { AiService } from './ai.service.js';
-import { PromptBuilderService } from './prompt-builder.service.js';
-import { GeminiClientService } from './gemini-client.service.js';
-import { ResponseParserService } from './response-parser.service.js';
+
+import { AiService } from './ai.service';
+import { GeminiClientService } from './gemini-client.service';
+import { PromptBuilderService } from './prompt-builder.service';
+import { ResponseParserService } from './response-parser.service';
 
 @Module({
   providers: [AiService, PromptBuilderService, GeminiClientService, ResponseParserService],

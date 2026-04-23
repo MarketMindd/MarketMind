@@ -1,16 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AiService } from './ai.service.js';
-import { PromptBuilderService } from './prompt-builder.service.js';
-import { GeminiClientService } from './gemini-client.service.js';
-import { ResponseParserService } from './response-parser.service.js';
+
 import { RiskTolerance } from '@market-mind/common';
-import type { FilteredSnapshot } from '../filter/filter.types.js';
 import type { AiRecommendation } from '@market-mind/common';
 
-const makeRecommendation = (
-  symbol: string,
-  riskTolerance: RiskTolerance,
-): AiRecommendation => ({
+import type { FilteredSnapshot } from '../filter/filter.types';
+import { AiService } from './ai.service';
+import { GeminiClientService } from './gemini-client.service';
+import { PromptBuilderService } from './prompt-builder.service';
+import { ResponseParserService } from './response-parser.service';
+
+const makeRecommendation = (symbol: string, riskTolerance: RiskTolerance): AiRecommendation => ({
   status: 'Invest',
   confidence: 0.8,
   rationale: 'Good momentum',
@@ -67,9 +66,7 @@ describe('AiService', () => {
   });
 
   it('calls Gemini exactly once for multiple users sharing the same risk tolerance', async () => {
-    mockResponseParser.parse.mockReturnValue(
-      makeRecommendation('AAPL', RiskTolerance.MEDIUM),
-    );
+    mockResponseParser.parse.mockReturnValue(makeRecommendation('AAPL', RiskTolerance.MEDIUM));
     const users = [
       { userId: 'u1', riskTolerance: RiskTolerance.MEDIUM },
       { userId: 'u2', riskTolerance: RiskTolerance.MEDIUM },
@@ -98,9 +95,7 @@ describe('AiService', () => {
     mockGeminiClient.generateRecommendation
       .mockRejectedValueOnce(new Error('API error'))
       .mockResolvedValueOnce('raw');
-    mockResponseParser.parse.mockReturnValueOnce(
-      makeRecommendation('AAPL', RiskTolerance.HIGH),
-    );
+    mockResponseParser.parse.mockReturnValueOnce(makeRecommendation('AAPL', RiskTolerance.HIGH));
 
     const users = [
       { userId: 'u1', riskTolerance: RiskTolerance.LOW },

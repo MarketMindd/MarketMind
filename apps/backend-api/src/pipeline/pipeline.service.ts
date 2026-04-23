@@ -1,8 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { FilterService } from '../filter/filter.service.js';
-import { AiService } from '../ai/ai.service.js';
-import { ProcessingService } from '../processing/processing.service.js';
-import { MarketSnapshot } from '../market/market.types.js';
+
+import { AiService } from '../ai/ai.service';
+import { FilterService } from '../filter/filter.service';
+import { MarketSnapshot } from '../market/market.types';
+import { ProcessingService } from '../processing/processing.service';
 
 @Injectable()
 export class PipelineService {

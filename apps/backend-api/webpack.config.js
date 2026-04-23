@@ -1,7 +1,12 @@
-const { NxAppWebpackPlugin } = require('@nx/webpack/app-plugin');
-const { join } = require('path');
+import { NxAppWebpackPlugin } from '@nx/webpack/app-plugin.js';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
+import nodeExternals from 'webpack-node-externals';
 
-module.exports = {
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+export default {
   output: {
     path: join(__dirname, 'dist'),
     clean: true,
@@ -9,6 +14,12 @@ module.exports = {
       devtoolModuleFilenameTemplate: '[absolute-resource-path]',
     }),
   },
+  externals: [
+    nodeExternals({
+      modulesDir: join(__dirname, '..', '..', 'node_modules'),
+      allowlist: [/^@market-mind\//],
+    }),
+  ],
   plugins: [
     new NxAppWebpackPlugin({
       target: 'node',
@@ -20,6 +31,8 @@ module.exports = {
       outputHashing: 'none',
       generatePackageJson: false,
       sourceMap: true,
+      externalDependencies: [],
+      mergeExternals: true,
     }),
   ],
 };

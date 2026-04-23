@@ -1,12 +1,6 @@
-import type {
-  SignInPayload,
-  SignUpPayload,
-  AuthResponse,
-} from '@market-mind/common';
-import type {
-  UseMutationOptions,
-  UseMutationResult,
-} from '@tanstack/react-query';
+import type { UseMutationOptions, UseMutationResult } from '@tanstack/react-query';
+
+import type { AuthResponse, SignInPayload, SignUpPayload } from '@market-mind/common';
 
 export type iClientQueriesProvider = {
   auth: {

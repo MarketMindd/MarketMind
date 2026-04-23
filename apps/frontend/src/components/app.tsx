@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
+
 import { ProtectedRoute } from './elements/protectedRoute';
 import { PublicRoute } from './elements/publicRoute';
 import { SignIn } from './views/auth/signIn';

@@ -1,9 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
+
 import { AiRecommendation, RiskTolerance } from '@market-mind/common';
-import { FilteredSnapshot } from '../filter/filter.types.js';
-import { PromptBuilderService } from './prompt-builder.service.js';
-import { GeminiClientService } from './gemini-client.service.js';
-import { ResponseParserService } from './response-parser.service.js';
+
+import { FilteredSnapshot } from '../filter/filter.types';
+import { GeminiClientService } from './gemini-client.service';
+import { PromptBuilderService } from './prompt-builder.service';
+import { ResponseParserService } from './response-parser.service';
 
 @Injectable()
 export class AiService {

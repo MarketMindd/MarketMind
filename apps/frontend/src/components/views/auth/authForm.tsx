@@ -1,8 +1,10 @@
+import { ArrowRight, Lock, Mail, User } from 'lucide-react';
 import { useState } from 'react';
+
+import { SignInPayload, SignUpPayload } from '@market-mind/common';
+
 import { Button } from '@/components/elements/button';
 import { Input } from '@/components/elements/input';
-import { Mail, Lock, User, ArrowRight } from 'lucide-react';
-import { SignInPayload, SignUpPayload } from '@market-mind/common';
 
 interface AuthFormSignInProps {
   isSignIn: true;
@@ -18,11 +20,7 @@ interface AuthFormSignUpProps {
 
 type AuthFormProps = AuthFormSignInProps | AuthFormSignUpProps;
 
-export const AuthForm: React.FC<AuthFormProps> = ({
-  isSignIn,
-  onAuth,
-  onModeSwitch,
-}) => {
+export const AuthForm: React.FC<AuthFormProps> = ({ isSignIn, onAuth, onModeSwitch }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
@@ -97,9 +95,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({
               <div className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="px-2 bg-background text-muted-foreground">
-                or continue with
-              </span>
+              <span className="px-2 bg-background text-muted-foreground">or continue with</span>
             </div>
           </div>
         </form>
