@@ -1,15 +1,14 @@
-import { AiRecommendation } from './aiRecommendation';
+import z from 'zod';
+
+import type { AiResponse } from './aiRecommendation';
+import type { MarketData } from './marketData';
 
 export interface Stock {
-  id: string;
   name: string;
-  ticker: string;
+  symbol: string;
   sector: string;
-  price: number;
-  change: number;
-  changePercent: number;
-  recommendation: AiRecommendation;
-  confidence: number;
-  isPortfolioStock: boolean;
-  explanation: string;
+  marketData: MarketData;
+  aiRecommendation: AiResponse;
 }
+
+export const getStockBySymbolParamSchema = z.string().min(1, 'Symbol is required');
