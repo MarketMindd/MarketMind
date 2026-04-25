@@ -1,25 +1,21 @@
-import React, { createContext, useContext, useState } from 'react';
 import {
   QueryClient,
   QueryClientProvider,
   useMutation,
   UseMutationOptions,
 } from '@tanstack/react-query';
-import type { iDataProvider } from '@/entities/dataProvider';
-import type {
-  SignInPayload,
-  SignUpPayload,
-  AuthResponse,
-} from '@market-mind/common';
+import React, { createContext, useContext, useState } from 'react';
+
+import type { AuthResponse, SignInPayload, SignUpPayload } from '@market-mind/common';
+
 import type { iClientQueriesProvider } from '@/entities/clientQueries';
+import type { iDataProvider } from '@/entities/dataProvider';
 
 type ClientQueriesContext = {
   dataProvider: iDataProvider;
 };
 
-const ClientQueriesDataContext = createContext<ClientQueriesContext | null>(
-  null,
-);
+const ClientQueriesDataContext = createContext<ClientQueriesContext | null>(null);
 
 export const ClientQueriesProvider = ({
   dataProvider,
@@ -40,23 +36,16 @@ export const ClientQueriesProvider = ({
 
 export const useClientQueries = (): iClientQueriesProvider => {
   const ctx = useContext(ClientQueriesDataContext);
-  if (!ctx)
-    throw new Error(
-      'useClientQueries must be used within ClientQueriesProvider',
-    );
+  if (!ctx) throw new Error('useClientQueries must be used within ClientQueriesProvider');
 
-  const useSignIn = (
-    options?: UseMutationOptions<AuthResponse, Error, SignInPayload>,
-  ) => {
+  const useSignIn = (options?: UseMutationOptions<AuthResponse, Error, SignInPayload>) => {
     return useMutation<AuthResponse, Error, SignInPayload>({
       mutationFn: (payload) => ctx.dataProvider.auth.signin(payload),
       ...options,
     });
   };
 
-  const useSignUp = (
-    options?: UseMutationOptions<AuthResponse, Error, SignUpPayload>,
-  ) => {
+  const useSignUp = (options?: UseMutationOptions<AuthResponse, Error, SignUpPayload>) => {
     return useMutation<AuthResponse, Error, SignUpPayload>({
       mutationFn: (payload) => ctx.dataProvider.auth.signup(payload),
       ...options,
