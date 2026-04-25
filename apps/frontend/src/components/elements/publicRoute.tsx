@@ -5,9 +5,7 @@ interface PublicRouteProps {
   children: React.ReactElement;
 }
 
-export const PublicRoute: React.FC<PublicRouteProps> = ({
-  children,
-}) => {
+export const PublicRoute: React.FC<PublicRouteProps> = ({ children }) => {
   const token = localStorage.getItem('accessToken');
 
   if (token) {

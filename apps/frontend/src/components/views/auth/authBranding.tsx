@@ -10,11 +10,7 @@ export const AuthBranding = () => {
 
       <div className="relative">
         <div className="flex items-center gap-3 mb-12">
-          <img
-            src={Logo}
-            alt="MarketMind Logo"
-            className="w-12 h-12 rounded-xl"
-          />
+          <img src={Logo} alt="MarketMind Logo" className="w-12 h-12 rounded-xl" />
           <span className="text-2xl font-semibold">
             <span className="text-foreground">Market</span>
             <span className="text-primary">Mind</span>
@@ -27,8 +23,8 @@ export const AuthBranding = () => {
           <span className="gradient-text">Recommendations</span>
         </h1>
         <p className="text-lg text-muted-foreground max-w-md">
-          Make smarter investment decisions with clear, explainable AI insights
-          tailored to your risk profile.
+          Make smarter investment decisions with clear, explainable AI insights tailored to your
+          risk profile.
         </p>
       </div>
 

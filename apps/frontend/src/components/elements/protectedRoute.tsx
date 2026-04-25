@@ -5,9 +5,7 @@ interface ProtectedRouteProps {
   children: React.ReactElement;
 }
 
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
-  children,
-}) => {
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const token = localStorage.getItem('accessToken');
 
   if (!token) {

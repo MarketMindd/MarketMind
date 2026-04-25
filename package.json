@@ -3,9 +3,9 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "start:frontend": "nx serve frontend",
+    "start:frontend": "nx serve frontend --no-tui",
     "build:frontend": "nx build frontend",
-    "start:api": "nx serve backend-api",
+    "start:api": "nx serve backend-api --no-tui",
     "build:api": "nx build backend-api",
     "db:migrate": "npm run db:migrate -w @market-mind/database",
     "db:migration:revert": "npm run db:migration:revert -w @market-mind/database",
@@ -16,6 +16,7 @@
   "private": true,
   "devDependencies": {
     "@eslint/js": "^9.8.0",
+    "@ianvs/prettier-plugin-sort-imports": "^4.7.1",
     "@nx/eslint": "22.5.2",
     "@nx/eslint-plugin": "22.5.2",
     "@nx/js": "22.5.2",
@@ -28,10 +29,12 @@
     "@swc-node/register": "~1.11.1",
     "@swc/core": "~1.15.5",
     "@swc/helpers": "~0.5.18",
+    "@types/jest": "^30.0.0",
     "@types/node": "20.19.9",
     "eslint": "^9.8.0",
     "eslint-config-prettier": "^10.0.0",
     "eslint-plugin-import": "2.31.0",
+    "eslint-plugin-unused-imports": "^4.4.1",
     "jiti": "2.4.2",
     "jsonc-eslint-parser": "^2.1.0",
     "nx": "22.5.2",
@@ -41,7 +44,7 @@
     "typescript-eslint": "^8.40.0"
   },
   "workspaces": [
-    "packages/*",
+    "libs/*",
     "apps/*"
   ],
   "dependencies": {

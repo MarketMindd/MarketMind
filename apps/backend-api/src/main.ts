@@ -1,10 +1,8 @@
-/**
- * This is not a production server yet!
- * This is only a minimal backend to get started.
- */
-
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+
+import 'dotenv/config';
+
 import { AppModule } from './app/app.module';
 import { appConfig } from './config/appConfig';
 
@@ -18,9 +16,7 @@ const bootstrap = async () => {
   app.setGlobalPrefix(globalPrefix);
   const port = appConfig.port;
   await app.listen(port);
-  Logger.log(
-    `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`,
-  );
+  Logger.log(`🚀 Application is running on: http://localhost:${port}/${globalPrefix}`);
 };
 
 bootstrap();

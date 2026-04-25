@@ -10,10 +10,10 @@
       "path": "./apps/backend-api"
     },
     {
-      "path": "./packages/database"
+      "path": "./libs/database"
     },
     {
-      "path": "./packages/common"
+      "path": "./libs/common"
     }
   ]
 }

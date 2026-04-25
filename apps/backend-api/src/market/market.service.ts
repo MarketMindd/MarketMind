@@ -1,15 +1,18 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CronJob } from 'cron';
+import { Repository } from 'typeorm';
+import YahooFinance from 'yahoo-finance2';
+
 import { retry } from '@market-mind/common';
 import { MarketDataEntity, PortfolioEntity } from '@market-mind/database';
-import { CronJob } from 'cron';
-import YahooFinance from 'yahoo-finance2';
-import { Repository } from 'typeorm';
+
+import { PipelineService } from '../pipeline/pipeline.service';
 import { MarketSnapshot } from './market.types';
 
 const CRON_JOB_NAME = 'market-poll';
-const MARKET_POLL_SCHEDULE = '*/15 * * * *';
+const MARKET_POLL_SCHEDULE = '*/1 * * * *';
 const QUOTE_RETRY_DELAYS_MS = [1000, 2000] as const;
 
 interface QuoteSnapshotFields {
@@ -25,6 +28,7 @@ export class MarketService implements OnModuleInit {
 
   constructor(
     private readonly schedulerRegistry: SchedulerRegistry,
+    private readonly pipelineService: PipelineService,
     @InjectRepository(PortfolioEntity)
     private readonly portfolioRepo: Repository<PortfolioEntity>,
     @InjectRepository(MarketDataEntity)
@@ -79,7 +83,7 @@ export class MarketService implements OnModuleInit {
 
         const snapshot = this.createSnapshot(symbol, quote, fetchedAt);
         await this.persistSnapshot(snapshot);
-        this.emitSnapshot(snapshot);
+        await this.pipelineService.process(snapshot);
       } catch (error) {
         this.logger.error(
           `Failed to process symbol ${symbol}`,
@@ -138,12 +142,7 @@ export class MarketService implements OnModuleInit {
       stockSymbol: snapshot.symbol,
       price: snapshot.price,
       volume: snapshot.volume,
+      priceChange: snapshot.priceChange,
     });
-  }
-
-  private emitSnapshot(snapshot: MarketSnapshot): void {
-    this.logger.debug(
-      `Snapshot ready for filter module: ${snapshot.symbol} @ ${snapshot.price}`,
-    );
   }
 }
