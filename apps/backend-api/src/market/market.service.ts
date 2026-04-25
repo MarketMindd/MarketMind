@@ -1,13 +1,15 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CronJob } from 'cron';
+import { Repository } from 'typeorm';
+import YahooFinance from 'yahoo-finance2';
+
 import { retry } from '@market-mind/common';
 import { MarketDataEntity, PortfolioEntity } from '@market-mind/database';
-import { CronJob } from 'cron';
-import YahooFinance from 'yahoo-finance2';
-import { Repository } from 'typeorm';
-import { MarketSnapshot } from './market.types.js';
-import { PipelineService } from '../pipeline/pipeline.service.js';
+
+import { PipelineService } from '../pipeline/pipeline.service';
+import { MarketSnapshot } from './market.types';
 
 const CRON_JOB_NAME = 'market-poll';
 const MARKET_POLL_SCHEDULE = '*/15 * * * *';

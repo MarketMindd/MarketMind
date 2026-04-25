@@ -1,11 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PipelineService } from './pipeline.service.js';
-import { FilterService } from '../filter/filter.service.js';
-import { AiService } from '../ai/ai.service.js';
-import { ProcessingService } from '../processing/processing.service.js';
-import type { MarketSnapshot } from '../market/market.types.js';
-import type { FilteredSnapshot } from '../filter/filter.types.js';
+
 import { RiskTolerance } from '@market-mind/common';
+
+import { AiService } from '../ai/ai.service';
+import { FilterService } from '../filter/filter.service';
+import type { FilteredSnapshot } from '../filter/filter.types';
+import type { MarketSnapshot } from '../market/market.types';
+import { ProcessingService } from '../processing/processing.service';
+import { PipelineService } from './pipeline.service';
 
 const makeSnapshot = (): MarketSnapshot => ({
   symbol: 'AAPL',

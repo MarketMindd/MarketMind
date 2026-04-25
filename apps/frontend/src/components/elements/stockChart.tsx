@@ -1,14 +1,9 @@
-import type { ChartDataPoint } from '@/types/stockChart';
-import { Stock, StockRecommendation } from '@market-mind/common';
 import { useMemo } from 'react';
-import {
-  Area,
-  AreaChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
+import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+
+import { Stock, StockRecommendation } from '@market-mind/common';
+
+import type { ChartDataPoint } from '@/types/stockChart';
 
 interface StockChartProps {
   stock: Stock;
@@ -27,31 +22,26 @@ const StockChart = ({ stock }: StockChartProps) => {
     const days = 30;
     let currentPrice = basePrice * (1 - (stock.changePercent / 100) * 5); // Start lower if positive trend
 
-    const data = Array.from({ length: days }).reduce<ChartDataPoint[]>(
-      (acc, _, i) => {
-        const change = (Math.random() - 0.45) * volatility * currentPrice;
-        currentPrice = Math.max(currentPrice + change, currentPrice * 0.9);
+    const data = Array.from({ length: days }).reduce<ChartDataPoint[]>((acc, _, i) => {
+      const change = (Math.random() - 0.45) * volatility * currentPrice;
+      currentPrice = Math.max(currentPrice + change, currentPrice * 0.9);
 
-        const trendFactor = i / days;
-        currentPrice =
-          currentPrice * (1 - trendFactor * 0.1) +
-          basePrice * (trendFactor * 0.1);
+      const trendFactor = i / days;
+      currentPrice = currentPrice * (1 - trendFactor * 0.1) + basePrice * (trendFactor * 0.1);
 
-        const date = new Date();
-        date.setDate(date.getDate() - (days - i));
+      const date = new Date();
+      date.setDate(date.getDate() - (days - i));
 
-        acc.push({
-          date: date.toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-          }),
-          price: Number(currentPrice.toFixed(2)),
-          fullDate: date.toLocaleDateString(),
-        });
-        return acc;
-      },
-      [],
-    );
+      acc.push({
+        date: date.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+        }),
+        price: Number(currentPrice.toFixed(2)),
+        fullDate: date.toLocaleDateString(),
+      });
+      return acc;
+    }, []);
 
     data[data.length - 1].price = stock.price;
 
@@ -62,25 +52,14 @@ const StockChart = ({ stock }: StockChartProps) => {
   const maxPrice = Math.max(...chartData.map((d) => d.price)) * 1.02;
 
   const isPositive = stock.change >= 0;
-  const strokeColor = isPositive
-    ? 'hsl(var(--success))'
-    : 'hsl(var(--destructive))';
+  const strokeColor = isPositive ? 'hsl(var(--success))' : 'hsl(var(--destructive))';
 
   return (
     <div className="h-64 w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart
-          data={chartData}
-          margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-        >
+        <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
           <defs>
-            <linearGradient
-              id={`gradient-${stock.id}`}
-              x1="0"
-              y1="0"
-              x2="0"
-              y2="1"
-            >
+            <linearGradient id={`gradient-${stock.id}`} x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor={strokeColor} stopOpacity={0.3} />
               <stop offset="100%" stopColor={strokeColor} stopOpacity={0} />
             </linearGradient>

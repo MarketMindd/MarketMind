@@ -1,8 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
 import { GoogleGenAI } from '@google/genai';
+import { Injectable, Logger } from '@nestjs/common';
 import { z } from 'zod';
+
 import { aiResponseSchema, retry } from '@market-mind/common';
-import { appConfig } from '../config/appConfig.js';
+
+import { appConfig } from '../config/appConfig';
 
 const GEMINI_MODEL = 'gemini-2.5-flash-lite';
 const GEMINI_RETRY_DELAYS_MS = [1000, 2000] as const;

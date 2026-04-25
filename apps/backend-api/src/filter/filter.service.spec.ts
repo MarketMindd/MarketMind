@@ -1,14 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { FilterService } from './filter.service.js';
+
+import { RiskTolerance } from '@market-mind/common';
 import {
   PortfolioEntity,
   RecommendationEntity,
   SymbolFilterStateEntity,
   UserProfileEntity,
 } from '@market-mind/database';
-import { RiskTolerance } from '@market-mind/common';
-import type { MarketSnapshot } from '../market/market.types.js';
+
+import type { MarketSnapshot } from '../market/market.types';
+import { FilterService } from './filter.service';
 
 jest.mock('newsapi', () => ({
   __esModule: true,
@@ -83,9 +85,8 @@ describe('FilterService', () => {
 
     service = module.get<FilterService>(FilterService);
 
-    mockNewsEverything = (
-      (service as unknown as { newsApi: { v2: { everything: jest.Mock } } }).newsApi
-    ).v2.everything;
+    mockNewsEverything = (service as unknown as { newsApi: { v2: { everything: jest.Mock } } })
+      .newsApi.v2.everything;
     mockNewsEverything.mockResolvedValue(noNewsResponse);
   });
 

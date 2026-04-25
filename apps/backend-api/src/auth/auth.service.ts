@@ -1,12 +1,4 @@
 import {
-  AuthResponse,
-  RiskTolerance,
-  SignInPayload,
-  SignUpPayload,
-  UserProfile,
-} from '@market-mind/common';
-import { UserProfileEntity } from '@market-mind/database';
-import {
   ConflictException,
   Injectable,
   NotFoundException,
@@ -16,6 +8,15 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcryptjs';
 import { Repository } from 'typeorm';
+
+import {
+  AuthResponse,
+  RiskTolerance,
+  SignInPayload,
+  SignUpPayload,
+  UserProfile,
+} from '@market-mind/common';
+import { UserProfileEntity } from '@market-mind/database';
 
 @Injectable()
 export class AuthService {
@@ -50,7 +51,7 @@ export class AuthService {
     });
 
     const saved = await this.usersRepo.save(user);
-    const { password: _p, createdAt, updatedAt, ...profile } = saved;
+    const { password: _p, createdAt: _createdAt, updatedAt: _updatedAt, ...profile } = saved;
     return this.createAuthResponse(profile);
   }
 
@@ -68,7 +69,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const { password: _p, createdAt, updatedAt, ...profile } = user;
+    const { password: _p, createdAt: _createdAt, updatedAt: _updatedAt, ...profile } = user;
     return this.createAuthResponse(profile);
   }
 }

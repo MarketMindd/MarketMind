@@ -1,7 +1,8 @@
-import { useClientQueries } from '@/hooks/useClientQueries';
-import { useToast } from '@/hooks/useToast';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+
+import { useClientQueries } from '@/hooks/useClientQueries';
+import { useToast } from '@/hooks/useToast';
 import { AuthBranding } from './authBranding';
 import { AuthForm } from './authForm';
 

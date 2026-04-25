@@ -25,8 +25,7 @@ export const mockStocks: Stock[] = [
     changePercent: -1.4,
     recommendation: StockRecommendation.HOLD,
     confidence: 72,
-    explanation:
-      'Already priced for perfection. Wait for a better entry point.',
+    explanation: 'Already priced for perfection. Wait for a better entry point.',
     isPortfolioStock: false,
   },
   {
@@ -39,8 +38,7 @@ export const mockStocks: Stock[] = [
     changePercent: 0.57,
     recommendation: StockRecommendation.INVEST,
     confidence: 81,
-    explanation:
-      'Defensive healthcare play with strong dividend yield and pipeline potential.',
+    explanation: 'Defensive healthcare play with strong dividend yield and pipeline potential.',
     isPortfolioStock: false,
   },
   {
@@ -53,8 +51,7 @@ export const mockStocks: Stock[] = [
     changePercent: -3.2,
     recommendation: StockRecommendation.EXIT,
     confidence: 68,
-    explanation:
-      'Margin compression and increased competition warrant caution.',
+    explanation: 'Margin compression and increased competition warrant caution.',
     isPortfolioStock: false,
   },
   {
@@ -67,8 +64,7 @@ export const mockStocks: Stock[] = [
     changePercent: 1.52,
     recommendation: StockRecommendation.INVEST,
     confidence: 91,
-    explanation:
-      'Azure + Copilot AI integration creates a powerful growth engine.',
+    explanation: 'Azure + Copilot AI integration creates a powerful growth engine.',
     isPortfolioStock: false,
   },
   {
@@ -81,8 +77,7 @@ export const mockStocks: Stock[] = [
     changePercent: -1.16,
     recommendation: StockRecommendation.HOLD,
     confidence: 65,
-    explanation:
-      'Energy transition uncertainty but strong cash flows support dividend.',
+    explanation: 'Energy transition uncertainty but strong cash flows support dividend.',
     isPortfolioStock: false,
   },
 ];

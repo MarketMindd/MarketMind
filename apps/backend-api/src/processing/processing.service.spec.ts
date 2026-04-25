@@ -1,8 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { ProcessingService } from './processing.service.js';
+
+import { AiRecommendation, RiskTolerance } from '@market-mind/common';
 import { RecommendationEntity } from '@market-mind/database';
-import { RiskTolerance, AiRecommendation } from '@market-mind/common';
+
+import { ProcessingService } from './processing.service';
 
 const makeRec = (overrides: Partial<AiRecommendation> = {}): AiRecommendation => ({
   symbol: 'AAPL',
@@ -76,9 +78,7 @@ describe('ProcessingService', () => {
     const recFail = makeRec({ symbol: 'FAIL', riskTolerance: RiskTolerance.LOW });
     const recOk = makeRec({ symbol: 'AAPL', riskTolerance: RiskTolerance.HIGH });
 
-    mockRepo.upsert
-      .mockRejectedValueOnce(new Error('DB error'))
-      .mockResolvedValueOnce(undefined);
+    mockRepo.upsert.mockRejectedValueOnce(new Error('DB error')).mockResolvedValueOnce(undefined);
 
     await expect(service.process([recFail, recOk])).resolves.not.toThrow();
     expect(mockRepo.upsert).toHaveBeenCalledTimes(2);
