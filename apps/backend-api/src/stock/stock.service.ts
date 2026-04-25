@@ -16,8 +16,6 @@ export class StockService {
   ) {}
 
   async getStockBySymbol(symbol: Stock['symbol']): Promise<Stock> {
-    console.log(`Fetching stock data for symbol: ${symbol}`);
-
     const rawData: RawStock | undefined = await this.stockRepo
       .createQueryBuilder('stocks')
       .leftJoin(
@@ -46,10 +44,10 @@ export class StockService {
       throw new NotFoundException(`Stock with symbol ${symbol} not found`);
     }
 
-    return this.mapStockEntityToStock(rawData);
+    return this.mapRawStockToStock(rawData);
   }
 
-  private mapStockEntityToStock(rawStock: RawStock): Stock {
+  private mapRawStockToStock(rawStock: RawStock): Stock {
     return {
       symbol: rawStock.symbol,
       name: rawStock.name,
