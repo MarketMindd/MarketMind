@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { aiResponseSchema, AiRecommendation, RiskTolerance } from '@market-mind/common';
+
+import { AiRecommendation, aiResponseSchema, RiskTolerance } from '@market-mind/common';
 
 @Injectable()
 export class ResponseParserService {

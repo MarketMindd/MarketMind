@@ -1,10 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PipelineService } from './pipeline.service.js';
-import { FilterService } from '../filter/filter.service.js';
-import { AiService } from '../ai/ai.service.js';
-import type { MarketSnapshot } from '../market/market.types.js';
-import type { FilteredSnapshot } from '../filter/filter.types.js';
+
 import { RiskTolerance } from '@market-mind/common';
+
+import { AiService } from '../ai/ai.service';
+import { FilterService } from '../filter/filter.service';
+import type { FilteredSnapshot } from '../filter/filter.types';
+import type { MarketSnapshot } from '../market/market.types';
+import { ProcessingService } from '../processing/processing.service';
+import { PipelineService } from './pipeline.service';
 
 const makeSnapshot = (): MarketSnapshot => ({
   symbol: 'AAPL',
@@ -24,16 +27,19 @@ describe('PipelineService', () => {
   let service: PipelineService;
   let mockFilterService: { filter: jest.Mock };
   let mockAiService: { analyze: jest.Mock };
+  let mockProcessingService: { process: jest.Mock };
 
   beforeEach(async () => {
     mockFilterService = { filter: jest.fn() };
     mockAiService = { analyze: jest.fn().mockResolvedValue([]) };
+    mockProcessingService = { process: jest.fn().mockResolvedValue(undefined) };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         PipelineService,
         { provide: FilterService, useValue: mockFilterService },
         { provide: AiService, useValue: mockAiService },
+        { provide: ProcessingService, useValue: mockProcessingService },
       ],
     }).compile();
 

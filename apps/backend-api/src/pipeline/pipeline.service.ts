@@ -1,7 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { FilterService } from '../filter/filter.service.js';
-import { AiService } from '../ai/ai.service.js';
-import { MarketSnapshot } from '../market/market.types.js';
+
+import { AiService } from '../ai/ai.service';
+import { FilterService } from '../filter/filter.service';
+import { MarketSnapshot } from '../market/market.types';
+import { ProcessingService } from '../processing/processing.service';
 
 @Injectable()
 export class PipelineService {
@@ -10,6 +12,7 @@ export class PipelineService {
   constructor(
     private readonly filterService: FilterService,
     private readonly aiService: AiService,
+    private readonly processingService: ProcessingService,
   ) {}
 
   async process(snapshot: MarketSnapshot): Promise<void> {
@@ -24,8 +27,9 @@ export class PipelineService {
 
     try {
       const recommendations = await this.aiService.analyze(filtered);
+      await this.processingService.process(recommendations);
       this.logger.log(
-        `Pipeline: ${snapshot.symbol} → ${recommendations.length} recommendation(s) generated`,
+        `Pipeline: ${snapshot.symbol} → ${recommendations.length} recommendation(s) persisted`,
       );
     } catch (error) {
       this.logger.warn(

@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
+
 import { RiskTolerance } from '@market-mind/common';
-import { FilteredSnapshot } from '../filter/filter.types.js';
+
+import { FilteredSnapshot } from '../filter/filter.types';
 
 const RISK_GUIDANCE: Record<RiskTolerance, string> = {
   [RiskTolerance.LOW]:
@@ -20,10 +22,7 @@ export class PromptBuilderService {
       snapshot.news.length === 0
         ? 'No recent news articles found for this symbol.'
         : snapshot.news
-            .map(
-              (a) =>
-                `- [${a.source}] ${a.title}${a.description ? `: ${a.description}` : ''}`,
-            )
+            .map((a) => `- [${a.source}] ${a.title}${a.description ? `: ${a.description}` : ''}`)
             .join('\n');
 
     return `You are a financial analysis assistant. Analyze the following market data and return a structured recommendation.

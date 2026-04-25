@@ -1,0 +1,22 @@
+import { z } from 'zod';
+
+import { RiskTolerance } from '../enums/risk-tolerance';
+import { StockRecommendation } from '../enums/command.js';
+
+export const recommendationStatusSchema = z.enum(StockRecommendation);
+
+export const aiResponseSchema = z.object({
+  status: recommendationStatusSchema,
+  confidence: z.number().min(0).max(1),
+  rationale: z.string().min(1),
+});
+
+export const aiRecommendationSchema = aiResponseSchema.extend({
+  symbol: z.string(),
+  riskTolerance: z.enum(RiskTolerance),
+  generatedAt: z.date(),
+});
+
+export type RecommendationStatus = z.infer<typeof recommendationStatusSchema>;
+export type AiResponse = z.infer<typeof aiResponseSchema>;
+export type AiRecommendation = z.infer<typeof aiRecommendationSchema>;
