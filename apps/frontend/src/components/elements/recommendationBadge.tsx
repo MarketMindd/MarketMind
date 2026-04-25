@@ -1,6 +1,6 @@
 import { Minus, TrendingDown, TrendingUp } from 'lucide-react';
 
-import { StockRecommendation } from '@market-mind/common';
+import { AiResponse, StockRecommendation } from '@market-mind/common';
 
 import { iconSizes, sizeClasses } from '@/consts/recommendationBadge';
 import { Size } from '@/enums/recommendationBadge';
@@ -8,8 +8,8 @@ import { RecommendationBadgeConfig } from '@/types/recommendationBadge';
 import { cn } from '@/utils/tailwindUtils';
 
 interface RecommendationBadgeProps {
-  recommendation: StockRecommendation;
-  confidence?: number;
+  recommendation: AiResponse['status'];
+  confidence?: AiResponse['confidence'];
   size?: Size;
   showConfidence?: boolean;
 }

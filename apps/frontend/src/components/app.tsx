@@ -36,14 +36,7 @@ export const App = () => {
           </PublicRoute>
         }
       />
-      <Route
-        path="/stock/:id"
-        element={
-          <ProtectedRoute>
-            <StockDetails />
-          </ProtectedRoute>
-        }
-      />
+      <Route path="/stock/:stockSymbol" element={<StockDetails />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
