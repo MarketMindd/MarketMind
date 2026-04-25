@@ -37,7 +37,7 @@ export class StockService {
       ])
       .where('stocks.symbol = :symbol', { symbol })
       .orderBy('marketData.time', 'DESC')
-      .addOrderBy('recommendation.createdAt', 'DESC')
+      .addOrderBy('recommendation.updatedAt', 'DESC')
       .getRawOne();
 
     if (!rawData) {
