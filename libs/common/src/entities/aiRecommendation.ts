@@ -1,8 +1,9 @@
 import { z } from 'zod';
 
 import { RiskTolerance } from '../enums/risk-tolerance';
+import { StockRecommendation } from '../enums/command.js';
 
-export const recommendationStatusSchema = z.enum(['Invest', 'Hold', 'Exit']);
+export const recommendationStatusSchema = z.enum(StockRecommendation);
 
 export const aiResponseSchema = z.object({
   status: recommendationStatusSchema,

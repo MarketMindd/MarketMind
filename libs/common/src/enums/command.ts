@@ -1,5 +1,5 @@
 export enum StockRecommendation {
-  INVEST = 'invest',
-  HOLD = 'hold',
-  EXIT = 'exit',
+  INVEST = 'Invest',
+  HOLD = 'Hold',
+  EXIT = 'Exit',
 }

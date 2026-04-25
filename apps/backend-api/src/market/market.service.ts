@@ -12,7 +12,7 @@ import { PipelineService } from '../pipeline/pipeline.service';
 import { MarketSnapshot } from './market.types';
 
 const CRON_JOB_NAME = 'market-poll';
-const MARKET_POLL_SCHEDULE = '*/15 * * * *';
+const MARKET_POLL_SCHEDULE = '*/1 * * * *';
 const QUOTE_RETRY_DELAYS_MS = [1000, 2000] as const;
 
 interface QuoteSnapshotFields {
