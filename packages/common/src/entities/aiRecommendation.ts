@@ -11,7 +11,7 @@ export const aiResponseSchema = z.object({
 
 export const aiRecommendationSchema = aiResponseSchema.extend({
   symbol: z.string(),
-  riskTolerance: z.nativeEnum(RiskTolerance),
+  riskTolerance: z.enum(RiskTolerance),
   generatedAt: z.date(),
 });
 
