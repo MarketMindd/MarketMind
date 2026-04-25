@@ -18,7 +18,7 @@ export class StockService {
   async getStockBySymbol(symbol: Stock['symbol']): Promise<Stock> {
     console.log(`Fetching stock data for symbol: ${symbol}`);
 
-    const rawData = await this.stockRepo
+    const rawData: RawStock | undefined = await this.stockRepo
       .createQueryBuilder('stocks')
       .leftJoin(
         RecommendationEntity,

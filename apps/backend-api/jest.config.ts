@@ -26,8 +26,8 @@ const config: Config = {
   testEnvironment: 'node',
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
-    '^@market-mind/common$': '<rootDir>/../../../packages/common/src/index.ts',
-    '^@market-mind/database$': '<rootDir>/../../../packages/database/src/index.ts',
+    '^@market-mind/common$': '<rootDir>/../../../libs/common/src/index.ts',
+    '^@market-mind/database$': '<rootDir>/../../../libs/database/src/index.ts',
   },
 };
 
