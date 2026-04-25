@@ -1,12 +1,19 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import NewsAPI from 'newsapi';
+import { Repository } from 'typeorm';
+
 import { retry, RiskTolerance } from '@market-mind/common';
-import { PortfolioEntity, SymbolFilterStateEntity, UserProfileEntity } from '@market-mind/database';
-import { appConfig } from '../config/appConfig.js';
-import { MarketSnapshot } from '../market/market.types.js';
-import { NewsArticle, UserContext, FilteredSnapshot } from './filter.types.js';
+import {
+  PortfolioEntity,
+  RecommendationEntity,
+  SymbolFilterStateEntity,
+  UserProfileEntity,
+} from '@market-mind/database';
+
+import { appConfig } from '../config/appConfig';
+import { MarketSnapshot } from '../market/market.types';
+import { FilteredSnapshot, NewsArticle, UserContext } from './filter.types';
 
 // Gate 1 — noise floor: ignore moves smaller than this vs the last AI-triggered priceChange.
 // Prevents redundant processing when price barely changes.
@@ -37,6 +44,8 @@ export class FilterService {
     private readonly portfolioRepo: Repository<PortfolioEntity>,
     @InjectRepository(UserProfileEntity)
     private readonly userProfileRepo: Repository<UserProfileEntity>,
+    @InjectRepository(RecommendationEntity)
+    private readonly recommendationRepo: Repository<RecommendationEntity>,
   ) {}
 
   async filter(snapshot: MarketSnapshot): Promise<FilteredSnapshot | null> {
@@ -75,10 +84,12 @@ export class FilterService {
 
     const recentCutoff = new Date(snapshot.fetchedAt.getTime() - RECENT_NEWS_WINDOW_MS);
     const hasRecentNews = news.some((a) => a.publishedAt >= recentCutoff);
+    const isColdStart = await this.hasMissingRecommendationCoverage(snapshot.symbol, users);
 
-    // Gate 2 — significance: forward if cumulative drift is large enough OR recent news exists.
+    // Gate 2 — significance: forward if cumulative drift is large enough, recent news exists,
+    // or tracked risk tolerances do not yet have recommendation coverage.
     const isPriceSignificant = delta >= SIGNIFICANCE_THRESHOLD;
-    if (!isPriceSignificant && !hasRecentNews) {
+    if (!isPriceSignificant && !hasRecentNews && !isColdStart) {
       this.logger.debug(
         `Significance skip ${snapshot.symbol}: delta ${delta.toFixed(2)}%, no recent articles`,
       );
@@ -93,7 +104,7 @@ export class FilterService {
 
     this.logger.log(
       `${snapshot.symbol} passed filter: delta=${delta.toFixed(2)}%, ` +
-        `recentNews=${hasRecentNews}, users=${users.length}`,
+        `recentNews=${hasRecentNews}, coldStart=${isColdStart}, users=${users.length}`,
     );
 
     return { snapshot, news, users };
@@ -153,5 +164,27 @@ export class FilterService {
       userId: p.id,
       riskTolerance: p.riskTolerance as RiskTolerance,
     }));
+  }
+
+  private async hasMissingRecommendationCoverage(
+    symbol: string,
+    users: UserContext[],
+  ): Promise<boolean> {
+    const trackedRiskTolerances = [...new Set(users.map((user) => user.riskTolerance))];
+
+    if (trackedRiskTolerances.length === 0) {
+      return false;
+    }
+
+    const recommendationRows = await this.recommendationRepo.find({
+      where: { stockSymbol: symbol },
+      select: ['riskTolerance'],
+    });
+
+    const coveredRiskTolerances = new Set(
+      recommendationRows.map((recommendation) => recommendation.riskTolerance as RiskTolerance),
+    );
+
+    return trackedRiskTolerances.some((riskTolerance) => !coveredRiskTolerances.has(riskTolerance));
   }
 }

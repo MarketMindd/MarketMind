@@ -1,9 +1,11 @@
+import { Minus, TrendingDown, TrendingUp } from 'lucide-react';
+
+import { StockRecommendation } from '@market-mind/common';
+
 import { iconSizes, sizeClasses } from '@/consts/recommendationBadge';
 import { Size } from '@/enums/recommendationBadge';
 import { RecommendationBadgeConfig } from '@/types/recommendationBadge';
 import { cn } from '@/utils/tailwindUtils';
-import { StockRecommendation } from '@market-mind/common';
-import { TrendingUp, Minus, TrendingDown } from 'lucide-react';
 
 interface RecommendationBadgeProps {
   recommendation: StockRecommendation;
@@ -48,9 +50,7 @@ const RecommendationBadge = ({
     >
       <Icon size={iconSizes[size]} />
       <span>{label}</span>
-      {showConfidence && confidence && (
-        <span className="opacity-70 ml-1">({confidence}%)</span>
-      )}
+      {showConfidence && confidence && <span className="opacity-70 ml-1">({confidence}%)</span>}
     </div>
   );
 };

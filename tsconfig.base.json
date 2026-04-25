@@ -1,12 +1,14 @@
 {
   "compilerOptions": {
     "composite": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "declarationMap": true,
     "importHelpers": true,
     "isolatedModules": true,
     "lib": ["es2022"],
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "noEmitOnError": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
@@ -18,8 +20,16 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@market-mind/common": ["packages/common/src/index.ts"],
-      "@market-mind/database": ["packages/database/src/index.ts"]
+      "@market-mind/common": ["libs/common/src/index.ts"],
+      "@market-mind/common/entities": ["libs/common/src/entities/index.ts"],
+      "@market-mind/common/enums": ["libs/common/src/enums/index.ts"],
+      "@market-mind/common/utils": ["libs/common/src/utils/index.ts"],
+      "@market-mind/database": ["libs/database/src/index.ts"],
+      "@market-mind/database/config": ["libs/database/src/config/index.ts"],
+      "@market-mind/database/datasource": ["libs/database/src/datasource/index.ts"],
+      "@market-mind/database/entities": ["libs/database/src/entities/index.ts"],
+      "@market-mind/database/migrations": ["libs/database/src/migrations/index.ts"],
+      "@market-mind/database/utils": ["libs/database/src/utils/index.ts"]
     }
   }
 }

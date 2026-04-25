@@ -1,12 +1,19 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { FilterService } from '../filter/filter.service.js';
-import { MarketSnapshot } from '../market/market.types.js';
+
+import { AiService } from '../ai/ai.service';
+import { FilterService } from '../filter/filter.service';
+import { MarketSnapshot } from '../market/market.types';
+import { ProcessingService } from '../processing/processing.service';
 
 @Injectable()
 export class PipelineService {
   private readonly logger = new Logger(PipelineService.name);
 
-  constructor(private readonly filterService: FilterService) {}
+  constructor(
+    private readonly filterService: FilterService,
+    private readonly aiService: AiService,
+    private readonly processingService: ProcessingService,
+  ) {}
 
   async process(snapshot: MarketSnapshot): Promise<void> {
     const filtered = await this.filterService.filter(snapshot);
@@ -18,6 +25,16 @@ export class PipelineService {
         `${filtered.news.length} articles)`,
     );
 
-    // TODO(Task 3): await this.aiService.analyze(filtered);
+    try {
+      const recommendations = await this.aiService.analyze(filtered);
+      await this.processingService.process(recommendations);
+      this.logger.log(
+        `Pipeline: ${snapshot.symbol} → ${recommendations.length} recommendation(s) persisted`,
+      );
+    } catch (error) {
+      this.logger.warn(
+        `Pipeline: AI stage failed for ${snapshot.symbol}: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
   }
 }

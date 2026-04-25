@@ -1,6 +1,7 @@
+import { SignInPayload, SignUpPayload } from '@market-mind/common';
+
 import { appConfig } from '@/config/appConfig';
 import { iDataProvider } from '@/entities/dataProvider';
-import { SignInPayload, SignUpPayload } from '@market-mind/common';
 
 export const createFetchDataProvider = (): iDataProvider => {
   const baseUrl = appConfig.apiBaseUrl;

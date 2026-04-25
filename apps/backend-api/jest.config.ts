@@ -5,18 +5,21 @@ const config: Config = {
   rootDir: 'src',
   testRegex: '.*\\.spec\\.ts$',
   transform: {
-    '^.+\\.(t|j)s$': ['ts-jest', {
-      tsconfig: {
-        module: 'commonjs',
-        moduleResolution: 'node',
-        experimentalDecorators: true,
-        emitDecoratorMetadata: true,
-        strict: true,
-        skipLibCheck: true,
-        esModuleInterop: true,
+    '^.+\\.(t|j)s$': [
+      'ts-jest',
+      {
+        tsconfig: {
+          module: 'commonjs',
+          moduleResolution: 'node',
+          experimentalDecorators: true,
+          emitDecoratorMetadata: true,
+          strict: true,
+          skipLibCheck: true,
+          esModuleInterop: true,
+        },
+        useESM: false,
       },
-      useESM: false,
-    }],
+    ],
   },
   collectCoverageFrom: ['**/*.(t|j)s'],
   coverageDirectory: '../coverage',
