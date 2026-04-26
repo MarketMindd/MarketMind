@@ -5,3 +5,4 @@ export * from './entities/marketData';
 export * from './enums/command';
 export * from './enums/risk-tolerance';
 export * from './utils/retry';
+export * from './types';

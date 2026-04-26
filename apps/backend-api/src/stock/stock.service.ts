@@ -44,10 +44,10 @@ export class StockService {
       throw new NotFoundException(`Stock with symbol ${symbol} not found`);
     }
 
-    return this.mapRawStockToStock(rawData);
+    return this.mapRawStock(rawData);
   }
 
-  private mapRawStockToStock(rawStock: RawStock): Stock {
+  private mapRawStock(rawStock: RawStock): Stock {
     return {
       symbol: rawStock.symbol,
       name: rawStock.name,
