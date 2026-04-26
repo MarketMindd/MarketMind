@@ -4,11 +4,15 @@ import { config } from 'dotenv';
 
 import { parseBoolean, parseNumber } from '../utils/parse.utils';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+let _dirname = '';
+if (typeof __dirname !== 'undefined') {
+  _dirname = __dirname;
+} else {
+  _dirname = dirname(fileURLToPath(new Function('return import.meta.url')()));
+}
 
-config({ path: resolve(__dirname, '../../../../.env') });
-config({ path: resolve(__dirname, '../.env') });
+config({ path: resolve(_dirname, '../../../../.env') });
+config({ path: resolve(_dirname, '../.env') });
 
 export interface DatabaseEnvironment {
   host: string;

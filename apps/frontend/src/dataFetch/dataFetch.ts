@@ -41,10 +41,25 @@ export const createFetchDataProvider = (): iDataProvider => {
     return res.json();
   };
 
+  const getStock = async (symbol: string) => {
+    const res = await fetch(`${baseUrl}/stocks/${symbol}`, {
+      method: 'GET',
+      headers: getHeaders(),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err?.message || 'Request failed');
+    }
+    return res.json();
+  };
+
   return {
     auth: {
       signin,
       signup,
+    },
+    stocks: {
+      getStock,
     },
   };
 };

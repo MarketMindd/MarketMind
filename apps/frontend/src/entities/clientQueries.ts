@@ -1,6 +1,11 @@
-import type { UseMutationOptions, UseMutationResult } from '@tanstack/react-query';
+import type {
+  UseMutationOptions,
+  UseMutationResult,
+  UseQueryOptions,
+  UseQueryResult,
+} from '@tanstack/react-query';
 
-import type { AuthResponse, SignInPayload, SignUpPayload } from '@market-mind/common';
+import type { AuthResponse, SignInPayload, SignUpPayload, Stock } from '@market-mind/common';
 
 export type iClientQueriesProvider = {
   auth: {
@@ -10,5 +15,11 @@ export type iClientQueriesProvider = {
     useSignUp: (
       options?: UseMutationOptions<AuthResponse, Error, SignUpPayload>,
     ) => UseMutationResult<AuthResponse, Error, SignUpPayload>;
+  };
+  stocks: {
+    useGetStock: (
+      symbol: string,
+      options?: Omit<UseQueryOptions<Stock, Error>, 'queryKey' | 'queryFn'>,
+    ) => UseQueryResult<Stock, Error>;
   };
 };

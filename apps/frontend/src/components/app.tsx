@@ -37,7 +37,7 @@ export const App = () => {
         }
       />
       <Route
-        path="/stock/:id"
+        path="/stock/:stockSymbol"
         element={
           <ProtectedRoute>
             <StockDetails />
