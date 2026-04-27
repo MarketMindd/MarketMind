@@ -25,4 +25,15 @@ export class AuthController {
   ): Promise<AuthResponse> {
     return this.authService.signin(body.email, body.password);
   }
+
+  @Post('refresh')
+  async refresh(@Body('refreshToken') refreshToken: string): Promise<AuthResponse> {
+    return this.authService.refreshTokens(refreshToken);
+  }
+
+  @Post('logout')
+  async logout(@Body() body: { userId: string; refreshToken: string }) {
+    await this.authService.logout(body.userId, body.refreshToken);
+    return { success: true };
+  }
 }

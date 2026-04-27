@@ -4,12 +4,8 @@ import { config } from 'dotenv';
 
 import { parseBoolean, parseNumber } from '../utils/parse.utils';
 
-let _dirname = '';
-if (typeof __dirname !== 'undefined') {
-  _dirname = __dirname;
-} else {
-  _dirname = dirname(fileURLToPath(new Function('return import.meta.url')()));
-}
+const _dirname =
+  typeof __dirname !== 'undefined' ? __dirname : dirname(fileURLToPath(import.meta.url));
 
 config({ path: resolve(_dirname, '../../../../.env') });
 config({ path: resolve(_dirname, '../.env') });
@@ -35,10 +31,7 @@ const parseDatabaseUrl = (databaseUrl: string, env: NodeJS.ProcessEnv): Database
   return {
     host: url.hostname || env.DB_HOST || env.PGHOST || 'localhost',
     port: url.port ? Number(url.port) : parseNumber(env.DB_PORT ?? env.PGPORT, 5432),
-    username:
-      decodeURIComponent(url.username) ||
-      env.DB_USER ||
-      getDefaultUsername(env),
+    username: decodeURIComponent(url.username) || env.DB_USER || getDefaultUsername(env),
     password: decodeURIComponent(url.password || env.DB_PASSWORD || env.PGPASSWORD || ''),
     database: url.pathname.replace(/^\//, '') || getDefaultDatabase(env),
     ssl: url.searchParams.get('sslmode') === 'require' || parseBoolean(env.DB_SSL, false),
