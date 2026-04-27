@@ -15,6 +15,9 @@ export type iClientQueriesProvider = {
     useSignUp: (
       options?: UseMutationOptions<AuthResponse, Error, SignUpPayload>,
     ) => UseMutationResult<AuthResponse, Error, SignUpPayload>;
+    useSignOut: (
+      options?: UseMutationOptions<void, Error, void>,
+    ) => UseMutationResult<void, Error, void>;
   };
   stocks: {
     useGetStock: (

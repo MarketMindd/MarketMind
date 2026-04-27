@@ -5,8 +5,9 @@ import { AuthResponse, SignInPayload, SignUpPayload } from '@market-mind/common'
 import { appConfig } from '@/config/appConfig';
 import { iDataProvider } from '@/entities/dataProvider';
 
-const ACCESS_TOKEN_KEY = 'accessToken';
-const REFRESH_TOKEN_KEY = 'refreshToken';
+export const ACCESS_TOKEN_KEY = 'accessToken';
+export const REFRESH_TOKEN_KEY = 'refreshToken';
+export const USER_ID_KEY = 'userId';
 
 let isRefreshing = false;
 let failedQueue: Array<{ resolve: (value?: unknown) => void; reject: (reason?: any) => void }> = [];
@@ -103,6 +104,7 @@ export const createFetchDataProvider = (): iDataProvider => {
       const res = await apiClient.post<AuthResponse>('/auth/signin', payload);
       localStorage.setItem(ACCESS_TOKEN_KEY, res.data.accessToken);
       localStorage.setItem(REFRESH_TOKEN_KEY, res.data.refreshToken);
+      localStorage.setItem(USER_ID_KEY, res.data.user.id);
       return res.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Request failed');
@@ -114,6 +116,7 @@ export const createFetchDataProvider = (): iDataProvider => {
       const res = await apiClient.post<AuthResponse>('/auth/signup', payload);
       localStorage.setItem(ACCESS_TOKEN_KEY, res.data.accessToken);
       localStorage.setItem(REFRESH_TOKEN_KEY, res.data.refreshToken);
+      localStorage.setItem(USER_ID_KEY, res.data.user.id);
       return res.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Request failed');
@@ -129,10 +132,28 @@ export const createFetchDataProvider = (): iDataProvider => {
     }
   };
 
+  const signout = async () => {
+    try {
+      const userId = localStorage.getItem(USER_ID_KEY);
+      const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+
+      if (userId && refreshToken) {
+        await apiClient.post('/auth/logout', { userId, refreshToken });
+      }
+    } catch (error: any) {
+      console.error('Logout failed:', error);
+    } finally {
+      localStorage.removeItem(ACCESS_TOKEN_KEY);
+      localStorage.removeItem(REFRESH_TOKEN_KEY);
+      localStorage.removeItem(USER_ID_KEY);
+    }
+  };
+
   return {
     auth: {
       signin,
       signup,
+      signout,
     },
     stocks: {
       getStock,
