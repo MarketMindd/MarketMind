@@ -9,7 +9,7 @@ export const useIsAuthenticated = () => {
   useEffect(() => {
     // Handler to check token state
     const checkAuth = () => {
-      setIsAuthenticated(!!localStorage.getItem('accessToken'));
+      setIsAuthenticated(!!localStorage.getItem(ACCESS_TOKEN_KEY));
     };
 
     // The 'storage' event fires when localStorage changes in OTHER tabs
