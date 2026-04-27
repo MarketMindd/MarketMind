@@ -1,5 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 
+import { APP_ROUTES } from '../consts/routes';
+
 import { ProtectedRoute } from './elements/protectedRoute';
 import { PublicRoute } from './elements/publicRoute';
 import { SignIn } from './views/auth/signIn';
@@ -8,43 +10,48 @@ import { Dashboard } from './views/dashboard/dashboard';
 import { NotFound } from './views/notFound/notFound';
 import StockDetails from './views/stockDetails/stockDetails';
 
+import { Navigation } from './elements/navigation';
+
 export const App = () => {
   return (
-    <Routes>
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/signin"
-        element={
-          <PublicRoute>
-            <SignIn />
-          </PublicRoute>
-        }
-      />
-      <Route
-        path="/signup"
-        element={
-          <PublicRoute>
-            <SignUp />
-          </PublicRoute>
-        }
-      />
-      <Route
-        path="/stock/:stockSymbol"
-        element={
-          <ProtectedRoute>
-            <StockDetails />
-          </ProtectedRoute>
-        }
-      />
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+    <div className="min-h-screen bg-background text-foreground pt-16">
+      <Navigation />
+      <Routes>
+        <Route path={APP_ROUTES.HOME} element={<Navigate to={APP_ROUTES.DASHBOARD} replace />} />
+        <Route
+          path={APP_ROUTES.DASHBOARD}
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={APP_ROUTES.SIGN_IN}
+          element={
+            <PublicRoute>
+              <SignIn />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path={APP_ROUTES.SIGN_UP}
+          element={
+            <PublicRoute>
+              <SignUp />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path={APP_ROUTES.STOCK_DETAILS}
+          element={
+            <ProtectedRoute>
+              <StockDetails />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </div>
   );
 };
