@@ -12,6 +12,7 @@ import StockDetails from './views/stockDetails/stockDetails';
 import RiskTolerance from './views/onboarding/riskTolerance';
 
 import { Navigation } from './elements/navigation';
+import { Interests } from './views/onboarding/interests';
 
 const MainLayout = () => {
   return (
@@ -92,6 +93,14 @@ export const App = () => {
           element={
             <ProtectedRoute>
               <RiskTolerance />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={APP_ROUTES.INTERESTS}
+          element={
+            <ProtectedRoute>
+              <Interests />
             </ProtectedRoute>
           }
         />
