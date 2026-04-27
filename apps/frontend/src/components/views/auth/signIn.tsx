@@ -18,9 +18,7 @@ export const SignIn: React.FC = () => {
     auth: { useSignIn },
   } = useClientQueries();
   const signIn = useSignIn({
-    onSuccess: (data) => {
-      // store token and move on
-      localStorage.setItem('accessToken', data.accessToken);
+    onSuccess: () => {
       navigate('/dashboard');
     },
     onError: (err: Error) => {
