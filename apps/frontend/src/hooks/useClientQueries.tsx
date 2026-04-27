@@ -54,6 +54,13 @@ export const useClientQueries = (): iClientQueriesProvider => {
     });
   };
 
+  const useSignOut = (options?: UseMutationOptions<void, Error, void>) => {
+    return useMutation<void, Error, void>({
+      mutationFn: () => ctx.dataProvider.auth.signout(),
+      ...options,
+    });
+  };
+
   const useGetStock = (
     symbol: string,
     options?: Omit<UseQueryOptions<Stock, Error>, 'queryKey' | 'queryFn'>,
@@ -65,5 +72,5 @@ export const useClientQueries = (): iClientQueriesProvider => {
     });
   };
 
-  return { auth: { useSignIn, useSignUp }, stocks: { useGetStock } };
+  return { auth: { useSignIn, useSignUp, useSignOut }, stocks: { useGetStock } };
 };

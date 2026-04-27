@@ -1,4 +1,5 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useClientQueries } from '../../hooks/useClientQueries';
 import { APP_ROUTES } from '../../consts/routes';
 import { cn } from '../../utils/tailwindUtils';
 import {
@@ -13,6 +14,14 @@ import logo from '../../assets/logo.png';
 
 export const Navigation = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { auth: { useSignOut } } = useClientQueries();
+  const { mutate: signOut } = useSignOut({
+    onSuccess: () => {
+      navigate(APP_ROUTES.SIGN_IN);
+    }
+  });
+
   const token = localStorage.getItem('accessToken');
   const isAuthenticated = !!token;
 
@@ -58,6 +67,7 @@ export const Navigation = () => {
                 variant="ghost"
                 size="sm"
                 className="text-muted-foreground hover:text-destructive"
+                onClick={() => signOut()}
               >
                 <LogOut size={18} />
                 <span className="hidden sm:inline ml-2">Logout</span>
