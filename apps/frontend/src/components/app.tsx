@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 
 import { APP_ROUTES } from '../consts/routes';
 
@@ -12,12 +12,29 @@ import StockDetails from './views/stockDetails/stockDetails';
 
 import { Navigation } from './elements/navigation';
 
-export const App = () => {
+const MainLayout = () => {
   return (
     <div className="min-h-screen bg-background text-foreground pt-16">
       <Navigation />
-      <Routes>
-        <Route path={APP_ROUTES.HOME} element={<Navigate to={APP_ROUTES.DASHBOARD} replace />} />
+      <Outlet />
+    </div>
+  );
+};
+
+const AuthLayout = () => {
+  return (
+    <div className="min-h-screen bg-background text-foreground">
+      <Outlet />
+    </div>
+  );
+};
+
+export const App = () => {
+  return (
+    <Routes>
+      <Route path={APP_ROUTES.HOME} element={<Navigate to={APP_ROUTES.DASHBOARD} replace />} />
+
+      <Route element={<MainLayout />}>
         <Route
           path={APP_ROUTES.DASHBOARD}
           element={
@@ -26,6 +43,33 @@ export const App = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path={APP_ROUTES.STOCK_DETAILS}
+          element={
+            <ProtectedRoute>
+              <StockDetails />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={APP_ROUTES.PORTFOLIO}
+          element={
+            <ProtectedRoute>
+              <div>Portfolio Component Placeholder</div>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={APP_ROUTES.CHAT}
+          element={
+            <ProtectedRoute>
+              <div>AI Chat Component Placeholder</div>
+            </ProtectedRoute>
+          }
+        />
+      </Route>
+
+      <Route element={<AuthLayout />}>
         <Route
           path={APP_ROUTES.SIGN_IN}
           element={
@@ -42,16 +86,9 @@ export const App = () => {
             </PublicRoute>
           }
         />
-        <Route
-          path={APP_ROUTES.STOCK_DETAILS}
-          element={
-            <ProtectedRoute>
-              <StockDetails />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </div>
+      </Route>
+
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 };

@@ -1,5 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useClientQueries } from '../../hooks/useClientQueries';
+import { useIsAuthenticated } from '../../hooks/useIsAuthenticated';
 import { APP_ROUTES } from '../../consts/routes';
 import { cn } from '../../utils/tailwindUtils';
 import {
@@ -22,8 +23,7 @@ export const Navigation = () => {
     }
   });
 
-  const token = localStorage.getItem('accessToken');
-  const isAuthenticated = !!token;
+  const isAuthenticated = useIsAuthenticated();
 
   const navItems = [
     { path: APP_ROUTES.DASHBOARD, label: 'Dashboard', icon: LayoutDashboard },
