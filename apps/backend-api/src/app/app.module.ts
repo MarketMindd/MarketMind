@@ -6,6 +6,7 @@ import { createDataSourceOptions } from '@market-mind/database';
 
 import { AuthModule } from '../auth/auth.module';
 import { MarketModule } from '../market/market.module';
+import { PortfolioModule } from '../portfolio/portfolio.module';
 import { StockModule } from '../stock/stock.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -16,6 +17,7 @@ import { AppService } from './app.service';
     ScheduleModule.forRoot(),
     AuthModule,
     MarketModule,
+    PortfolioModule,
     StockModule,
   ],
   controllers: [AppController],

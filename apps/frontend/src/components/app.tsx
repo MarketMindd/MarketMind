@@ -9,14 +9,17 @@ import { SignUp } from './views/auth/signUp';
 import { Dashboard } from './views/dashboard/dashboard';
 import { NotFound } from './views/notFound/notFound';
 import StockDetails from './views/stockDetails/stockDetails';
+import Portfolio from './views/portfolio/portfolio';
 
 import { Navigation } from './elements/navigation';
 
 const MainLayout = () => {
   return (
-    <div className="min-h-screen bg-background text-foreground pt-16">
+    <div className="h-screen bg-background text-foreground flex flex-col overflow-hidden">
       <Navigation />
-      <Outlet />
+      <main className="flex-1 pt-16 overflow-y-auto flex flex-col">
+        <Outlet />
+      </main>
     </div>
   );
 };
@@ -55,17 +58,13 @@ export const App = () => {
           path={APP_ROUTES.PORTFOLIO}
           element={
             <ProtectedRoute>
-              <div>Portfolio Component Placeholder</div>
+              <Portfolio />
             </ProtectedRoute>
           }
         />
         <Route
           path={APP_ROUTES.CHAT}
-          element={
-            <ProtectedRoute>
-              <div>AI Chat Component Placeholder</div>
-            </ProtectedRoute>
-          }
+          element={<Navigate to={APP_ROUTES.DASHBOARD} replace />}
         />
       </Route>
 

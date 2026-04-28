@@ -1,4 +1,4 @@
-import type { AuthResponse, SignInPayload, SignUpPayload, Stock } from '@market-mind/common';
+import type { AuthResponse, SignInPayload, SignUpPayload, Stock, PortfolioItem, SavePortfolioPayload } from '@market-mind/common';
 
 export interface iDataProvider {
   auth: {
@@ -8,5 +8,9 @@ export interface iDataProvider {
   };
   stocks: {
     getStock: (symbol: string) => Promise<Stock>;
+  };
+  portfolio: {
+    getPortfolio: () => Promise<PortfolioItem[]>;
+    savePortfolio: (payload: SavePortfolioPayload) => Promise<{ success: boolean }>;
   };
 }
