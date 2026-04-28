@@ -28,22 +28,24 @@ export const AuthBranding = () => {
         </p>
       </div>
 
-      <div className="relative space-y-6">
+      <div className="relative space-y-6 py-12 px-4">
         <div className="glass-card p-4 max-w-sm animate-fade-in">
           <div className="flex items-center gap-3 mb-2">
-            <span className="font-mono text-primary font-semibold">AAPL</span>
-            <span className="text-xs bg-success/20 text-success px-2 py-0.5 rounded-full">
-              Invest
-            </span>
+            <span className="text-primary font-semibold">✨ AI-Powered Insights</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            Strong services growth and AI integration potential...
+            Get deep analytics derived from millions of financial data points.
           </p>
         </div>
 
-        <div className="glass-card p-4 max-w-xs ml-12 animate-fade-in stagger-1">
-          <div className="text-2xl font-semibold text-foreground">87%</div>
-          <div className="text-sm text-muted-foreground">Confidence Score</div>
+        <div className="glass-card p-4 max-w-sm ml-12 animate-fade-in stagger-1">
+          <div className="flex items-center gap-3 mb-2">
+            <span className="text-primary font-semibold">🎯 Personalized Portfolios</span>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Tailor recommendations to your exact risk tolerance and effortlessly track your
+            financial goals.
+          </p>
         </div>
       </div>
     </div>
