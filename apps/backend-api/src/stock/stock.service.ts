@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { Stock } from '@market-mind/common';
 import { MarketDataEntity, RecommendationEntity, StockEntity } from '@market-mind/database';
 
+import { appConfig } from '../config/appConfig';
 import { DEFAULT_STOCK_RECOMMENDATION } from './consts';
 import type { RawStock } from './types';
 
@@ -15,7 +16,7 @@ export class StockService {
     private readonly stockRepo: Repository<StockEntity>,
   ) {}
 
-  async getStocks(limit = 9): Promise<Stock[]> {
+  async getStocks(limit = appConfig.stock.maxStocksCount): Promise<Stock[]> {
     const rawData: RawStock[] = await this.stockRepo
       .createQueryBuilder('stocks')
       .leftJoin(

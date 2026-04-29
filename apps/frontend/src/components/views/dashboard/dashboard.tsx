@@ -1,18 +1,21 @@
-import { Activity, Briefcase, ChevronRight, Filter, Sparkles, TrendingDown, TrendingUp } from 'lucide-react';
+import {
+  Activity,
+  Briefcase,
+  ChevronRight,
+  Filter,
+  Sparkles,
+  TrendingDown,
+  TrendingUp,
+} from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-
-
 import { RecommendationStatus, StockRecommendation } from '@market-mind/common';
 
-
-
 import { Button } from '@/components/elements/button';
-import StockCard from '@/components/elements/stockCard';
+import { StockCard } from '@/components/elements/stockCard';
 import { useClientQueries } from '@/hooks/useClientQueries';
 import { cn } from '@/utils/tailwindUtils';
-
 
 export const Dashboard = () => {
   const navigate = useNavigate();
@@ -28,10 +31,12 @@ export const Dashboard = () => {
   const recommendedStocks = stocks.filter((stock) => !portfolioTickers.includes(stock.symbol));
 
   const filteredRecommendedStocks = recommendedStocks.filter((stock) =>
-    filter === 'all' ? true : (stock.aiRecommendation.status.toLowerCase() === filter),
+    filter === 'all' ? true : stock.aiRecommendation.status.toLowerCase() === filter,
   );
 
-  const investCount = stocks.filter((s) => s.aiRecommendation.status === StockRecommendation.INVEST).length;
+  const investCount = stocks.filter(
+    (s) => s.aiRecommendation.status === StockRecommendation.INVEST,
+  ).length;
   const holdCount = stocks.filter(
     (s) => s.aiRecommendation.status === StockRecommendation.HOLD,
   ).length;
@@ -223,5 +228,3 @@ export const Dashboard = () => {
     </div>
   );
 };
-
-export default Dashboard;

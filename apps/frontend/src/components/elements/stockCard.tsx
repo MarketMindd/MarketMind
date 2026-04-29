@@ -1,6 +1,6 @@
 import { ArrowDownRight, ArrowUpRight, Briefcase } from 'lucide-react';
 
-import { calculateDollarChange, PortfolioItem, Stock } from '@market-mind/common';
+import { calculatePriceChange, PortfolioItem, Stock } from '@market-mind/common';
 
 import RecommendationBadge from '@/components/elements/recommendationBadge';
 import { cn } from '@/utils/tailwindUtils';
@@ -12,10 +12,10 @@ interface StockCardProps {
   portfolioData?: PortfolioItem;
 }
 
-const StockCard = ({ stock, onClick, className, portfolioData }: StockCardProps) => {
+export const StockCard = ({ stock, onClick, className, portfolioData }: StockCardProps) => {
   const isPositive = stock.marketData.priceChange >= 0;
 
-  const dollarChange = calculateDollarChange(stock.marketData.price, stock.marketData.priceChange);
+  const dollarChange = calculatePriceChange(stock.marketData.price, stock.marketData.priceChange);
 
   return (
     <div
@@ -124,5 +124,3 @@ const StockCard = ({ stock, onClick, className, portfolioData }: StockCardProps)
     </div>
   );
 };
-
-export default StockCard;
