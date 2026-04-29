@@ -43,15 +43,6 @@ export const getDatabaseConfig = (env: NodeJS.ProcessEnv = process.env): Databas
     return parseDatabaseUrl(env.DATABASE_URL, env);
   }
 
-  console.log( {
-    host: env.DB_HOST ?? env.PGHOST ?? 'localhost',
-    port: parseNumber(env.DB_PORT ?? env.PGPORT, 5432),
-    username: env.DB_USER ?? env.PGUSER ?? getDefaultUsername(env),
-    password: env.DB_PASSWORD ?? env.PGPASSWORD ?? '',
-    database: getDefaultDatabase(env),
-    ssl: parseBoolean(env.DB_SSL ?? env.PGSSLMODE, false),
-  });
-
   return {
     host: env.DB_HOST ?? env.PGHOST ?? 'localhost',
     port: parseNumber(env.DB_PORT ?? env.PGPORT, 5432),
