@@ -72,10 +72,15 @@ const PortfolioInput = ({ portfolio, onChange, compact = false }: PortfolioInput
     onChange(portfolio.filter(s => s.ticker !== ticker));
   };
 
-  const updateStock = (ticker: string, field: 'shares' | 'avgPrice', value: number) => {
+  const updateStock = (ticker: string, field: 'shares' | 'avgPrice', valueStr: string) => {
+    if (valueStr.length > 10) return;
+
+    const numValue = valueStr === '' ? 0 : Number(valueStr);
+    if (isNaN(numValue) || numValue < 0) return;
+
     onChange(
       portfolio.map(s =>
-        s.ticker === ticker ? { ...s, [field]: value } : s
+        s.ticker === ticker ? { ...s, [field]: numValue } : s
       )
     );
   };
@@ -147,7 +152,7 @@ const PortfolioInput = ({ portfolio, onChange, compact = false }: PortfolioInput
                         type="number"
                         min="0"
                         value={stock.shares || ''}
-                        onChange={(e) => updateStock(stock.ticker, 'shares', Number(e.target.value))}
+                        onChange={(e) => updateStock(stock.ticker, 'shares', e.target.value)}
                         className={cn('h-8 text-sm mt-0.5', compact && 'h-7')}
                         placeholder="0"
                       />
@@ -159,7 +164,7 @@ const PortfolioInput = ({ portfolio, onChange, compact = false }: PortfolioInput
                         min="0"
                         step="0.01"
                         value={stock.avgPrice || ''}
-                        onChange={(e) => updateStock(stock.ticker, 'avgPrice', Number(e.target.value))}
+                        onChange={(e) => updateStock(stock.ticker, 'avgPrice', e.target.value)}
                         className={cn('h-8 text-sm mt-0.5', compact && 'h-7')}
                         placeholder="0.00"
                       />
