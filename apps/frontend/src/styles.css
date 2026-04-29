@@ -181,21 +181,12 @@
   animation: pulse-glow 2s ease-in-out infinite;
 }
 
-/* Scrollbar styling */
+/* Hide global app scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  display: none;
 }
 
-::-webkit-scrollbar-track {
-  background: hsl(222 47% 8%);
-}
-
-::-webkit-scrollbar-thumb {
-  background: hsl(222 30% 25%);
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: hsl(222 30% 35%);
+html, body {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }

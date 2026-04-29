@@ -110,5 +110,3 @@ export const RiskTolerance: React.FC = () => {
     </div>
   );
 };
-
-export default RiskTolerance;

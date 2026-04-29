@@ -8,7 +8,7 @@ import { Size } from '@/enums/recommendationBadge';
 import { useClientQueries } from '@/hooks/useClientQueries';
 import { cn } from '@/utils/tailwindUtils';
 
-const StockDetails = () => {
+export const StockDetails = () => {
   const { stockSymbol } = useParams();
   const { stocks } = useClientQueries();
 
@@ -44,8 +44,8 @@ const StockDetails = () => {
   const isPositive = stock.marketData.volume >= 0;
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="pt-28 sm:pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
+    <div className="flex-1 flex flex-col bg-background">
+      <div className="pt-8 sm:pt-6 pb-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
         <Link to="/dashboard">
           <Button variant="ghost" className="mb-6 animate-fade-in">
             <ArrowLeft size={18} />
@@ -143,5 +143,3 @@ const StockDetails = () => {
     </div>
   );
 };
-
-export default StockDetails;

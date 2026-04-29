@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 
-import { AuthResponse, SignInPayload, SignUpPayload } from '@market-mind/common';
+import { AuthResponse, SignInPayload, SignUpPayload, PortfolioItem, SavePortfolioPayload } from '@market-mind/common';
 
 import { appConfig } from '@/config/appConfig';
 import { iDataProvider } from '@/entities/dataProvider';
@@ -157,6 +157,16 @@ export const createFetchDataProvider = (): iDataProvider => {
     },
     stocks: {
       getStock,
+    },
+    portfolio: {
+      getPortfolio: async () => {
+        const res = await apiClient.get<PortfolioItem[]>('/portfolio');
+        return res.data;
+      },
+      savePortfolio: async (payload: SavePortfolioPayload) => {
+        const res = await apiClient.put<{ success: boolean }>('/portfolio', payload);
+        return res.data;
+      },
     },
   };
 };

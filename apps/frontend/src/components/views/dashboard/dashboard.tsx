@@ -7,7 +7,7 @@ export const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-background">
+    <div className="flex-1 flex flex-col items-center justify-center bg-background">
       <h1 className="text-3xl font-bold">Welcome to the Dashboard</h1>
       <p className="text-muted-foreground mt-2">You are successfully logged in.</p>
       <button
