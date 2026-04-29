@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
-import { Stock, StockRecommendation } from '@market-mind/common';
+import { Stock } from '@market-mind/common';
 
 import type { ChartDataPoint } from '@/types/stockChart';
 
@@ -13,11 +13,7 @@ const StockChart = ({ stock }: StockChartProps) => {
   const chartData = useMemo(() => {
     const basePrice = stock.price;
     const volatility =
-      stock.recommendation === StockRecommendation.EXIT
-        ? 0.03
-        : stock.recommendation === StockRecommendation.HOLD
-          ? 0.02
-          : 0.015;
+      stock.recommendation === 'Exit' ? 0.03 : stock.recommendation === 'Hold' ? 0.02 : 0.015;
 
     const days = 30;
     let currentPrice = basePrice * (1 - (stock.changePercent / 100) * 5); // Start lower if positive trend

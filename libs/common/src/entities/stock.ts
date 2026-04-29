@@ -1,4 +1,4 @@
-import { AiRecommendation } from './aiRecommendation';
+import { RecommendationStatus } from './aiRecommendation';
 
 export interface Stock {
   id: string;
@@ -8,7 +8,7 @@ export interface Stock {
   price: number;
   change: number;
   changePercent: number;
-  recommendation: AiRecommendation;
+  recommendation: RecommendationStatus;
   confidence: number;
   isPortfolioStock: boolean;
   explanation: string;
