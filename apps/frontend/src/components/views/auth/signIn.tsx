@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { APP_ROUTES } from '@/consts/routes';
 import { useClientQueries } from '@/hooks/useClientQueries';
 import { useToast } from '@/hooks/useToast';
 import { AuthBranding } from './authBranding';
@@ -11,7 +12,7 @@ export const SignIn: React.FC = () => {
   const { toast } = useToast();
 
   const handleModeSwitch = () => {
-    navigate('/signup');
+    navigate(APP_ROUTES.SIGN_UP);
   };
 
   const {
@@ -19,7 +20,7 @@ export const SignIn: React.FC = () => {
   } = useClientQueries();
   const signIn = useSignIn({
     onSuccess: () => {
-      navigate('/dashboard');
+      navigate(APP_ROUTES.DASHBOARD);
     },
     onError: (err: Error) => {
       toast({
