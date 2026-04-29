@@ -1,16 +1,18 @@
 import { Briefcase, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
-import { PortfolioItem } from '@market-mind/common';
+
 
 import { Button } from '@/components/elements/button';
 import { Input } from '@/components/elements/input';
 import { useClientQueries } from '@/hooks/useClientQueries';
 import { cn } from '@/utils/tailwindUtils';
 
+import { PortfolioItemWithStock } from '@market-mind/common';
+
 interface PortfolioInputProps {
-  portfolio: PortfolioItem[];
-  onChange: (portfolio: PortfolioItem[]) => void;
+  portfolio: PortfolioItemWithStock[];
+  onChange: (portfolio: PortfolioItemWithStock[]) => void;
   compact?: boolean;
 }
 
@@ -44,7 +46,19 @@ const PortfolioInput = ({ portfolio, onChange, compact = false }: PortfolioInput
   );
 
   const addStock = (ticker: string) => {
-    onChange([...portfolio, { ticker, shares: 0, avgPrice: 0 }]);
+    const stockDetails = availableStocks.find((s) => s.symbol === ticker);
+    const stockObj = stockDetails
+      ? {
+          symbol: stockDetails.symbol,
+          name: stockDetails.name,
+          sector: stockDetails.sector,
+          marketData: {
+            price: stockDetails.marketData?.price ?? 0,
+          },
+        }
+      : undefined;
+
+    onChange([...portfolio, { ticker, shares: 0, avgPrice: 0, stock: stockObj }]);
     setSearchTerm('');
     setShowDropdown(false);
     setHighlightedIndex(0);

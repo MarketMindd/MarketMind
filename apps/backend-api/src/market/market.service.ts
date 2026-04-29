@@ -6,7 +6,7 @@ import { Repository } from 'typeorm';
 import YahooFinance from 'yahoo-finance2';
 
 import { retry } from '@market-mind/common';
-import { MarketDataEntity, PortfolioEntity } from '@market-mind/database';
+import { MarketDataEntity, PortfolioEntity, StockEntity } from '@market-mind/database';
 
 import { PipelineService } from '../pipeline/pipeline.service';
 import { MarketSnapshot } from './market.types';
@@ -94,9 +94,10 @@ export class MarketService implements OnModuleInit {
   }
 
   private async getTrackedSymbols(): Promise<string[]> {
-    const rows = await this.portfolioRepo
-      .createQueryBuilder('portfolio')
-      .select('DISTINCT portfolio.stockSymbol', 'symbol')
+    const stockRepo = this.portfolioRepo.manager.getRepository(StockEntity);
+    const rows = await stockRepo
+      .createQueryBuilder('stocks')
+      .select('stocks.symbol', 'symbol')
       .getRawMany<{ symbol: string }>();
 
     return rows

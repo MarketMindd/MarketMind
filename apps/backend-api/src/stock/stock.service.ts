@@ -56,15 +56,15 @@ export class StockService implements OnModuleInit {
       )
       .innerJoin(MarketDataEntity, 'marketData', 'marketData.stockSymbol = stocks.symbol')
       .select([
-        'stocks.symbol as symbol',
-        'stocks.name as name',
-        'stocks.sector as sector',
-        'marketData.price as price',
-        'marketData.volume as volume',
+        'stocks.symbol as "symbol"',
+        'stocks.name as "name"',
+        'stocks.sector as "sector"',
+        'marketData.price as "price"',
+        'marketData.volume as "volume"',
         'marketData.priceChange AS "priceChange"',
-        'recommendation.status as status',
+        'recommendation.status as "status"',
         'recommendation.confidenceScore AS "confidence"',
-        'recommendation.rationale as rationale',
+        'recommendation.rationale as "rationale"',
       ])
       .where('stocks.symbol IN (:...symbols)', { symbols })
       .distinctOn(['stocks.symbol'])
@@ -86,15 +86,15 @@ export class StockService implements OnModuleInit {
       )
       .leftJoin(MarketDataEntity, 'marketData', 'marketData.stockSymbol = stocks.symbol')
       .select([
-        'stocks.symbol as symbol',
-        'stocks.name as name',
-        'stocks.sector as sector',
-        'marketData.price as price',
-        'marketData.volume as volume',
+        'stocks.symbol as "symbol"',
+        'stocks.name as "name"',
+        'stocks.sector as "sector"',
+        'marketData.price as "price"',
+        'marketData.volume as "volume"',
         'marketData.priceChange AS "priceChange"',
-        'recommendation.status as status',
+        'recommendation.status as "status"',
         'recommendation.confidenceScore AS "confidence"',
-        'recommendation.rationale as rationale',
+        'recommendation.rationale as "rationale"',
       ])
       .distinctOn(['stocks.symbol'])
       .orderBy('stocks.symbol')
