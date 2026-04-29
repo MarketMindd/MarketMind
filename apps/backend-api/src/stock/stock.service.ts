@@ -88,7 +88,7 @@ export class StockService {
       aiRecommendation: rawStock.status
         ? {
             status: rawStock.status,
-            confidence: Number(rawStock.confidence ?? 0) * 10,
+            confidence: Number(rawStock.confidence ?? 0) * 100,
             rationale: rawStock.rationale ?? '',
           }
         : DEFAULT_STOCK_RECOMMENDATION,
