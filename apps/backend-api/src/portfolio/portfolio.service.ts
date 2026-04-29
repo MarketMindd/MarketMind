@@ -1,18 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-
 import type { PortfolioItemWithStock, SavePortfolioPayload } from '@market-mind/common';
 import { MarketDataEntity, PortfolioEntity, StockEntity } from '@market-mind/database';
-import type { RawStock } from '../stock/types';
 
 @Injectable()
 export class PortfolioService {
   constructor(
     @InjectRepository(PortfolioEntity)
     private readonly portfolioRepo: Repository<PortfolioEntity>,
-    @InjectRepository(StockEntity)
-    private readonly stockRepo: Repository<StockEntity>,
   ) {}
 
   async getPortfolio(userId: string): Promise<PortfolioItemWithStock[]> {
@@ -39,14 +35,16 @@ export class PortfolioService {
     if (rawData.length === 0) return [];
 
     return rawData.map((raw) => {
-      const stock = raw.symbol ? {
-        symbol: raw.symbol,
-        name: raw.name,
-        sector: raw.sector,
-        marketData: {
-          price: Number(raw.price ?? 0),
-        },
-      } : undefined;
+      const stock = raw.symbol
+        ? {
+            symbol: raw.symbol,
+            name: raw.name,
+            sector: raw.sector,
+            marketData: {
+              price: Number(raw.price ?? 0),
+            },
+          }
+        : undefined;
 
       return {
         id: raw.portfolioId,
@@ -60,22 +58,20 @@ export class PortfolioService {
 
   async savePortfolio(userId: string, payload: SavePortfolioPayload): Promise<void> {
     const currentItems = await this.portfolioRepo.find({ where: { userId } });
-    
+
     const incomingItems = payload.items;
-    
-    const incomingSymbols = incomingItems.map(i => i.ticker);
-    const itemsToDelete = currentItems.filter(i => !incomingSymbols.includes(i.stockSymbol));
-    
+
+    const incomingSymbols = incomingItems.map((i) => i.ticker);
+    const itemsToDelete = currentItems.filter((i) => !incomingSymbols.includes(i.stockSymbol));
+
     if (itemsToDelete.length > 0) {
       await this.portfolioRepo.remove(itemsToDelete);
     }
-    
-
 
     const itemsToSave: PortfolioEntity[] = [];
-    
+
     for (const item of incomingItems) {
-      const existing = currentItems.find(i => i.stockSymbol === item.ticker);
+      const existing = currentItems.find((i) => i.stockSymbol === item.ticker);
       if (existing) {
         existing.shares = item.shares;
         existing.avgPrice = item.avgPrice;
@@ -90,7 +86,7 @@ export class PortfolioService {
         itemsToSave.push(newItem);
       }
     }
-    
+
     if (itemsToSave.length > 0) {
       await this.portfolioRepo.save(itemsToSave);
     }

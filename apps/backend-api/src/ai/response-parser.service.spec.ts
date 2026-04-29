@@ -1,7 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-
 import { RiskTolerance } from '@market-mind/common';
-
 import { ResponseParserService } from './response-parser.service';
 
 describe('ResponseParserService', () => {

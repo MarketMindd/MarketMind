@@ -8,7 +8,6 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcryptjs';
 import { Repository } from 'typeorm';
-
 import {
   AuthResponse,
   RiskTolerance,
@@ -17,7 +16,6 @@ import {
   UserProfile,
 } from '@market-mind/common';
 import { UserProfileEntity } from '@market-mind/database';
-
 import { appConfig } from '../config/appConfig';
 
 @Injectable()

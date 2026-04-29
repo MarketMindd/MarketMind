@@ -1,9 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
-
 import { createDataSourceOptions } from '@market-mind/database';
-
 import { AuthModule } from '../auth/auth.module';
 import { MarketModule } from '../market/market.module';
 import { PortfolioModule } from '../portfolio/portfolio.module';

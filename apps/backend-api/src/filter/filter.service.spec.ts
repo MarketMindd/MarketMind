@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-
 import { RiskTolerance } from '@market-mind/common';
 import {
   PortfolioEntity,
@@ -8,7 +7,6 @@ import {
   SymbolFilterStateEntity,
   UserProfileEntity,
 } from '@market-mind/database';
-
 import type { MarketSnapshot } from '../market/market.types';
 import { FilterService } from './filter.service';
 

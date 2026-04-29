@@ -1,9 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-
 import { AiRecommendation, RiskTolerance } from '@market-mind/common';
 import { RecommendationEntity } from '@market-mind/database';
-
 import { ProcessingService } from './processing.service';
 
 const makeRec = (overrides: Partial<AiRecommendation> = {}): AiRecommendation => ({

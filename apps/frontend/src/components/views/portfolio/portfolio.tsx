@@ -1,8 +1,6 @@
 import { Briefcase, DollarSign, Save, TrendingDown, TrendingUp } from 'lucide-react';
 import { useEffect, useState } from 'react';
-
 import { PortfolioItemWithStock } from '@market-mind/common';
-
 import { Button } from '@/components/elements/button';
 import { useClientQueries } from '@/hooks/useClientQueries';
 import { cn } from '@/utils/tailwindUtils';
@@ -63,7 +61,12 @@ export const Portfolio = () => {
             <p className="text-muted-foreground">Manage your current stock holdings</p>
           </div>
           {hasChanges && (
-            <Button variant="glow" onClick={handleSave} className="" disabled={isPending}>
+            <Button
+              variant="glow"
+              onClick={handleSave}
+              className="animate-fade-in"
+              disabled={isPending}
+            >
               <Save size={18} />
               {isPending ? 'Saving...' : 'Save Changes'}
             </Button>

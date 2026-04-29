@@ -1,9 +1,8 @@
-import { Body, Controller, Get, Put, Request, UseGuards } from '@nestjs/common';
-
-import { PortfolioService } from './portfolio.service';
-import { ZodValidationPipe } from '../pipes/zodValidatorPipe';
+import { Body, Controller, Get, Put, Request } from '@nestjs/common';
 import { savePortfolioPayloadSchema } from '@market-mind/common';
-import type { SavePortfolioPayload, PortfolioItemWithStock } from '@market-mind/common';
+import type { PortfolioItemWithStock, SavePortfolioPayload } from '@market-mind/common';
+import { ZodValidationPipe } from '../pipes/zodValidatorPipe';
+import { PortfolioService } from './portfolio.service';
 
 @Controller('portfolio')
 export class PortfolioController {

@@ -1,10 +1,8 @@
-import { Injectable, Logger, NotFoundException, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-
 import { Stock } from '@market-mind/common';
 import { MarketDataEntity, RecommendationEntity, StockEntity } from '@market-mind/database';
-
 import { DEFAULT_STOCK_RECOMMENDATION } from './consts';
 import type { RawStock } from './types';
 
@@ -118,7 +116,7 @@ export class StockService implements OnModuleInit {
       aiRecommendation: rawStock.status
         ? {
             status: rawStock.status,
-            confidence: Number(rawStock.confidence ?? 0) * 10,
+            confidence: Number(rawStock.confidence ?? 0) * 100,
             rationale: rawStock.rationale ?? '',
           }
         : DEFAULT_STOCK_RECOMMENDATION,

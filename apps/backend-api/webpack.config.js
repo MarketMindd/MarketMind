@@ -1,6 +1,6 @@
-import { NxAppWebpackPlugin } from '@nx/webpack/app-plugin.js';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
+import { NxAppWebpackPlugin } from '@nx/webpack/app-plugin.js';
 import nodeExternals from 'webpack-node-externals';
 
 const __filename = fileURLToPath(import.meta.url);

@@ -4,8 +4,14 @@ import type {
   UseQueryOptions,
   UseQueryResult,
 } from '@tanstack/react-query';
-
-import type { AuthResponse, SignInPayload, SignUpPayload, Stock, PortfolioItemWithStock, SavePortfolioPayload } from '@market-mind/common';
+import type {
+  AuthResponse,
+  PortfolioItemWithStock,
+  SavePortfolioPayload,
+  SignInPayload,
+  SignUpPayload,
+  Stock,
+} from '@market-mind/common';
 
 export type iClientQueriesProvider = {
   auth: {

@@ -5,7 +5,7 @@ export class AddRecommendations1777200000000 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      'CREATE TYPE "public"."recommendation_status_enum" AS ENUM(\'Invest\', \'Hold\', \'Exit\')',
+      "CREATE TYPE \"public\".\"recommendation_status_enum\" AS ENUM('Invest', 'Hold', 'Exit')",
     );
     await queryRunner.query(`
       CREATE TABLE IF NOT EXISTS "recommendations" (

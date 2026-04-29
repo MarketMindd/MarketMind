@@ -1,8 +1,6 @@
 import { ArrowRight, Lock, Mail, User } from 'lucide-react';
 import { useState } from 'react';
-
 import { SignInPayload, SignUpPayload } from '@market-mind/common';
-
 import { Button } from '@/components/elements/button';
 import { Input } from '@/components/elements/input';
 

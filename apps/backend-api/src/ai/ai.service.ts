@@ -1,7 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-
 import { AiRecommendation, RiskTolerance } from '@market-mind/common';
-
 import { FilteredSnapshot } from '../filter/filter.types';
 import { GeminiClientService } from './gemini-client.service';
 import { PromptBuilderService } from './prompt-builder.service';

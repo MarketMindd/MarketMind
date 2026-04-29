@@ -1,8 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-
 import { RiskTolerance } from '@market-mind/common';
 import type { AiRecommendation } from '@market-mind/common';
-
 import type { FilteredSnapshot } from '../filter/filter.types';
 import { AiService } from './ai.service';
 import { GeminiClientService } from './gemini-client.service';

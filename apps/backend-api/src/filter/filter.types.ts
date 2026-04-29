@@ -1,5 +1,4 @@
 import { RiskTolerance } from '@market-mind/common';
-
 import { MarketSnapshot } from '../market/market.types';
 
 export interface NewsArticle {

@@ -1,5 +1,4 @@
 import { DataSourceOptions } from 'typeorm';
-
 import { getDatabaseConfig } from '../config/database.config';
 import { MarketDataEntity } from '../entities/market-data.entity';
 import { PortfolioEntity } from '../entities/portfolio.entity';

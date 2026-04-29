@@ -1,6 +1,5 @@
 import type {
   AuthResponse,
-  PortfolioItem,
   PortfolioItemWithStock,
   SavePortfolioPayload,
   SignInPayload,

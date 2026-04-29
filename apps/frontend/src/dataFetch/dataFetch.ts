@@ -1,7 +1,11 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
-
-import { AuthResponse, SignInPayload, SignUpPayload, PortfolioItem, SavePortfolioPayload } from '@market-mind/common';
-
+import {
+  AuthResponse,
+  PortfolioItem,
+  SavePortfolioPayload,
+  SignInPayload,
+  SignUpPayload,
+} from '@market-mind/common';
 import { appConfig } from '@/config/appConfig';
 import { iDataProvider } from '@/entities/dataProvider';
 

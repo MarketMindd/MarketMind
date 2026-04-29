@@ -1,7 +1,7 @@
 import { ArrowDownRight, ArrowLeft, ArrowUpRight, Brain, LineChart } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import { AdvancedRealTimeChart } from 'react-ts-tradingview-widgets';
-
+import { calculatePriceChange } from '@market-mind/common';
 import { Button } from '@/components/elements/button';
 import RecommendationBadge from '@/components/elements/recommendationBadge';
 import { Size } from '@/enums/recommendationBadge';
@@ -41,7 +41,7 @@ export const StockDetails = () => {
     );
   }
 
-  const isPositive = stock.marketData.volume >= 0;
+  const isPositive = stock.marketData.priceChange >= 0;
 
   return (
     <div className="flex-1 flex flex-col bg-background">
@@ -86,7 +86,8 @@ export const StockDetails = () => {
                 {isPositive ? <ArrowUpRight size={20} /> : <ArrowDownRight size={20} />}
                 <span>
                   {isPositive ? '+' : ''}
-                  {stock.marketData.volume.toFixed(2)} ({isPositive ? '+' : ''}
+                  {calculatePriceChange(stock.marketData.price, stock.marketData.priceChange)} (
+                  {isPositive ? '+' : ''}
                   {stock.marketData.priceChange.toFixed(2)}%)
                 </span>
               </div>

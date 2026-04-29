@@ -1,14 +1,10 @@
 import { Briefcase, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-
-
-
+import { PortfolioItemWithStock } from '@market-mind/common';
 import { Button } from '@/components/elements/button';
 import { Input } from '@/components/elements/input';
 import { useClientQueries } from '@/hooks/useClientQueries';
 import { cn } from '@/utils/tailwindUtils';
-
-import { PortfolioItemWithStock } from '@market-mind/common';
 
 interface PortfolioInputProps {
   portfolio: PortfolioItemWithStock[];
@@ -17,7 +13,9 @@ interface PortfolioInputProps {
 }
 
 const PortfolioInput = ({ portfolio, onChange, compact = false }: PortfolioInputProps) => {
-  const { stocks: { useGetAllStocks } } = useClientQueries();
+  const {
+    stocks: { useGetAllStocks },
+  } = useClientQueries();
   const [searchTerm, setSearchTerm] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);

@@ -1,5 +1,4 @@
 import { z } from 'zod';
-
 import { RiskTolerance } from '../enums/risk-tolerance';
 
 export const userProfileSchema = z.object({

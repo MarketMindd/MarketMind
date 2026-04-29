@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-
 import { AiService } from '../ai/ai.service';
 import { FilterService } from '../filter/filter.service';
 import { MarketSnapshot } from '../market/market.types';

@@ -7,17 +7,14 @@ import {
   UseQueryOptions,
 } from '@tanstack/react-query';
 import React, { createContext, useContext, useState } from 'react';
-
 import type {
   AuthResponse,
-  PortfolioItem,
   PortfolioItemWithStock,
   SavePortfolioPayload,
   SignInPayload,
   SignUpPayload,
   Stock,
 } from '@market-mind/common';
-
 import type { iClientQueriesProvider } from '@/entities/clientQueries';
 import type { iDataProvider } from '@/entities/dataProvider';
 
@@ -123,12 +120,18 @@ export const useClientQueries = (): iClientQueriesProvider => {
     });
   };
 
-  const useSavePortfolio = (options?: UseMutationOptions<{ success: boolean }, Error, SavePortfolioPayload>) => {
+  const useSavePortfolio = (
+    options?: UseMutationOptions<{ success: boolean }, Error, SavePortfolioPayload>,
+  ) => {
     return useMutation<{ success: boolean }, Error, SavePortfolioPayload>({
       mutationFn: (payload) => ctx.dataProvider.portfolio.savePortfolio(payload),
       ...options,
     });
   };
 
-  return { auth: { useSignIn, useSignUp, useSignOut }, stocks: { useGetStock, useGetStocks, useGetAllStocks }, portfolio: { usePortfolio, useSavePortfolio } };
+  return {
+    auth: { useSignIn, useSignUp, useSignOut },
+    stocks: { useGetStock, useGetStocks, useGetAllStocks },
+    portfolio: { usePortfolio, useSavePortfolio },
+  };
 };
