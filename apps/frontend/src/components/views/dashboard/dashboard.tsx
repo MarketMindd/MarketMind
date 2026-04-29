@@ -1,39 +1,43 @@
-import {
-  Activity,
-  Briefcase,
-  ChevronRight,
-  Filter,
-  Sparkles,
-  TrendingDown,
-  TrendingUp,
-} from 'lucide-react';
+import { Activity, Briefcase, ChevronRight, Filter, Sparkles, TrendingDown, TrendingUp } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { PortfolioStock, RecommendationStatus } from '@market-mind/common';
+
+
+import { RecommendationStatus, StockRecommendation } from '@market-mind/common';
+
+
 
 import { Button } from '@/components/elements/button';
-import PerformanceSummary from '@/components/elements/performanceSummary';
 import StockCard from '@/components/elements/stockCard';
-import { mockStocks } from '@/data/mockData';
+import { useClientQueries } from '@/hooks/useClientQueries';
 import { cn } from '@/utils/tailwindUtils';
+
 
 export const Dashboard = () => {
   const navigate = useNavigate();
+  const {
+    portfolio: { usePortfolio },
+    stocks: { useGetStocks },
+  } = useClientQueries();
   const [filter, setFilter] = useState<'all' | RecommendationStatus>('all');
-  const portfolio: PortfolioStock[] = [];
+  const { data: portfolio = [] } = usePortfolio();
   const portfolioTickers = portfolio.map((p) => p.ticker);
-
-  const portfolioStocks = mockStocks.filter((stock) => portfolioTickers.includes(stock.ticker));
-  const recommendedStocks = mockStocks.filter((stock) => !portfolioTickers.includes(stock.ticker));
+  const { data: stocks = [] } = useGetStocks();
+  const portfolioStocks = stocks.filter((stock) => portfolioTickers.includes(stock.symbol));
+  const recommendedStocks = stocks.filter((stock) => !portfolioTickers.includes(stock.symbol));
 
   const filteredRecommendedStocks = recommendedStocks.filter((stock) =>
-    filter === 'all' ? true : stock.recommendation === filter,
+    filter === 'all' ? true : (stock.aiRecommendation.status.toLowerCase() === filter),
   );
 
-  const investCount = mockStocks.filter((s) => s.recommendation === 'Invest').length;
-  const holdCount = mockStocks.filter((s) => s.recommendation === 'Hold').length;
-  const exitCount = mockStocks.filter((s) => s.recommendation === 'Exit').length;
+  const investCount = stocks.filter((s) => s.aiRecommendation.status === StockRecommendation.INVEST).length;
+  const holdCount = stocks.filter(
+    (s) => s.aiRecommendation.status === StockRecommendation.HOLD,
+  ).length;
+  const exitCount = stocks.filter(
+    (s) => s.aiRecommendation.status === StockRecommendation.EXIT,
+  ).length;
 
   const summaryCards = [
     {
@@ -55,8 +59,6 @@ export const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/*TODO: add navigation bar*/}
-
       <main className="pt-28 sm:pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="mb-8 animate-fade-in">
           <h1 className="text-3xl font-bold text-foreground mb-2">Good morning, Investor</h1>
@@ -83,10 +85,7 @@ export const Dashboard = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-8">
-          <div className="lg:col-span-1">
-            <PerformanceSummary />
-          </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
           <div className="lg:col-span-3 grid grid-cols-3 gap-4">
             {summaryCards.map((card, i) => (
               <button
@@ -139,16 +138,16 @@ export const Dashboard = () => {
             </div>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {portfolioStocks.map((stock, i) => {
-                const portfolioData = portfolio.find((p) => p.ticker === stock.ticker);
+                const portfolioData = portfolio.find((p) => p.ticker === stock.symbol);
                 return (
                   <div
-                    key={stock.id}
+                    key={stock.symbol}
                     className="animate-fade-in"
                     style={{ animationDelay: `${0.2 + i * 0.1}s` }}
                   >
                     <StockCard
                       stock={stock}
-                      onClick={() => navigate(`/stock/${stock.id}`)}
+                      onClick={() => navigate(`/stock/${stock.symbol}`)}
                       portfolioData={portfolioData}
                     />
                   </div>
@@ -170,7 +169,6 @@ export const Dashboard = () => {
             </div>
           </div>
 
-          {/* Filter tabs */}
           <div className="flex items-center gap-2 mb-6">
             <Filter size={18} className="text-muted-foreground" />
             <div className="flex gap-2">
@@ -191,11 +189,11 @@ export const Dashboard = () => {
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filteredRecommendedStocks.map((stock, i) => (
               <div
-                key={stock.id}
+                key={stock.symbol}
                 className="animate-fade-in"
                 style={{ animationDelay: `${0.2 + i * 0.1}s` }}
               >
-                <StockCard stock={stock} onClick={() => navigate(`/stock/${stock.id}`)} />
+                <StockCard stock={stock} onClick={() => navigate(`/stock/${stock.symbol}`)} />
               </div>
             ))}
           </div>

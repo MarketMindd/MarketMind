@@ -1,17 +1,19 @@
 import { ArrowDownRight, ArrowUpRight, Briefcase } from 'lucide-react';
-import { PortfolioStock, Stock } from '@market-mind/common';
-import { cn } from '@/utils/tailwindUtils';
+
+import { PortfolioItem, Stock } from '@market-mind/common';
+
 import RecommendationBadge from '@/components/elements/recommendationBadge';
+import { cn } from '@/utils/tailwindUtils';
 
 interface StockCardProps {
   stock: Stock;
   onClick?: () => void;
   className?: string;
-  portfolioData?: PortfolioStock;
+  portfolioData?: PortfolioItem;
 }
 
 const StockCard = ({ stock, onClick, className, portfolioData }: StockCardProps) => {
-  const isPositive = stock.change >= 0;
+  const isPositive = stock.marketData.volume >= 0;
 
   return (
     <div
@@ -21,7 +23,7 @@ const StockCard = ({ stock, onClick, className, portfolioData }: StockCardProps)
       <div className="flex items-start justify-between mb-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="font-mono text-primary font-semibold">{stock.ticker}</span>
+            <span className="font-mono text-primary font-semibold">{stock.symbol}</span>
             <span className="text-xs text-muted-foreground px-2 py-0.5 bg-secondary rounded-full">
               {stock.sector}
             </span>
@@ -31,15 +33,17 @@ const StockCard = ({ stock, onClick, className, portfolioData }: StockCardProps)
           </h3>
         </div>
         <RecommendationBadge
-          recommendation={stock.recommendation}
-          confidence={stock.confidence}
+          recommendation={stock.aiRecommendation.status}
+          confidence={stock.aiRecommendation.confidence}
           showConfidence
         />
       </div>
 
       <div className="flex items-end justify-between mb-4">
         <div>
-          <span className="text-2xl font-semibold text-foreground">${stock.price.toFixed(2)}</span>
+          <span className="text-2xl font-semibold text-foreground">
+            ${stock.marketData.price.toFixed(2)}
+          </span>
           <div
             className={cn(
               'flex items-center gap-1 text-sm mt-1',
@@ -49,8 +53,8 @@ const StockCard = ({ stock, onClick, className, portfolioData }: StockCardProps)
             {isPositive ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
             <span>
               {isPositive ? '+' : ''}
-              {stock.change.toFixed(2)} ({isPositive ? '+' : ''}
-              {stock.changePercent.toFixed(2)}%)
+              {stock.marketData.volume.toFixed(2)} ({isPositive ? '+' : ''}
+              {stock.marketData.priceChange.toFixed(2)}%)
             </span>
           </div>
         </div>
@@ -61,21 +65,25 @@ const StockCard = ({ stock, onClick, className, portfolioData }: StockCardProps)
               <div
                 className={cn(
                   'h-full rounded-full transition-all duration-500',
-                  stock.confidence >= 80
+                  stock.aiRecommendation.confidence >= 80
                     ? 'bg-success'
-                    : stock.confidence >= 60
+                    : stock.aiRecommendation.confidence >= 60
                       ? 'bg-warning'
                       : 'bg-destructive',
                 )}
-                style={{ width: `${stock.confidence}%` }}
+                style={{ width: `${stock.aiRecommendation.confidence}%` }}
               />
             </div>
-            <span className="text-sm font-mono text-muted-foreground">{stock.confidence}%</span>
+            <span className="text-sm font-mono text-muted-foreground">
+              {stock.aiRecommendation.confidence}%
+            </span>
           </div>
         </div>
       </div>
 
-      <p className="text-sm text-muted-foreground leading-relaxed">{stock.explanation}</p>
+      <p className="text-sm text-muted-foreground leading-relaxed">
+        {stock.aiRecommendation.rationale}
+      </p>
 
       {portfolioData && (
         <div className="mt-4 pt-4 border-t border-border/50">
@@ -90,11 +98,16 @@ const StockCard = ({ stock, onClick, className, portfolioData }: StockCardProps)
             <span
               className={cn(
                 'font-medium',
-                stock.price > portfolioData.avgPrice ? 'text-success' : 'text-destructive',
+                stock.marketData.price > portfolioData.avgPrice
+                  ? 'text-success'
+                  : 'text-destructive',
               )}
             >
-              {stock.price > portfolioData.avgPrice ? '+' : ''}
-              {(((stock.price - portfolioData.avgPrice) / portfolioData.avgPrice) * 100).toFixed(1)}
+              {stock.marketData.price > portfolioData.avgPrice ? '+' : ''}
+              {(
+                ((stock.marketData.price - portfolioData.avgPrice) / portfolioData.avgPrice) *
+                100
+              ).toFixed(1)}
               %
             </span>
           </div>

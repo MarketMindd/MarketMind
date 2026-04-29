@@ -15,6 +15,35 @@ export class StockService {
     private readonly stockRepo: Repository<StockEntity>,
   ) {}
 
+  async getStocks(limit = 9): Promise<Stock[]> {
+    const rawData: RawStock[] = await this.stockRepo
+      .createQueryBuilder('stocks')
+      .leftJoin(
+        RecommendationEntity,
+        'recommendation',
+        'recommendation.stockSymbol = stocks.symbol',
+      )
+      .innerJoin(MarketDataEntity, 'marketData', 'marketData.stockSymbol = stocks.symbol')
+      .select([
+        'stocks.symbol as symbol',
+        'stocks.name as name',
+        'stocks.sector as sector',
+        'marketData.price as price',
+        'marketData.volume as volume',
+        'marketData.priceChange AS "priceChange"',
+        'recommendation.status as status',
+        'recommendation.confidenceScore AS "confidence"',
+        'recommendation.rationale as rationale',
+      ])
+      .distinctOn(['stocks.symbol'])
+      .orderBy('stocks.symbol', 'ASC')
+      .addOrderBy('marketData.time', 'DESC')
+      .limit(limit)
+      .getRawMany();
+
+    return rawData.map((raw) => this.mapRawStock(raw));
+  }
+
   async getStockBySymbol(symbol: Stock['symbol']): Promise<Stock> {
     const rawData: RawStock | undefined = await this.stockRepo
       .createQueryBuilder('stocks')
