@@ -7,4 +7,5 @@ export const APP_ROUTES = {
   SIGN_UP: '/signup',
   STOCK_DETAILS: '/stock/:stockSymbol',
   RISK_TOLERANCE: '/onboarding/risk-tolerance',
+  INTERESTS: '/onboarding/interests',
 } as const;
