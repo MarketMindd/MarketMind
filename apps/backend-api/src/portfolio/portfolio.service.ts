@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 
-import { PortfolioEntity, StockEntity } from '@market-mind/database';
-import type { PortfolioItem, SavePortfolioPayload } from '@market-mind/common';
+import type { PortfolioItemWithStock, SavePortfolioPayload } from '@market-mind/common';
+import { MarketDataEntity, PortfolioEntity, StockEntity } from '@market-mind/database';
+import type { RawStock } from '../stock/types';
 
 @Injectable()
 export class PortfolioService {
@@ -14,14 +15,47 @@ export class PortfolioService {
     private readonly stockRepo: Repository<StockEntity>,
   ) {}
 
-  async getPortfolio(userId: string): Promise<PortfolioItem[]> {
-    const items = await this.portfolioRepo.find({ where: { userId } });
-    return items.map((item) => ({
-      id: item.id,
-      ticker: item.stockSymbol,
-      shares: Number(item.shares),
-      avgPrice: Number(item.avgPrice),
-    }));
+  async getPortfolio(userId: string): Promise<PortfolioItemWithStock[]> {
+    const rawData = await this.portfolioRepo
+      .createQueryBuilder('portfolio')
+      .where('portfolio.userId = :userId', { userId })
+      .leftJoin(StockEntity, 'stocks', 'stocks.symbol = portfolio.stockSymbol')
+      .leftJoin(MarketDataEntity, 'marketData', 'marketData.stockSymbol = portfolio.stockSymbol')
+      .select([
+        'portfolio.id as "portfolioId"',
+        'portfolio.stockSymbol as "ticker"',
+        'portfolio.shares as "shares"',
+        'portfolio.avgPrice as "avgPrice"',
+        'stocks.symbol as "symbol"',
+        'stocks.name as "name"',
+        'stocks.sector as "sector"',
+        'marketData.price as "price"',
+      ])
+      .distinctOn(['portfolio.stockSymbol'])
+      .orderBy('portfolio.stockSymbol')
+      .addOrderBy('marketData.time', 'DESC')
+      .getRawMany();
+
+    if (rawData.length === 0) return [];
+
+    return rawData.map((raw) => {
+      const stock = raw.symbol ? {
+        symbol: raw.symbol,
+        name: raw.name,
+        sector: raw.sector,
+        marketData: {
+          price: Number(raw.price ?? 0),
+        },
+      } : undefined;
+
+      return {
+        id: raw.portfolioId,
+        ticker: raw.ticker,
+        shares: Number(raw.shares),
+        avgPrice: Number(raw.avgPrice),
+        stock,
+      };
+    });
   }
 
   async savePortfolio(userId: string, payload: SavePortfolioPayload): Promise<void> {
@@ -36,26 +70,7 @@ export class PortfolioService {
       await this.portfolioRepo.remove(itemsToDelete);
     }
     
-    // TODO: Change this when list of stocks will be stored in db
-    // Ensure all incoming stocks exist in the database
-    if (incomingSymbols.length > 0) {
-      const existingStocks = await this.stockRepo.find({
-        where: { symbol: In(incomingSymbols) },
-      });
-      const existingStockSymbols = existingStocks.map(s => s.symbol);
-      const missingSymbols = incomingSymbols.filter(s => !existingStockSymbols.includes(s));
-      
-      if (missingSymbols.length > 0) {
-        const newStocks = missingSymbols.map(symbol => 
-          this.stockRepo.create({
-            symbol,
-            name: symbol, // Fallback name
-            sector: 'Unknown', // Fallback sector
-          })
-        );
-        await this.stockRepo.save(newStocks);
-      }
-    }
+
 
     const itemsToSave: PortfolioEntity[] = [];
     

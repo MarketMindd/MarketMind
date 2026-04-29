@@ -123,19 +123,19 @@ export const createFetchDataProvider = (): iDataProvider => {
     }
   };
 
-  const getStock = async (symbol: string) => {
+  const getStocks = async (symbols: string[]) => {
     try {
-      const res = await apiClient.get(`/stocks/${symbol}`);
+      if (symbols.length === 0) return [];
+      const res = await apiClient.get(`/stocks?symbols=${symbols.join(',')}`);
       return res.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Request failed');
     }
   };
 
-  const getStocks = async (symbols: string[]) => {
+  const getAllStocks = async () => {
     try {
-      if (symbols.length === 0) return [];
-      const res = await apiClient.get(`/stocks?symbols=${symbols.join(',')}`);
+      const res = await apiClient.get('/stocks');
       return res.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Request failed');
@@ -166,8 +166,8 @@ export const createFetchDataProvider = (): iDataProvider => {
       signout,
     },
     stocks: {
-      getStock,
       getStocks,
+      getAllStocks,
     },
     portfolio: {
       getPortfolio: async () => {

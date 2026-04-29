@@ -11,15 +11,11 @@ export class StockController {
 
   @Get()
   async getStocks(@Query('symbols') symbolsString: string): Promise<Stock[]> {
-    if (!symbolsString) return [];
+    if (!symbolsString) {
+      return this.stockService.getAllStocks();
+    }
     const symbols = symbolsString.split(',').filter(Boolean);
     return this.stockService.getStocksBySymbols(symbols);
   }
 
-  @Get(':symbol')
-  async getStock(
-    @Param('symbol', new ZodValidationPipe(getStockBySymbolParamSchema)) symbol: Stock['symbol'],
-  ): Promise<Stock> {
-    return this.stockService.getStockBySymbol(symbol);
-  }
 }

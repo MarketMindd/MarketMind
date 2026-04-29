@@ -5,7 +5,7 @@ import type {
   UseQueryResult,
 } from '@tanstack/react-query';
 
-import type { AuthResponse, SignInPayload, SignUpPayload, Stock, PortfolioItem, SavePortfolioPayload } from '@market-mind/common';
+import type { AuthResponse, SignInPayload, SignUpPayload, Stock, PortfolioItemWithStock, SavePortfolioPayload } from '@market-mind/common';
 
 export type iClientQueriesProvider = {
   auth: {
@@ -24,11 +24,18 @@ export type iClientQueriesProvider = {
       symbol: string,
       options?: Omit<UseQueryOptions<Stock, Error>, 'queryKey' | 'queryFn'>,
     ) => UseQueryResult<Stock, Error>;
+    useGetStocks: (
+      symbols: string[],
+      options?: Omit<UseQueryOptions<Stock[], Error>, 'queryKey' | 'queryFn'>,
+    ) => UseQueryResult<Stock[], Error>;
+    useGetAllStocks: (
+      options?: Omit<UseQueryOptions<Stock[], Error>, 'queryKey' | 'queryFn'>,
+    ) => UseQueryResult<Stock[], Error>;
   };
   portfolio: {
     usePortfolio: (
-      options?: Omit<UseQueryOptions<PortfolioItem[], Error>, 'queryKey' | 'queryFn'>,
-    ) => UseQueryResult<PortfolioItem[], Error>;
+      options?: Omit<UseQueryOptions<PortfolioItemWithStock[], Error>, 'queryKey' | 'queryFn'>,
+    ) => UseQueryResult<PortfolioItemWithStock[], Error>;
     useSavePortfolio: (
       options?: UseMutationOptions<{ success: boolean }, Error, SavePortfolioPayload>,
     ) => UseMutationResult<{ success: boolean }, Error, SavePortfolioPayload>;

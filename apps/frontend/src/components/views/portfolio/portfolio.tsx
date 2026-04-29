@@ -1,11 +1,10 @@
-import { useQuery } from '@tanstack/react-query';
 import { Briefcase, DollarSign, Save, TrendingDown, TrendingUp } from 'lucide-react';
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import { PortfolioItem } from '@market-mind/common';
+import { PortfolioItemWithStock } from '@market-mind/common';
 
 import { Button } from '@/components/elements/button';
-import { ClientQueriesDataContext, useClientQueries } from '@/hooks/useClientQueries';
+import { useClientQueries } from '@/hooks/useClientQueries';
 import { cn } from '@/utils/tailwindUtils';
 import PortfolioInput from './portfolioInput';
 import { PortfolioStockRow } from './portfolioStockRow';
@@ -22,7 +21,7 @@ export const Portfolio = () => {
     },
   });
 
-  const [localPortfolio, setLocalPortfolio] = useState<PortfolioItem[]>([]);
+  const [localPortfolio, setLocalPortfolio] = useState<PortfolioItemWithStock[]>([]);
   const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
@@ -38,25 +37,13 @@ export const Portfolio = () => {
     savePortfolio({ items: localPortfolio });
   };
 
-  const ctx = useContext(ClientQueriesDataContext);
-
-  const stockQueries = useQuery({
-    queryKey: ['portfolioStocks', localPortfolio.map((s) => s.ticker)],
-    queryFn: async () => {
-      if (!ctx?.dataProvider || localPortfolio.length === 0) return [];
-      return ctx.dataProvider.stocks.getStocks(localPortfolio.map(s => s.ticker));
-    },
-    enabled: localPortfolio.length > 0 && !!ctx?.dataProvider,
-  });
-
-  const getStockPrice = (ticker: string, defaultPrice: number) => {
-    const stock = stockQueries.data?.find((s) => s.symbol === ticker);
-    return stock?.marketData?.price ?? defaultPrice;
+  const getStockPrice = (stock: PortfolioItemWithStock) => {
+    return stock.stock?.marketData?.price || stock.avgPrice;
   };
 
   // Calculate portfolio metrics
   const portfolioValue = localPortfolio.reduce((sum, stock) => {
-    const currentPrice = getStockPrice(stock.ticker, stock.avgPrice);
+    const currentPrice = getStockPrice(stock);
     return sum + stock.shares * currentPrice;
   }, 0);
 
@@ -200,7 +187,7 @@ export const Portfolio = () => {
                     <PortfolioStockRow
                       key={stock.ticker}
                       stock={stock}
-                      currentPrice={getStockPrice(stock.ticker, stock.avgPrice)}
+                      currentPrice={getStockPrice(stock)}
                     />
                   ))}
                 </tbody>

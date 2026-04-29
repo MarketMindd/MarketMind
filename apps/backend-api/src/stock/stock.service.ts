@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -8,43 +8,40 @@ import { MarketDataEntity, RecommendationEntity, StockEntity } from '@market-min
 import { DEFAULT_STOCK_RECOMMENDATION } from './consts';
 import type { RawStock } from './types';
 
+const INITIAL_STOCKS = [
+  { symbol: 'AAPL', name: 'Apple Inc.', sector: 'Technology' },
+  { symbol: 'NVDA', name: 'NVIDIA Corporation', sector: 'Technology' },
+  { symbol: 'MSFT', name: 'Microsoft Corporation', sector: 'Technology' },
+  { symbol: 'GOOGL', name: 'Alphabet Inc.', sector: 'Communication Services' },
+  { symbol: 'AMZN', name: 'Amazon.com Inc.', sector: 'Consumer Cyclical' },
+  { symbol: 'META', name: 'Meta Platforms', sector: 'Communication Services' },
+  { symbol: 'TSLA', name: 'Tesla Inc.', sector: 'Consumer Cyclical' },
+  { symbol: 'JNJ', name: 'Johnson & Johnson', sector: 'Healthcare' },
+  { symbol: 'XOM', name: 'Exxon Mobil', sector: 'Energy' },
+  { symbol: 'JPM', name: 'JPMorgan Chase', sector: 'Financial Services' },
+  { symbol: 'V', name: 'Visa Inc.', sector: 'Financial Services' },
+  { symbol: 'UNH', name: 'UnitedHealth Group', sector: 'Healthcare' },
+  { symbol: 'HD', name: 'Home Depot', sector: 'Consumer Cyclical' },
+  { symbol: 'PG', name: 'Procter & Gamble', sector: 'Consumer Defensive' },
+  { symbol: 'DIS', name: 'Walt Disney', sector: 'Communication Services' },
+];
+
 @Injectable()
-export class StockService {
+export class StockService implements OnModuleInit {
+  private readonly logger = new Logger(StockService.name);
+
   constructor(
     @InjectRepository(StockEntity)
     private readonly stockRepo: Repository<StockEntity>,
   ) {}
 
-  async getStockBySymbol(symbol: Stock['symbol']): Promise<Stock> {
-    const rawData: RawStock | undefined = await this.stockRepo
-      .createQueryBuilder('stocks')
-      .leftJoin(
-        RecommendationEntity,
-        'recommendation',
-        'recommendation.stockSymbol = stocks.symbol',
-      )
-      .innerJoin(MarketDataEntity, 'marketData', 'marketData.stockSymbol = stocks.symbol')
-      .select([
-        'stocks.symbol as symbol',
-        'stocks.name as name',
-        'stocks.sector as sector',
-        'marketData.price as price',
-        'marketData.volume as volume',
-        'marketData.priceChange AS "priceChange"',
-        'recommendation.status as status',
-        'recommendation.confidenceScore AS "confidence"',
-        'recommendation.rationale as rationale',
-      ])
-      .where('stocks.symbol = :symbol', { symbol })
-      .orderBy('marketData.time', 'DESC')
-      .addOrderBy('recommendation.updatedAt', 'DESC')
-      .getRawOne();
-
-    if (!rawData) {
-      throw new NotFoundException(`Stock with symbol ${symbol} not found`);
+  async onModuleInit() {
+    const count = await this.stockRepo.count();
+    if (count === 0) {
+      this.logger.log('Seeding initial stocks...');
+      await this.stockRepo.save(INITIAL_STOCKS);
+      this.logger.log(`Successfully seeded ${INITIAL_STOCKS.length} stocks.`);
     }
-
-    return this.mapRawStock(rawData);
   }
 
   async getStocksBySymbols(symbols: string[]): Promise<Stock[]> {
@@ -70,6 +67,35 @@ export class StockService {
         'recommendation.rationale as rationale',
       ])
       .where('stocks.symbol IN (:...symbols)', { symbols })
+      .distinctOn(['stocks.symbol'])
+      .orderBy('stocks.symbol')
+      .addOrderBy('marketData.time', 'DESC')
+      .addOrderBy('recommendation.updatedAt', 'DESC')
+      .getRawMany();
+
+    return rawData.map((data) => this.mapRawStock(data));
+  }
+
+  async getAllStocks(): Promise<Stock[]> {
+    const rawData: RawStock[] = await this.stockRepo
+      .createQueryBuilder('stocks')
+      .leftJoin(
+        RecommendationEntity,
+        'recommendation',
+        'recommendation.stockSymbol = stocks.symbol',
+      )
+      .leftJoin(MarketDataEntity, 'marketData', 'marketData.stockSymbol = stocks.symbol')
+      .select([
+        'stocks.symbol as symbol',
+        'stocks.name as name',
+        'stocks.sector as sector',
+        'marketData.price as price',
+        'marketData.volume as volume',
+        'marketData.priceChange AS "priceChange"',
+        'recommendation.status as status',
+        'recommendation.confidenceScore AS "confidence"',
+        'recommendation.rationale as rationale',
+      ])
       .distinctOn(['stocks.symbol'])
       .orderBy('stocks.symbol')
       .addOrderBy('marketData.time', 'DESC')
