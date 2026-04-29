@@ -2,18 +2,13 @@ import { ArrowDownRight, ArrowLeft, ArrowUpRight, Brain, LineChart } from 'lucid
 import { Link, useParams } from 'react-router-dom';
 import { AdvancedRealTimeChart } from 'react-ts-tradingview-widgets';
 
-
-
 import { calculateDollarChange } from '@market-mind/common';
-
-
 
 import { Button } from '@/components/elements/button';
 import RecommendationBadge from '@/components/elements/recommendationBadge';
 import { Size } from '@/enums/recommendationBadge';
 import { useClientQueries } from '@/hooks/useClientQueries';
 import { cn } from '@/utils/tailwindUtils';
-
 
 export const StockDetails = () => {
   const { stockSymbol } = useParams();
@@ -93,7 +88,8 @@ export const StockDetails = () => {
                 {isPositive ? <ArrowUpRight size={20} /> : <ArrowDownRight size={20} />}
                 <span>
                   {isPositive ? '+' : ''}
-                  {calculateDollarChange(stock.marketData.price, stock.marketData.priceChange)} ({isPositive ? '+' : ''}
+                  {calculateDollarChange(stock.marketData.price, stock.marketData.priceChange)} (
+                  {isPositive ? '+' : ''}
                   {stock.marketData.priceChange.toFixed(2)}%)
                 </span>
               </div>
