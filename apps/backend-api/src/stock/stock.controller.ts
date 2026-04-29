@@ -9,6 +9,11 @@ import { StockService } from './stock.service';
 export class StockController {
   constructor(private readonly stockService: StockService) {}
 
+  @Get()
+  async getStocks(): Promise<Stock[]> {
+    return this.stockService.getStocks();
+  }
+
   @Get(':symbol')
   async getStock(
     @Param('symbol', new ZodValidationPipe(getStockBySymbolParamSchema)) symbol: Stock['symbol'],

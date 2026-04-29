@@ -72,6 +72,16 @@ export const useClientQueries = (): iClientQueriesProvider => {
     });
   };
 
+  const useGetStocks = (
+    options?: Omit<UseQueryOptions<Stock[], Error>, 'queryKey' | 'queryFn'>,
+  ) => {
+    return useQuery<Stock[], Error>({
+      queryKey: ['stocks'],
+      queryFn: () => ctx.dataProvider.stocks.getStocks(),
+      ...options,
+    });
+  };
+
   const usePortfolio = (
     options?: Omit<UseQueryOptions<PortfolioItem[], Error>, 'queryKey' | 'queryFn'>,
   ) => {
@@ -89,5 +99,5 @@ export const useClientQueries = (): iClientQueriesProvider => {
     });
   };
 
-  return { auth: { useSignIn, useSignUp, useSignOut }, stocks: { useGetStock }, portfolio: { usePortfolio, useSavePortfolio } };
+  return { auth: { useSignIn, useSignUp, useSignOut }, stocks: { useGetStock, useGetStocks }, portfolio: { usePortfolio, useSavePortfolio } };
 };

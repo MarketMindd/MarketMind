@@ -24,6 +24,9 @@ export type iClientQueriesProvider = {
       symbol: string,
       options?: Omit<UseQueryOptions<Stock, Error>, 'queryKey' | 'queryFn'>,
     ) => UseQueryResult<Stock, Error>;
+    useGetStocks: (
+      options?: Omit<UseQueryOptions<Stock[], Error>, 'queryKey' | 'queryFn'>,
+    ) => UseQueryResult<Stock[], Error>;
   };
   portfolio: {
     usePortfolio: (

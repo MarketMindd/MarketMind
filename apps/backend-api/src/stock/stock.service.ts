@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { Stock } from '@market-mind/common';
 import { MarketDataEntity, RecommendationEntity, StockEntity } from '@market-mind/database';
 
+import { appConfig } from '../config/appConfig';
 import { DEFAULT_STOCK_RECOMMENDATION } from './consts';
 import type { RawStock } from './types';
 
@@ -14,6 +15,35 @@ export class StockService {
     @InjectRepository(StockEntity)
     private readonly stockRepo: Repository<StockEntity>,
   ) {}
+
+  async getStocks(limit = appConfig.stock.maxStocksCount): Promise<Stock[]> {
+    const rawData: RawStock[] = await this.stockRepo
+      .createQueryBuilder('stocks')
+      .leftJoin(
+        RecommendationEntity,
+        'recommendation',
+        'recommendation.stockSymbol = stocks.symbol',
+      )
+      .innerJoin(MarketDataEntity, 'marketData', 'marketData.stockSymbol = stocks.symbol')
+      .select([
+        'stocks.symbol as symbol',
+        'stocks.name as name',
+        'stocks.sector as sector',
+        'marketData.price as price',
+        'marketData.volume as volume',
+        'marketData.priceChange AS "priceChange"',
+        'recommendation.status as status',
+        'recommendation.confidenceScore AS "confidence"',
+        'recommendation.rationale as rationale',
+      ])
+      .distinctOn(['stocks.symbol'])
+      .orderBy('stocks.symbol', 'ASC')
+      .addOrderBy('marketData.time', 'DESC')
+      .limit(limit)
+      .getRawMany();
+
+    return rawData.map((raw) => this.mapRawStock(raw));
+  }
 
   async getStockBySymbol(symbol: Stock['symbol']): Promise<Stock> {
     const rawData: RawStock | undefined = await this.stockRepo

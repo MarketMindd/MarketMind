@@ -8,7 +8,6 @@ import { Briefcase, TrendingUp, TrendingDown, DollarSign, Save } from 'lucide-re
 import { useClientQueries } from '@/hooks/useClientQueries';
 import { PortfolioItem } from '@market-mind/common';
 import { cn } from '@/utils/tailwindUtils';
-import { availableStocksForPortfolio } from '@/data/mockStocks';
 
 export const Portfolio = () => {
   const { portfolio: { usePortfolio, useSavePortfolio } } = useClientQueries();
