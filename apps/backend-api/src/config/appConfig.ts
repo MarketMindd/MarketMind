@@ -21,6 +21,6 @@ export const appConfig = {
   auth: {
     maxActiveSessions: parseInt(process.env.MAX_ACTIVE_SESSIONS || '5', 10),
   },
-  newsApiKey: process.env.NEWSAPI_KEY ?? '',
+  newsApiKey: process.env.NEWSAPI_KEY ?? '605aaebbb6824b33994544598c2149dd',
   geminiApiKey: process.env.GEMINI_API_KEY ?? '',
 } as const;

@@ -1,9 +1,14 @@
 import { ArrowDownRight, ArrowUpRight, Briefcase } from 'lucide-react';
 
+
+
 import { PortfolioItem, Stock } from '@market-mind/common';
+
+
 
 import RecommendationBadge from '@/components/elements/recommendationBadge';
 import { cn } from '@/utils/tailwindUtils';
+
 
 interface StockCardProps {
   stock: Stock;
@@ -13,7 +18,15 @@ interface StockCardProps {
 }
 
 const StockCard = ({ stock, onClick, className, portfolioData }: StockCardProps) => {
-  const isPositive = stock.marketData.volume >= 0;
+  const isPositive = stock.marketData.priceChange >= 0;
+
+  const calculateDollarChange = (currentPrice: number, percentChange: number) => {
+    const decimalChange = percentChange / 100;
+    const originalPrice = currentPrice / (1 + decimalChange);
+    const dollarChange = currentPrice - originalPrice;
+
+    return Number(dollarChange.toFixed(2));
+  }
 
   return (
     <div
@@ -53,7 +66,7 @@ const StockCard = ({ stock, onClick, className, portfolioData }: StockCardProps)
             {isPositive ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
             <span>
               {isPositive ? '+' : ''}
-              {stock.marketData.volume.toFixed(2)} ({isPositive ? '+' : ''}
+              {calculateDollarChange(stock.marketData.price, stock.marketData.priceChange)} ({isPositive ? '+' : ''}
               {stock.marketData.priceChange.toFixed(2)}%)
             </span>
           </div>
