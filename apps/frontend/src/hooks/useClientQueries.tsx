@@ -17,7 +17,7 @@ type ClientQueriesContext = {
   dataProvider: iDataProvider;
 };
 
-const ClientQueriesDataContext = createContext<ClientQueriesContext | null>(null);
+export const ClientQueriesDataContext = createContext<ClientQueriesContext | null>(null);
 
 export const ClientQueriesProvider = ({
   dataProvider,

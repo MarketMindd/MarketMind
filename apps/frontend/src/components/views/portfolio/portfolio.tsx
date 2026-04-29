@@ -1,14 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 
 import PortfolioInput from './portfolioInput';
 import { PortfolioStockRow } from './portfolioStockRow';
-import { mockStocks } from '@/data/mockStocks';
 import { Button } from '@/components/elements/button';
 import { Briefcase, TrendingUp, TrendingDown, DollarSign, Save } from 'lucide-react';
-import { useClientQueries } from '@/hooks/useClientQueries';
+import { useClientQueries, ClientQueriesDataContext } from '@/hooks/useClientQueries';
 import { PortfolioItem } from '@market-mind/common';
 import { cn } from '@/utils/tailwindUtils';
-import { availableStocksForPortfolio } from '@/data/mockStocks';
+import { useQueries } from '@tanstack/react-query';
 
 export const Portfolio = () => {
   const { portfolio: { usePortfolio, useSavePortfolio } } = useClientQueries();
@@ -28,7 +27,6 @@ export const Portfolio = () => {
   }, [portfolio]);
 
   useEffect(() => {
-    // Simple deep comparison for changes
     const changed = JSON.stringify(localPortfolio) !== JSON.stringify(portfolio);
     setHasChanges(changed);
   }, [localPortfolio, portfolio]);
@@ -37,10 +35,24 @@ export const Portfolio = () => {
     savePortfolio({ items: localPortfolio });
   };
 
+  const ctx = useContext(ClientQueriesDataContext);
+
+  const stockQueries = useQueries({
+    queries: localPortfolio.map((stock) => ({
+      queryKey: ['stock', stock.ticker],
+      queryFn: () => ctx!.dataProvider.stocks.getStock(stock.ticker),
+      enabled: !!ctx?.dataProvider,
+    })),
+  });
+
+  const getStockPrice = (ticker: string, defaultPrice: number) => {
+    const query = stockQueries.find(q => q.data && q.data.symbol === ticker);
+    return query?.data?.marketData?.price ?? defaultPrice;
+  };
+
   // Calculate portfolio metrics
   const portfolioValue = localPortfolio.reduce((sum, stock) => {
-    const currentStock = mockStocks.find(s => s.ticker === stock.ticker);
-    const currentPrice = currentStock?.price || stock.avgPrice;
+    const currentPrice = getStockPrice(stock.ticker, stock.avgPrice);
     return sum + (stock.shares * currentPrice);
   }, 0);
 
@@ -50,8 +62,8 @@ export const Portfolio = () => {
 
   return (
     <div className="flex-1 flex flex-col bg-background">
-      <div className="pt-8 sm:pt-6 pb-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
-        <div className="flex items-center justify-between mb-8 animate-fade-in">
+      <div className="pt-8 sm:pt-6 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+        <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-foreground mb-2 flex items-center gap-3">
               <Briefcase className="w-8 h-8 text-primary" />
@@ -62,7 +74,7 @@ export const Portfolio = () => {
             </p>
           </div>
           {hasChanges && (
-            <Button variant="glow" onClick={handleSave} className="animate-fade-in" disabled={isPending}>
+            <Button variant="glow" onClick={handleSave} className="" disabled={isPending}>
               <Save size={18} />
               {isPending ? 'Saving...' : 'Save Changes'}
             </Button>
@@ -70,7 +82,7 @@ export const Portfolio = () => {
         </div>
 
         {localPortfolio.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 animate-fade-in stagger-1">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             <div className="glass-card p-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
@@ -133,7 +145,7 @@ export const Portfolio = () => {
           </div>
         )}
 
-        <div className="glass-card p-6 animate-fade-in stagger-2">
+        <div className="glass-card p-6">
           <h2 className="text-lg font-semibold text-foreground mb-4">Your Holdings</h2>
           <PortfolioInput
             portfolio={localPortfolio}
@@ -142,7 +154,7 @@ export const Portfolio = () => {
         </div>
 
         {localPortfolio.length > 0 && (
-          <div className="glass-card p-6 mt-6 animate-fade-in stagger-3">
+          <div className="glass-card p-6 mt-6">
             <h2 className="text-lg font-semibold text-foreground mb-4">Holdings Summary</h2>
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -157,7 +169,7 @@ export const Portfolio = () => {
                 </thead>
                 <tbody>
                   {localPortfolio.map((stock) => (
-                    <PortfolioStockRow key={stock.ticker} stock={stock} />
+                    <PortfolioStockRow key={stock.ticker} stock={stock} currentPrice={getStockPrice(stock.ticker, stock.avgPrice)} />
                   ))}
                 </tbody>
               </table>
