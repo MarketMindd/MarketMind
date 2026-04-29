@@ -3,7 +3,6 @@ export * from './entities/userProfile';
 export * from './entities/stock';
 export * from './entities/marketData';
 export * from './entities/portfolio';
-export * from './entities/portfolio-stock';
 export * from './enums/command';
 export * from './enums/risk-tolerance';
 export * from './utils/retry';
