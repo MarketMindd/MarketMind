@@ -1,7 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-
 import { RiskTolerance } from '@market-mind/common';
-
 import { AiService } from '../ai/ai.service';
 import { FilterService } from '../filter/filter.service';
 import type { FilteredSnapshot } from '../filter/filter.types';

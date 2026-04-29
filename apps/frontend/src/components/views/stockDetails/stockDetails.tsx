@@ -1,9 +1,7 @@
 import { ArrowDownRight, ArrowLeft, ArrowUpRight, Brain, LineChart } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import { AdvancedRealTimeChart } from 'react-ts-tradingview-widgets';
-
 import { calculatePriceChange } from '@market-mind/common';
-
 import { Button } from '@/components/elements/button';
 import RecommendationBadge from '@/components/elements/recommendationBadge';
 import { Size } from '@/enums/recommendationBadge';

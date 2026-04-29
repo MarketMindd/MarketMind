@@ -1,9 +1,9 @@
-import { useState, useRef, useEffect } from 'react';
+import { Briefcase, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { PortfolioItem } from '@market-mind/common';
 import { Button } from '@/components/elements/button';
 import { Input } from '@/components/elements/input';
-import { Plus, X, Briefcase } from 'lucide-react';
 import { availableStocksForPortfolio } from '@/data/mockStocks';
-import { PortfolioItem } from '@market-mind/common';
 import { cn } from '@/utils/tailwindUtils';
 
 interface PortfolioInputProps {
@@ -32,10 +32,10 @@ const PortfolioInput = ({ portfolio, onChange, compact = false }: PortfolioInput
   }, []);
 
   const filteredStocks = availableStocksForPortfolio.filter(
-    stock =>
-      !portfolio.some(p => p.ticker === stock.ticker) &&
+    (stock) =>
+      !portfolio.some((p) => p.ticker === stock.ticker) &&
       (stock.ticker.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        stock.name.toLowerCase().includes(searchTerm.toLowerCase()))
+        stock.name.toLowerCase().includes(searchTerm.toLowerCase())),
   );
 
   const addStock = (ticker: string) => {
@@ -69,15 +69,11 @@ const PortfolioInput = ({ portfolio, onChange, compact = false }: PortfolioInput
   };
 
   const removeStock = (ticker: string) => {
-    onChange(portfolio.filter(s => s.ticker !== ticker));
+    onChange(portfolio.filter((s) => s.ticker !== ticker));
   };
 
   const updateStock = (ticker: string, field: 'shares' | 'avgPrice', value: number) => {
-    onChange(
-      portfolio.map(s =>
-        s.ticker === ticker ? { ...s, [field]: value } : s
-      )
-    );
+    onChange(portfolio.map((s) => (s.ticker === ticker ? { ...s, [field]: value } : s)));
   };
 
   return (
@@ -107,8 +103,8 @@ const PortfolioInput = ({ portfolio, onChange, compact = false }: PortfolioInput
                 type="button"
                 onClick={() => addStock(stock.ticker)}
                 className={cn(
-                  "w-full px-4 py-2 text-left flex items-center justify-between text-sm transition-colors",
-                  highlightedIndex === index ? "bg-secondary" : "hover:bg-secondary/50"
+                  'w-full px-4 py-2 text-left flex items-center justify-between text-sm transition-colors',
+                  highlightedIndex === index ? 'bg-secondary' : 'hover:bg-secondary/50',
                 )}
               >
                 <span className="font-mono text-primary">{stock.ticker}</span>
@@ -121,19 +117,21 @@ const PortfolioInput = ({ portfolio, onChange, compact = false }: PortfolioInput
 
       {portfolio.length > 0 && (
         <div className={cn('space-y-2', compact && 'space-y-1.5')}>
-          {portfolio.map(stock => {
-            const stockInfo = availableStocksForPortfolio.find(s => s.ticker === stock.ticker);
+          {portfolio.map((stock) => {
+            const stockInfo = availableStocksForPortfolio.find((s) => s.ticker === stock.ticker);
             return (
               <div
                 key={stock.ticker}
                 className={cn(
                   'flex items-center gap-2 bg-secondary/30 rounded-lg p-3',
-                  compact && 'p-2'
+                  compact && 'p-2',
                 )}
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className={cn('font-mono text-primary font-medium', compact && 'text-sm')}>
+                    <span
+                      className={cn('font-mono text-primary font-medium', compact && 'text-sm')}
+                    >
                       {stock.ticker}
                     </span>
                     <span className="text-xs text-muted-foreground truncate">
@@ -147,7 +145,9 @@ const PortfolioInput = ({ portfolio, onChange, compact = false }: PortfolioInput
                         type="number"
                         min="0"
                         value={stock.shares || ''}
-                        onChange={(e) => updateStock(stock.ticker, 'shares', Number(e.target.value))}
+                        onChange={(e) =>
+                          updateStock(stock.ticker, 'shares', Number(e.target.value))
+                        }
                         className={cn('h-8 text-sm mt-0.5', compact && 'h-7')}
                         placeholder="0"
                       />
@@ -159,7 +159,9 @@ const PortfolioInput = ({ portfolio, onChange, compact = false }: PortfolioInput
                         min="0"
                         step="0.01"
                         value={stock.avgPrice || ''}
-                        onChange={(e) => updateStock(stock.ticker, 'avgPrice', Number(e.target.value))}
+                        onChange={(e) =>
+                          updateStock(stock.ticker, 'avgPrice', Number(e.target.value))
+                        }
                         className={cn('h-8 text-sm mt-0.5', compact && 'h-7')}
                         placeholder="0.00"
                       />
@@ -182,10 +184,12 @@ const PortfolioInput = ({ portfolio, onChange, compact = false }: PortfolioInput
       )}
 
       {portfolio.length === 0 && (
-        <div className={cn(
-          'text-center py-6 border border-dashed border-border rounded-lg',
-          compact && 'py-4'
-        )}>
+        <div
+          className={cn(
+            'text-center py-6 border border-dashed border-border rounded-lg',
+            compact && 'py-4',
+          )}
+        >
           <Briefcase className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
           <p className="text-sm text-muted-foreground">
             No stocks added yet. Search above to add your holdings.

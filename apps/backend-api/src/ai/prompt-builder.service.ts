@@ -1,7 +1,5 @@
 import { Injectable } from '@nestjs/common';
-
 import { RiskTolerance } from '@market-mind/common';
-
 import { FilteredSnapshot } from '../filter/filter.types';
 
 const RISK_GUIDANCE: Record<RiskTolerance, string> = {

@@ -1,7 +1,5 @@
 import { Minus, TrendingDown, TrendingUp } from 'lucide-react';
-
 import { AiResponse, StockRecommendation } from '@market-mind/common';
-
 import { iconSizes, sizeClasses } from '@/consts/recommendationBadge';
 import { Size } from '@/enums/recommendationBadge';
 import { RecommendationBadgeConfig } from '@/types/recommendationBadge';

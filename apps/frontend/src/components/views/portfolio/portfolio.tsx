@@ -1,22 +1,23 @@
-import { useState, useEffect } from 'react';
-
+import { Briefcase, DollarSign, Save, TrendingDown, TrendingUp } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { PortfolioItem } from '@market-mind/common';
+import { Button } from '@/components/elements/button';
+import { mockStocks } from '@/data/mockStocks';
+import { useClientQueries } from '@/hooks/useClientQueries';
+import { cn } from '@/utils/tailwindUtils';
 import PortfolioInput from './portfolioInput';
 import { PortfolioStockRow } from './portfolioStockRow';
-import { mockStocks } from '@/data/mockStocks';
-import { Button } from '@/components/elements/button';
-import { Briefcase, TrendingUp, TrendingDown, DollarSign, Save } from 'lucide-react';
-import { useClientQueries } from '@/hooks/useClientQueries';
-import { PortfolioItem } from '@market-mind/common';
-import { cn } from '@/utils/tailwindUtils';
 
 export const Portfolio = () => {
-  const { portfolio: { usePortfolio, useSavePortfolio } } = useClientQueries();
+  const {
+    portfolio: { usePortfolio, useSavePortfolio },
+  } = useClientQueries();
   const { data: portfolio = [], refetch } = usePortfolio();
   const { mutate: savePortfolio, isPending } = useSavePortfolio({
     onSuccess: () => {
       setHasChanges(false);
       refetch();
-    }
+    },
   });
 
   const [localPortfolio, setLocalPortfolio] = useState<PortfolioItem[]>([]);
@@ -38,12 +39,12 @@ export const Portfolio = () => {
 
   // Calculate portfolio metrics
   const portfolioValue = localPortfolio.reduce((sum, stock) => {
-    const currentStock = mockStocks.find(s => s.ticker === stock.ticker);
+    const currentStock = mockStocks.find((s) => s.ticker === stock.ticker);
     const currentPrice = currentStock?.price || stock.avgPrice;
-    return sum + (stock.shares * currentPrice);
+    return sum + stock.shares * currentPrice;
   }, 0);
 
-  const totalCost = localPortfolio.reduce((sum, stock) => sum + (stock.shares * stock.avgPrice), 0);
+  const totalCost = localPortfolio.reduce((sum, stock) => sum + stock.shares * stock.avgPrice, 0);
   const totalGainLoss = portfolioValue - totalCost;
   const totalGainLossPercent = totalCost > 0 ? (totalGainLoss / totalCost) * 100 : 0;
 
@@ -56,12 +57,15 @@ export const Portfolio = () => {
               <Briefcase className="w-8 h-8 text-primary" />
               My Portfolio
             </h1>
-            <p className="text-muted-foreground">
-              Manage your current stock holdings
-            </p>
+            <p className="text-muted-foreground">Manage your current stock holdings</p>
           </div>
           {hasChanges && (
-            <Button variant="glow" onClick={handleSave} className="animate-fade-in" disabled={isPending}>
+            <Button
+              variant="glow"
+              onClick={handleSave}
+              className="animate-fade-in"
+              disabled={isPending}
+            >
               <Save size={18} />
               {isPending ? 'Saving...' : 'Save Changes'}
             </Button>
@@ -77,17 +81,25 @@ export const Portfolio = () => {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Total Value</p>
-                  <p className="text-xl font-bold text-foreground">${portfolioValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                  <p className="text-xl font-bold text-foreground">
+                    $
+                    {portfolioValue.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </p>
                 </div>
               </div>
             </div>
 
             <div className="glass-card p-4">
               <div className="flex items-center gap-3">
-                <div className={cn(
-                  'w-10 h-10 rounded-lg flex items-center justify-center',
-                  totalGainLoss >= 0 ? 'bg-success/20' : 'bg-destructive/20'
-                )}>
+                <div
+                  className={cn(
+                    'w-10 h-10 rounded-lg flex items-center justify-center',
+                    totalGainLoss >= 0 ? 'bg-success/20' : 'bg-destructive/20',
+                  )}
+                >
                   {totalGainLoss >= 0 ? (
                     <TrendingUp className="w-5 h-5 text-success" />
                   ) : (
@@ -96,11 +108,17 @@ export const Portfolio = () => {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Total Gain/Loss</p>
-                  <p className={cn(
-                    'text-xl font-bold',
-                    totalGainLoss >= 0 ? 'text-success' : 'text-destructive'
-                  )}>
-                    {totalGainLoss >= 0 ? '+' : ''}${totalGainLoss.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  <p
+                    className={cn(
+                      'text-xl font-bold',
+                      totalGainLoss >= 0 ? 'text-success' : 'text-destructive',
+                    )}
+                  >
+                    {totalGainLoss >= 0 ? '+' : ''}$
+                    {totalGainLoss.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
                   </p>
                 </div>
               </div>
@@ -108,10 +126,12 @@ export const Portfolio = () => {
 
             <div className="glass-card p-4">
               <div className="flex items-center gap-3">
-                <div className={cn(
-                  'w-10 h-10 rounded-lg flex items-center justify-center',
-                  totalGainLossPercent >= 0 ? 'bg-success/20' : 'bg-destructive/20'
-                )}>
+                <div
+                  className={cn(
+                    'w-10 h-10 rounded-lg flex items-center justify-center',
+                    totalGainLossPercent >= 0 ? 'bg-success/20' : 'bg-destructive/20',
+                  )}
+                >
                   {totalGainLossPercent >= 0 ? (
                     <TrendingUp className="w-5 h-5 text-success" />
                   ) : (
@@ -120,11 +140,14 @@ export const Portfolio = () => {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Return %</p>
-                  <p className={cn(
-                    'text-xl font-bold',
-                    totalGainLossPercent >= 0 ? 'text-success' : 'text-destructive'
-                  )}>
-                    {totalGainLossPercent >= 0 ? '+' : ''}{totalGainLossPercent.toFixed(2)}%
+                  <p
+                    className={cn(
+                      'text-xl font-bold',
+                      totalGainLossPercent >= 0 ? 'text-success' : 'text-destructive',
+                    )}
+                  >
+                    {totalGainLossPercent >= 0 ? '+' : ''}
+                    {totalGainLossPercent.toFixed(2)}%
                   </p>
                 </div>
               </div>
@@ -134,10 +157,7 @@ export const Portfolio = () => {
 
         <div className="glass-card p-6 animate-fade-in stagger-2">
           <h2 className="text-lg font-semibold text-foreground mb-4">Your Holdings</h2>
-          <PortfolioInput
-            portfolio={localPortfolio}
-            onChange={setLocalPortfolio}
-          />
+          <PortfolioInput portfolio={localPortfolio} onChange={setLocalPortfolio} />
         </div>
 
         {localPortfolio.length > 0 && (
@@ -147,11 +167,21 @@ export const Portfolio = () => {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-border">
-                    <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Stock</th>
-                    <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">Shares</th>
-                    <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">Avg Cost</th>
-                    <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">Current</th>
-                    <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">Gain/Loss</th>
+                    <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">
+                      Stock
+                    </th>
+                    <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">
+                      Shares
+                    </th>
+                    <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">
+                      Avg Cost
+                    </th>
+                    <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">
+                      Current
+                    </th>
+                    <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">
+                      Gain/Loss
+                    </th>
                   </tr>
                 </thead>
                 <tbody>

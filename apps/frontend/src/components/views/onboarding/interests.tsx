@@ -1,6 +1,6 @@
+import { ArrowLeft, Check, Sparkles, TrendingUp } from 'lucide-react';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Check, TrendingUp, Sparkles } from 'lucide-react';
 import { Button } from '@/components/elements/button';
 import { APP_ROUTES } from '@/consts/routes';
 import { cn } from '@/utils/tailwindUtils';
@@ -22,7 +22,7 @@ export const Interests: React.FC = () => {
 
   const toggleSector = (sectorId: string) => {
     setSelectedSectors((prev) =>
-      prev.includes(sectorId) ? prev.filter((id) => id !== sectorId) : [...prev, sectorId]
+      prev.includes(sectorId) ? prev.filter((id) => id !== sectorId) : [...prev, sectorId],
     );
   };
 
@@ -61,7 +61,7 @@ export const Interests: React.FC = () => {
                   'w-10 h-10 rounded-full flex items-center justify-center font-medium transition-all duration-300',
                   2 >= s
                     ? 'bg-primary text-primary-foreground'
-                    : 'bg-secondary text-muted-foreground'
+                    : 'bg-secondary text-muted-foreground',
                 )}
               >
                 {2 > s ? <Check size={18} /> : s}
@@ -70,7 +70,7 @@ export const Interests: React.FC = () => {
                 <div
                   className={cn(
                     'w-16 h-0.5 rounded-full transition-all duration-300',
-                    2 > s ? 'bg-primary' : 'bg-secondary'
+                    2 > s ? 'bg-primary' : 'bg-secondary',
                   )}
                 />
               )}
@@ -92,7 +92,7 @@ export const Interests: React.FC = () => {
                   'p-4 rounded-xl border-2 text-center transition-all duration-200 hover-lift',
                   selectedSectors.includes(sector.id)
                     ? 'border-primary bg-primary/10'
-                    : 'border-border bg-secondary/30 hover:border-muted-foreground/30'
+                    : 'border-border bg-secondary/30 hover:border-muted-foreground/30',
                 )}
               >
                 <span className="text-2xl block mb-2">{sector.icon}</span>

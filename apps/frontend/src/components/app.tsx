@@ -1,5 +1,4 @@
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
-
 import { APP_ROUTES } from '../consts/routes';
 import { Navigation } from './elements/navigation';
 import { ProtectedRoute } from './elements/protectedRoute';

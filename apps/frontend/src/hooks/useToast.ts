@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 import type { ToastActionElement, ToastProps } from '@/components/elements/toast';
 
 const TOAST_LIMIT = 1;

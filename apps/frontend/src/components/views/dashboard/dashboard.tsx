@@ -9,9 +9,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-
 import { RecommendationStatus, StockRecommendation } from '@market-mind/common';
-
 import { Button } from '@/components/elements/button';
 import { StockCard } from '@/components/elements/stockCard';
 import { useClientQueries } from '@/hooks/useClientQueries';

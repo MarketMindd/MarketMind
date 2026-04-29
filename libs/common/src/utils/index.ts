@@ -1,2 +1,2 @@
 export * from './retry';
-export * from './price'
+export * from './price';

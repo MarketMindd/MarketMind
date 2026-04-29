@@ -1,9 +1,9 @@
+import { useEffect, useState } from 'react';
 import { ACCESS_TOKEN_KEY } from '@/dataFetch/dataFetch';
-import { useState, useEffect } from 'react';
 
 export const useIsAuthenticated = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(
-    !!localStorage.getItem(ACCESS_TOKEN_KEY)
+    !!localStorage.getItem(ACCESS_TOKEN_KEY),
   );
 
   useEffect(() => {

@@ -1,5 +1,5 @@
 import { PortfolioItem } from '@market-mind/common';
-import { mockStocks, availableStocksForPortfolio } from '@/data/mockStocks';
+import { availableStocksForPortfolio, mockStocks } from '@/data/mockStocks';
 import { cn } from '@/utils/tailwindUtils';
 
 interface PortfolioStockRowProps {

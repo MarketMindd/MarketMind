@@ -1,7 +1,5 @@
 import { Controller, Get, Param } from '@nestjs/common';
-
 import { getStockBySymbolParamSchema, Stock } from '@market-mind/common';
-
 import { ZodValidationPipe } from '../pipes/zodValidatorPipe';
 import { StockService } from './stock.service';
 

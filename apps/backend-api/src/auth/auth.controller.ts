@@ -1,8 +1,6 @@
 import { Body, Controller, Post } from '@nestjs/common';
-
 import { AuthResponse, signInPayloadSchema, signUpPayloadSchema } from '@market-mind/common';
 import type { SignInPayload, SignUpPayload } from '@market-mind/common';
-
 import { Public } from '../decorators/roles.decorator';
 import { ZodValidationPipe } from '../pipes/zodValidatorPipe';
 import { AuthService } from './auth.service';

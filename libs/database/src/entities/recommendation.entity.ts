@@ -5,7 +5,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-
 import { RiskTolerance } from '@market-mind/common';
 import type { RecommendationStatus } from '@market-mind/common';
 

@@ -1,10 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-
 import { Stock } from '@market-mind/common';
 import { MarketDataEntity, RecommendationEntity, StockEntity } from '@market-mind/database';
-
 import { appConfig } from '../config/appConfig';
 import { DEFAULT_STOCK_RECOMMENDATION } from './consts';
 import type { RawStock } from './types';

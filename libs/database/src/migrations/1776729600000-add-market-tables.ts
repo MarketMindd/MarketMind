@@ -5,7 +5,7 @@ export class AddMarketTables1776729600000 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      'CREATE TYPE "public"."user_profiles_riskTolerance_enum" AS ENUM(\'Low\', \'Medium\', \'High\')',
+      "CREATE TYPE \"public\".\"user_profiles_riskTolerance_enum\" AS ENUM('Low', 'Medium', 'High')",
     );
     await queryRunner.query(
       'ALTER TABLE "user_profiles" ADD "riskTolerance" "public"."user_profiles_riskTolerance_enum" NOT NULL DEFAULT \'Medium\'',

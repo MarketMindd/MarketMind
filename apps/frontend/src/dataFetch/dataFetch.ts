@@ -1,7 +1,12 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
-
-import { AuthResponse, SignInPayload, SignUpPayload, PortfolioItem, SavePortfolioPayload, Stock } from '@market-mind/common';
-
+import {
+  AuthResponse,
+  PortfolioItem,
+  SavePortfolioPayload,
+  SignInPayload,
+  SignUpPayload,
+  Stock,
+} from '@market-mind/common';
 import { appConfig } from '@/config/appConfig';
 import { iDataProvider } from '@/entities/dataProvider';
 
@@ -139,7 +144,7 @@ export const createFetchDataProvider = (): iDataProvider => {
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Request failed');
     }
-  }
+  };
 
   const signout = async () => {
     try {

@@ -8,9 +8,7 @@
   "importOrder": [
     "^reflect-metadata",
     "<THIRD_PARTY_MODULES>",
-    "",
     "^@market-mind/(.*)$",
-    "",
     "^@/(.*)$",
     "^[./]"
   ],

@@ -2,7 +2,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import NewsAPI from 'newsapi';
 import { Repository } from 'typeorm';
-
 import { retry, RiskTolerance } from '@market-mind/common';
 import {
   PortfolioEntity,
@@ -10,7 +9,6 @@ import {
   SymbolFilterStateEntity,
   UserProfileEntity,
 } from '@market-mind/database';
-
 import { appConfig } from '../config/appConfig';
 import { MarketSnapshot } from '../market/market.types';
 import { FilteredSnapshot, NewsArticle, UserContext } from './filter.types';

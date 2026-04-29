@@ -24,8 +24,9 @@ export const appConfig = {
   newsApiKey: process.env.NEWSAPI_KEY ?? 'empty',
   geminiApiKey: process.env.GEMINI_API_KEY ?? '',
   stock: {
-    maxStocksCount: !!process.env.MAX_STOCKS_COUNT && !isNaN(+process.env.MAX_STOCKS_COUNT)
-      ? +process.env.MAX_STOCKS_COUNT
-      : 9,
+    maxStocksCount:
+      !!process.env.MAX_STOCKS_COUNT && !isNaN(+process.env.MAX_STOCKS_COUNT)
+        ? +process.env.MAX_STOCKS_COUNT
+        : 9,
   },
 } as const;

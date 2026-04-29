@@ -1,7 +1,6 @@
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { config } from 'dotenv';
-
 import { parseBoolean, parseNumber } from '../utils/parse.utils';
 
 const _dirname =

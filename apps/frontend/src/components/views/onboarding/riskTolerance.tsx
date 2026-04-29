@@ -1,15 +1,30 @@
+import { ArrowRight, Check, TrendingUp } from 'lucide-react';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Check, TrendingUp } from 'lucide-react';
 import { RiskTolerance as RiskToleranceEnum } from '@market-mind/common';
 import { Button } from '@/components/elements/button';
 import { APP_ROUTES } from '@/consts/routes';
 import { cn } from '@/utils/tailwindUtils';
 
 const riskLevels = [
-  { id: RiskToleranceEnum.LOW, name: 'Conservative', description: 'Lower risk, steady growth focus', icon: '🛡️' },
-  { id: RiskToleranceEnum.MEDIUM, name: 'Moderate', description: 'Balanced risk and reward', icon: '⚖️' },
-  { id: RiskToleranceEnum.HIGH, name: 'Aggressive', description: 'Higher risk, higher potential returns', icon: '🚀' },
+  {
+    id: RiskToleranceEnum.LOW,
+    name: 'Conservative',
+    description: 'Lower risk, steady growth focus',
+    icon: '🛡️',
+  },
+  {
+    id: RiskToleranceEnum.MEDIUM,
+    name: 'Moderate',
+    description: 'Balanced risk and reward',
+    icon: '⚖️',
+  },
+  {
+    id: RiskToleranceEnum.HIGH,
+    name: 'Aggressive',
+    description: 'Higher risk, higher potential returns',
+    icon: '🚀',
+  },
 ];
 
 export const RiskTolerance: React.FC = () => {
@@ -45,16 +60,18 @@ export const RiskTolerance: React.FC = () => {
                   'w-10 h-10 rounded-full flex items-center justify-center font-medium transition-all duration-300',
                   1 >= s
                     ? 'bg-primary text-primary-foreground'
-                    : 'bg-secondary text-muted-foreground'
+                    : 'bg-secondary text-muted-foreground',
                 )}
               >
                 {1 > s ? <Check size={18} /> : s}
               </div>
               {s < 2 && (
-                <div className={cn(
-                  'w-16 h-0.5 rounded-full transition-all duration-300',
-                  1 > s ? 'bg-primary' : 'bg-secondary'
-                )} />
+                <div
+                  className={cn(
+                    'w-16 h-0.5 rounded-full transition-all duration-300',
+                    1 > s ? 'bg-primary' : 'bg-secondary',
+                  )}
+                />
               )}
             </div>
           ))}
@@ -78,7 +95,7 @@ export const RiskTolerance: React.FC = () => {
                   'w-full p-5 rounded-xl border-2 text-left transition-all duration-200 hover-lift',
                   selectedRisk === level.id
                     ? 'border-primary bg-primary/10'
-                    : 'border-border bg-secondary/30 hover:border-muted-foreground/30'
+                    : 'border-border bg-secondary/30 hover:border-muted-foreground/30',
                 )}
               >
                 <div className="flex items-center gap-4">
@@ -96,11 +113,7 @@ export const RiskTolerance: React.FC = () => {
           </div>
           <div className="flex items-center justify-between mt-8 pt-6 border-t border-border/50">
             <div />
-            <Button
-              variant="glow"
-              disabled={!selectedRisk}
-              onClick={handleContinue}
-            >
+            <Button variant="glow" disabled={!selectedRisk} onClick={handleContinue}>
               Continue
               <ArrowRight size={18} />
             </Button>

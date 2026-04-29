@@ -1,5 +1,4 @@
 import z from 'zod';
-
 import type { AiResponse } from './aiRecommendation';
 import type { MarketData } from './marketData';
 

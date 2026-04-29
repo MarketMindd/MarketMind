@@ -4,10 +4,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CronJob } from 'cron';
 import { Repository } from 'typeorm';
 import YahooFinance from 'yahoo-finance2';
-
 import { retry } from '@market-mind/common';
 import { MarketDataEntity, PortfolioEntity } from '@market-mind/database';
-
 import { PipelineService } from '../pipeline/pipeline.service';
 import { MarketSnapshot } from './market.types';
 

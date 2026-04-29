@@ -1,4 +1,11 @@
-import type { AuthResponse, SignInPayload, SignUpPayload, Stock, PortfolioItem, SavePortfolioPayload } from '@market-mind/common';
+import type {
+  AuthResponse,
+  PortfolioItem,
+  SavePortfolioPayload,
+  SignInPayload,
+  SignUpPayload,
+  Stock,
+} from '@market-mind/common';
 
 export interface iDataProvider {
   auth: {

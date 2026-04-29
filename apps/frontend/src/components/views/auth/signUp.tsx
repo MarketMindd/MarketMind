@@ -1,6 +1,5 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-
 import { APP_ROUTES } from '@/consts/routes';
 import { useClientQueries } from '@/hooks/useClientQueries';
 import { useToast } from '@/hooks/useToast';

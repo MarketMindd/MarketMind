@@ -1,7 +1,5 @@
 import { ArrowDownRight, ArrowUpRight, Briefcase } from 'lucide-react';
-
 import { calculatePriceChange, PortfolioItem, Stock } from '@market-mind/common';
-
 import RecommendationBadge from '@/components/elements/recommendationBadge';
 import { cn } from '@/utils/tailwindUtils';
 
