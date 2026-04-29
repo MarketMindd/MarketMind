@@ -9,7 +9,6 @@ declare namespace NodeJS {
     DB_SSL?: string;
     PGHOST?: string;
     PGPORT?: string;
-    PGUSER?: string;
     PGPASSWORD?: string;
     PGDATABASE?: string;
     PGSSLMODE?: string;

@@ -27,9 +27,9 @@ export type UserProfile = z.infer<typeof userProfileSchema>;
 export type SignUpPayload = z.infer<typeof signUpPayloadSchema>;
 export type SignInPayload = z.infer<typeof signInPayloadSchema>;
 
-// an object returned by auth endpoints with both the profile and a JWT
 export const authResponseSchema = z.object({
   accessToken: z.string(),
+  refreshToken: z.string(),
   user: userProfileSchema,
 });
 export type AuthResponse = z.infer<typeof authResponseSchema>;

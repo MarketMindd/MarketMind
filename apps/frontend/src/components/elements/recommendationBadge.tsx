@@ -1,6 +1,6 @@
 import { Minus, TrendingDown, TrendingUp } from 'lucide-react';
 
-import { RecommendationStatus } from '@market-mind/common';
+import { AiResponse, StockRecommendation } from '@market-mind/common';
 
 import { iconSizes, sizeClasses } from '@/consts/recommendationBadge';
 import { Size } from '@/enums/recommendationBadge';
@@ -8,24 +8,24 @@ import { RecommendationBadgeConfig } from '@/types/recommendationBadge';
 import { cn } from '@/utils/tailwindUtils';
 
 interface RecommendationBadgeProps {
-  recommendation: RecommendationStatus;
-  confidence?: number;
+  recommendation: AiResponse['status'];
+  confidence?: AiResponse['confidence'];
   size?: Size;
   showConfidence?: boolean;
 }
 
-const config: Record<RecommendationStatus, RecommendationBadgeConfig> = {
-  Invest: {
+const config: Record<StockRecommendation, RecommendationBadgeConfig> = {
+  [StockRecommendation.INVEST]: {
     label: 'Invest',
     icon: TrendingUp,
     className: 'bg-success/20 text-success border-success/30',
   },
-  Hold: {
+  [StockRecommendation.HOLD]: {
     label: 'Hold',
     icon: Minus,
     className: 'bg-warning/20 text-warning border-warning/30',
   },
-  Exit: {
+  [StockRecommendation.EXIT]: {
     label: 'Exit',
     icon: TrendingDown,
     className: 'bg-destructive/20 text-destructive border-destructive/30',

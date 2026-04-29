@@ -48,6 +48,6 @@
     "apps/*"
   ],
   "dependencies": {
-    "recharts": "^3.8.1"
+    "react-ts-tradingview-widgets": "^1.2.8"
   }
 }

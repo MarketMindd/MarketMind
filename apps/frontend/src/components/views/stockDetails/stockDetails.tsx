@@ -1,19 +1,34 @@
 import { ArrowDownRight, ArrowLeft, ArrowUpRight, Brain, LineChart } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
+import { AdvancedRealTimeChart } from 'react-ts-tradingview-widgets';
 
 import { Button } from '@/components/elements/button';
 import RecommendationBadge from '@/components/elements/recommendationBadge';
-import StockChart from '@/components/elements/stockChart';
-import { mockStocks } from '@/data/mockData';
 import { Size } from '@/enums/recommendationBadge';
+import { useClientQueries } from '@/hooks/useClientQueries';
 import { cn } from '@/utils/tailwindUtils';
 
-const StockDetails = () => {
-  const { id } = useParams();
+export const StockDetails = () => {
+  const { stockSymbol } = useParams();
+  const { stocks } = useClientQueries();
 
-  const stock = mockStocks.find((s) => s.id === id);
+  const {
+    data: stock,
+    isLoading,
+    error,
+  } = stocks.useGetStock(stockSymbol ?? '', {
+    enabled: !!stockSymbol,
+  });
 
-  if (!stock) {
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <span className="text-xl font-semibold text-foreground">Loading...</span>
+      </div>
+    );
+  }
+
+  if (error || !stock) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -26,11 +41,11 @@ const StockDetails = () => {
     );
   }
 
-  const isPositive = stock.change >= 0;
+  const isPositive = stock.marketData.volume >= 0;
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="pt-28 sm:pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
+    <div className="flex-1 flex flex-col bg-background">
+      <div className="pt-8 sm:pt-6 pb-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
         <Link to="/dashboard">
           <Button variant="ghost" className="mb-6 animate-fade-in">
             <ArrowLeft size={18} />
@@ -42,7 +57,7 @@ const StockDetails = () => {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <span className="font-mono text-2xl text-primary font-bold">{stock.ticker}</span>
+                <span className="font-mono text-2xl text-primary font-bold">{stock.symbol}</span>
                 <span className="text-sm text-muted-foreground px-3 py-1 bg-secondary rounded-full">
                   {stock.sector}
                 </span>
@@ -50,8 +65,8 @@ const StockDetails = () => {
               <h1 className="text-xl font-semibold text-foreground">{stock.name}</h1>
             </div>
             <RecommendationBadge
-              recommendation={stock.recommendation}
-              confidence={stock.confidence}
+              recommendation={stock.aiRecommendation.status}
+              confidence={stock.aiRecommendation.confidence}
               size={Size.LG}
               showConfidence
             />
@@ -59,7 +74,9 @@ const StockDetails = () => {
 
           <div className="flex items-end gap-6">
             <div>
-              <span className="text-4xl font-bold text-foreground">${stock.price.toFixed(2)}</span>
+              <span className="text-4xl font-bold text-foreground">
+                ${stock.marketData.price.toFixed(2)}
+              </span>
               <div
                 className={cn(
                   'flex items-center gap-1 text-lg mt-1',
@@ -69,8 +86,8 @@ const StockDetails = () => {
                 {isPositive ? <ArrowUpRight size={20} /> : <ArrowDownRight size={20} />}
                 <span>
                   {isPositive ? '+' : ''}
-                  {stock.change.toFixed(2)} ({isPositive ? '+' : ''}
-                  {stock.changePercent.toFixed(2)}%)
+                  {stock.marketData.volume.toFixed(2)} ({isPositive ? '+' : ''}
+                  {stock.marketData.priceChange.toFixed(2)}%)
                 </span>
               </div>
             </div>
@@ -82,16 +99,18 @@ const StockDetails = () => {
                   <div
                     className={cn(
                       'h-full rounded-full transition-all duration-700',
-                      stock.confidence >= 80
+                      stock.aiRecommendation.confidence >= 80
                         ? 'bg-success'
-                        : stock.confidence >= 60
+                        : stock.aiRecommendation.confidence >= 60
                           ? 'bg-warning'
                           : 'bg-destructive',
                     )}
-                    style={{ width: `${stock.confidence}%` }}
+                    style={{ width: `${stock.aiRecommendation.confidence}%` }}
                   />
                 </div>
-                <span className="text-lg font-mono font-semibold">{stock.confidence}%</span>
+                <span className="text-lg font-mono font-semibold">
+                  {stock.aiRecommendation.confidence}%
+                </span>
               </div>
             </div>
           </div>
@@ -104,7 +123,9 @@ const StockDetails = () => {
             </div>
             <h2 className="text-lg font-semibold text-foreground">Price History (30 Days)</h2>
           </div>
-          <StockChart stock={stock} />
+          <div style={{ height: '500px', width: '100%' }}>
+            <AdvancedRealTimeChart symbol={stock.symbol} interval="D" theme="dark" autosize />
+          </div>
         </div>
 
         <div className="glass-card p-6 mb-6 animate-fade-in stagger-3">
@@ -114,11 +135,11 @@ const StockDetails = () => {
             </div>
             <h2 className="text-lg font-semibold text-foreground">AI Analysis</h2>
           </div>
-          <p className="text-muted-foreground leading-relaxed">{stock.explanation}</p>
+          <p className="text-muted-foreground leading-relaxed">
+            {stock.aiRecommendation.rationale}
+          </p>
         </div>
       </div>
     </div>
   );
 };
-
-export default StockDetails;

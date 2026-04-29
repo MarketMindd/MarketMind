@@ -33,4 +33,7 @@ export class UserProfileEntity {
 
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt!: Date;
+
+  @Column({ type: 'text', array: true, default: [] })
+  refreshTokens!: string[];
 }

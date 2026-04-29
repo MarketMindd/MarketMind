@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { APP_ROUTES } from '@/consts/routes';
 import { useClientQueries } from '@/hooks/useClientQueries';
 import { useToast } from '@/hooks/useToast';
 import { AuthBranding } from './authBranding';
@@ -11,17 +12,15 @@ export const SignUp: React.FC = () => {
   const { toast } = useToast();
 
   const handleModeSwitch = () => {
-    navigate('/signin');
+    navigate(APP_ROUTES.SIGN_IN);
   };
 
   const {
     auth: { useSignUp },
   } = useClientQueries();
   const signUp = useSignUp({
-    onSuccess: (data) => {
-      // after signup we also get token so store and go to dashboard
-      localStorage.setItem('accessToken', data.accessToken);
-      navigate('/dashboard');
+    onSuccess: () => {
+      navigate(APP_ROUTES.RISK_TOLERANCE);
     },
     onError: (err: Error) =>
       toast({

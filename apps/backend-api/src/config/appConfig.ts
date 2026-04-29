@@ -15,6 +15,11 @@ export const appConfig = {
   jwt: {
     secret: getJwtSecret('supersecret_default'),
     expiresIn: parseInt(process.env.JWT_EXPIRES_IN || '3600', 10),
+    refreshSecret: process.env.JWT_REFRESH_SECRET || getJwtSecret('refresh_supersecret_default'),
+    refreshExpiresIn: parseInt(process.env.JWT_REFRESH_EXPIRES_IN || '604800', 10),
+  },
+  auth: {
+    maxActiveSessions: parseInt(process.env.MAX_ACTIVE_SESSIONS || '5', 10),
   },
   newsApiKey: process.env.NEWSAPI_KEY ?? 'stam api key',
   geminiApiKey: process.env.GEMINI_API_KEY ?? '',
