@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 
 import { getStockBySymbolParamSchema, Stock } from '@market-mind/common';
 
@@ -8,6 +8,13 @@ import { StockService } from './stock.service';
 @Controller('stocks')
 export class StockController {
   constructor(private readonly stockService: StockService) {}
+
+  @Get()
+  async getStocks(@Query('symbols') symbolsString: string): Promise<Stock[]> {
+    if (!symbolsString) return [];
+    const symbols = symbolsString.split(',').filter(Boolean);
+    return this.stockService.getStocksBySymbols(symbols);
+  }
 
   @Get(':symbol')
   async getStock(

@@ -1,4 +1,4 @@
-import { useQueries } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Briefcase, DollarSign, Save, TrendingDown, TrendingUp } from 'lucide-react';
 import { useContext, useEffect, useState } from 'react';
 
@@ -40,17 +40,18 @@ export const Portfolio = () => {
 
   const ctx = useContext(ClientQueriesDataContext);
 
-  const stockQueries = useQueries({
-    queries: localPortfolio.map((stock) => ({
-      queryKey: ['stock', stock.ticker],
-      queryFn: () => ctx!.dataProvider.stocks.getStock(stock.ticker),
-      enabled: !!ctx?.dataProvider,
-    })),
+  const stockQueries = useQuery({
+    queryKey: ['portfolioStocks', localPortfolio.map((s) => s.ticker)],
+    queryFn: async () => {
+      if (!ctx?.dataProvider || localPortfolio.length === 0) return [];
+      return ctx.dataProvider.stocks.getStocks(localPortfolio.map(s => s.ticker));
+    },
+    enabled: localPortfolio.length > 0 && !!ctx?.dataProvider,
   });
 
   const getStockPrice = (ticker: string, defaultPrice: number) => {
-    const query = stockQueries.find((q) => q.data && q.data.symbol === ticker);
-    return query?.data?.marketData?.price ?? defaultPrice;
+    const stock = stockQueries.data?.find((s) => s.symbol === ticker);
+    return stock?.marketData?.price ?? defaultPrice;
   };
 
   // Calculate portfolio metrics

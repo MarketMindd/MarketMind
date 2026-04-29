@@ -47,6 +47,38 @@ export class StockService {
     return this.mapRawStock(rawData);
   }
 
+  async getStocksBySymbols(symbols: string[]): Promise<Stock[]> {
+    if (!symbols || symbols.length === 0) return [];
+
+    const rawData: RawStock[] = await this.stockRepo
+      .createQueryBuilder('stocks')
+      .leftJoin(
+        RecommendationEntity,
+        'recommendation',
+        'recommendation.stockSymbol = stocks.symbol',
+      )
+      .innerJoin(MarketDataEntity, 'marketData', 'marketData.stockSymbol = stocks.symbol')
+      .select([
+        'stocks.symbol as symbol',
+        'stocks.name as name',
+        'stocks.sector as sector',
+        'marketData.price as price',
+        'marketData.volume as volume',
+        'marketData.priceChange AS "priceChange"',
+        'recommendation.status as status',
+        'recommendation.confidenceScore AS "confidence"',
+        'recommendation.rationale as rationale',
+      ])
+      .where('stocks.symbol IN (:...symbols)', { symbols })
+      .distinctOn(['stocks.symbol'])
+      .orderBy('stocks.symbol')
+      .addOrderBy('marketData.time', 'DESC')
+      .addOrderBy('recommendation.updatedAt', 'DESC')
+      .getRawMany();
+
+    return rawData.map((data) => this.mapRawStock(data));
+  }
+
   private mapRawStock(rawStock: RawStock): Stock {
     return {
       symbol: rawStock.symbol,

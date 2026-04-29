@@ -132,6 +132,16 @@ export const createFetchDataProvider = (): iDataProvider => {
     }
   };
 
+  const getStocks = async (symbols: string[]) => {
+    try {
+      if (symbols.length === 0) return [];
+      const res = await apiClient.get(`/stocks?symbols=${symbols.join(',')}`);
+      return res.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || 'Request failed');
+    }
+  };
+
   const signout = async () => {
     try {
       const userId = localStorage.getItem(USER_ID_KEY);
@@ -157,6 +167,7 @@ export const createFetchDataProvider = (): iDataProvider => {
     },
     stocks: {
       getStock,
+      getStocks,
     },
     portfolio: {
       getPortfolio: async () => {

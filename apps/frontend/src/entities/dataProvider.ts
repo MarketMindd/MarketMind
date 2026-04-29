@@ -8,6 +8,7 @@ export interface iDataProvider {
   };
   stocks: {
     getStock: (symbol: string) => Promise<Stock>;
+    getStocks: (symbols: string[]) => Promise<Stock[]>;
   };
   portfolio: {
     getPortfolio: () => Promise<PortfolioItem[]>;
