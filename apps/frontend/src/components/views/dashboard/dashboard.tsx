@@ -23,7 +23,7 @@ export const Dashboard = () => {
     portfolio: { usePortfolio },
     stocks: { useGetStocks },
   } = useClientQueries();
-  const [filter, setFilter] = useState<'all' | RecommendationStatus>('all');
+  const [filter, setFilter] = useState<'All' | RecommendationStatus>('All');
   const { data: portfolio = [] } = usePortfolio();
   const portfolioTickers = portfolio.map((p) => p.ticker);
   const { data: stocks = [] } = useGetStocks();
@@ -31,7 +31,7 @@ export const Dashboard = () => {
   const recommendedStocks = stocks.filter((stock) => !portfolioTickers.includes(stock.symbol));
 
   const filteredRecommendedStocks = recommendedStocks.filter((stock) =>
-    filter === 'all' ? true : stock.aiRecommendation.status.toLowerCase() === filter,
+    filter === 'All' ? true : stock.aiRecommendation.status === filter,
   );
 
   const investCount = stocks.filter(
@@ -46,15 +46,21 @@ export const Dashboard = () => {
 
   const summaryCards = [
     {
-      label: 'Invest',
+      label: StockRecommendation.INVEST,
       count: investCount,
       icon: TrendingUp,
       color: 'text-success',
       bg: 'bg-success/10',
     },
-    { label: 'Hold', count: holdCount, icon: Activity, color: 'text-warning', bg: 'bg-warning/10' },
     {
-      label: 'Exit',
+      label: StockRecommendation.HOLD,
+      count: holdCount,
+      icon: Activity,
+      color: 'text-warning',
+      bg: 'bg-warning/10',
+    },
+    {
+      label: StockRecommendation.EXIT,
       count: exitCount,
       icon: TrendingDown,
       color: 'text-destructive',
@@ -72,23 +78,23 @@ export const Dashboard = () => {
           </p>
         </div>
 
-        <div className="glass-card p-6 mb-8 animate-fade-in stagger-1">
-          <div className="flex items-start gap-4">
-            <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
-              <Sparkles className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <h2 className="font-semibold text-foreground mb-2">AI Market Summary</h2>
-              <p className="text-muted-foreground text-sm leading-relaxed">
-                Based on your <span className="text-primary">moderate risk profile</span> and
-                interest in technology, I recommend focusing on established tech leaders with strong
-                cash flows. Microsoft and Apple remain top picks, while caution is advised on
-                high-volatility names like Tesla. The market shows cautious optimism with the S&P
-                500 up 12% YTD.
-              </p>
-            </div>
-          </div>
-        </div>
+        {/*<div className="glass-card p-6 mb-8 animate-fade-in stagger-1">*/}
+        {/*  <div className="flex items-start gap-4">*/}
+        {/*    <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">*/}
+        {/*      <Sparkles className="w-5 h-5 text-primary" />*/}
+        {/*    </div>*/}
+        {/*    <div>*/}
+        {/*      <h2 className="font-semibold text-foreground mb-2">AI Market Summary</h2>*/}
+        {/*      <p className="text-muted-foreground text-sm leading-relaxed">*/}
+        {/*        Based on your <span className="text-primary">moderate risk profile</span> and*/}
+        {/*        interest in technology, I recommend focusing on established tech leaders with strong*/}
+        {/*        cash flows. Microsoft and Apple remain top picks, while caution is advised on*/}
+        {/*        high-volatility names like Tesla. The market shows cautious optimism with the S&P*/}
+        {/*        500 up 12% YTD.*/}
+        {/*      </p>*/}
+        {/*    </div>*/}
+        {/*  </div>*/}
+        {/*</div>*/}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
           <div className="lg:col-span-3 grid grid-cols-3 gap-4">
@@ -98,7 +104,7 @@ export const Dashboard = () => {
                 onClick={() =>
                   setFilter(
                     filter === (card.label as typeof filter)
-                      ? 'all'
+                      ? 'All'
                       : (card.label as typeof filter),
                   )
                 }
@@ -177,7 +183,7 @@ export const Dashboard = () => {
           <div className="flex items-center gap-2 mb-6">
             <Filter size={18} className="text-muted-foreground" />
             <div className="flex gap-2">
-              {['all', 'invest', 'hold', 'exit'].map((f) => (
+              {['All', StockRecommendation.INVEST, StockRecommendation.HOLD, StockRecommendation.EXIT].map((f) => (
                 <Button
                   key={f}
                   variant={filter === f ? 'default' : 'ghost'}
