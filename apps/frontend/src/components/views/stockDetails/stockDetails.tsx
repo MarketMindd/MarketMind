@@ -8,7 +8,7 @@ import { Size } from '@/enums/recommendationBadge';
 import { useClientQueries } from '@/hooks/useClientQueries';
 import { cn } from '@/utils/tailwindUtils';
 
-const StockDetails = () => {
+export const StockDetails = () => {
   const { stockSymbol } = useParams();
   const { stocks } = useClientQueries();
 
@@ -143,5 +143,3 @@ const StockDetails = () => {
     </div>
   );
 };
-
-export default StockDetails;

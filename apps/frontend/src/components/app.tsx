@@ -1,17 +1,17 @@
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 
 import { APP_ROUTES } from '../consts/routes';
-
+import { Navigation } from './elements/navigation';
 import { ProtectedRoute } from './elements/protectedRoute';
 import { PublicRoute } from './elements/publicRoute';
 import { SignIn } from './views/auth/signIn';
 import { SignUp } from './views/auth/signUp';
 import { Dashboard } from './views/dashboard/dashboard';
 import { NotFound } from './views/notFound/notFound';
-import StockDetails from './views/stockDetails/stockDetails';
-import Portfolio from './views/portfolio/portfolio';
-
-import { Navigation } from './elements/navigation';
+import { Interests } from './views/onboarding/interests';
+import { RiskTolerance } from './views/onboarding/riskTolerance';
+import { Portfolio } from './views/portfolio/portfolio';
+import { StockDetails } from './views/stockDetails/stockDetails';
 
 const MainLayout = () => {
   return (
@@ -62,10 +62,7 @@ export const App = () => {
             </ProtectedRoute>
           }
         />
-        <Route
-          path={APP_ROUTES.CHAT}
-          element={<Navigate to={APP_ROUTES.DASHBOARD} replace />}
-        />
+        <Route path={APP_ROUTES.CHAT} element={<Navigate to={APP_ROUTES.DASHBOARD} replace />} />
       </Route>
 
       <Route element={<AuthLayout />}>
@@ -83,6 +80,22 @@ export const App = () => {
             <PublicRoute>
               <SignUp />
             </PublicRoute>
+          }
+        />
+        <Route
+          path={APP_ROUTES.RISK_TOLERANCE}
+          element={
+            <ProtectedRoute>
+              <RiskTolerance />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={APP_ROUTES.INTERESTS}
+          element={
+            <ProtectedRoute>
+              <Interests />
+            </ProtectedRoute>
           }
         />
       </Route>

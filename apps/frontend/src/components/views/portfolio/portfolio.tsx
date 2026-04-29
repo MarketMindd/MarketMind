@@ -9,7 +9,7 @@ import { PortfolioItem } from '@market-mind/common';
 import { cn } from '@/utils/tailwindUtils';
 import { availableStocksForPortfolio } from '@/data/mockStocks';
 
-const Portfolio = () => {
+export const Portfolio = () => {
   const { portfolio: { usePortfolio, useSavePortfolio } } = useClientQueries();
   const { data: portfolio = [], refetch } = usePortfolio();
   const { mutate: savePortfolio, isPending } = useSavePortfolio({
@@ -192,5 +192,3 @@ const Portfolio = () => {
     </div>
   );
 };
-
-export default Portfolio;
