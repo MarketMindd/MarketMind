@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Stock } from '@market-mind/common';
@@ -8,8 +8,6 @@ import type { RawStock } from './types';
 
 @Injectable()
 export class StockService {
-  private readonly logger = new Logger(StockService.name);
-
   constructor(
     @InjectRepository(StockEntity)
     private readonly stockRepo: Repository<StockEntity>,
