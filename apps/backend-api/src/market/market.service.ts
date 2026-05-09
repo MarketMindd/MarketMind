@@ -27,10 +27,10 @@ export class MarketService implements OnModuleInit {
   constructor(
     private readonly schedulerRegistry: SchedulerRegistry,
     private readonly pipelineService: PipelineService,
-    @InjectRepository(PortfolioEntity)
-    private readonly portfolioRepo: Repository<PortfolioEntity>,
     @InjectRepository(MarketDataEntity)
     private readonly marketDataRepo: Repository<MarketDataEntity>,
+    @InjectRepository(StockEntity)
+    private readonly stockRepo: Repository<StockEntity>,
   ) {}
 
   onModuleInit(): void {
@@ -92,13 +92,12 @@ export class MarketService implements OnModuleInit {
   }
 
   private async getTrackedSymbols(): Promise<string[]> {
-    const stockRepo = this.portfolioRepo.manager.getRepository(StockEntity);
-    const rows = await stockRepo
+    const symbols = await this.stockRepo
       .createQueryBuilder('stocks')
       .select('stocks.symbol', 'symbol')
       .getRawMany<{ symbol: string }>();
 
-    return rows
+    return symbols
       .map(({ symbol }) => symbol?.trim())
       .filter((symbol): symbol is string => Boolean(symbol));
   }

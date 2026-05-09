@@ -12,6 +12,8 @@ interface PortfolioInputProps {
   compact?: boolean;
 }
 
+type EditablePortfolioField = keyof Pick<PortfolioItemWithStock, 'shares' | 'avgPrice'>;
+
 const PortfolioInput = ({ portfolio, onChange, compact = false }: PortfolioInputProps) => {
   const {
     stocks: { useGetAllStocks },
@@ -85,7 +87,7 @@ const PortfolioInput = ({ portfolio, onChange, compact = false }: PortfolioInput
     onChange(portfolio.filter((s) => s.ticker !== ticker));
   };
 
-  const updateStock = (ticker: string, field: 'shares' | 'avgPrice', valueStr: string) => {
+  const updateStock = (ticker: string, field: EditablePortfolioField, valueStr: string) => {
     if (valueStr.length > 10) return;
 
     const numValue = valueStr === '' ? 0 : Number(valueStr);

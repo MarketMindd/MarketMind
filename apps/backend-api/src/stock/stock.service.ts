@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Stock } from '@market-mind/common';
@@ -6,41 +6,14 @@ import { MarketDataEntity, RecommendationEntity, StockEntity } from '@market-min
 import { DEFAULT_STOCK_RECOMMENDATION } from './consts';
 import type { RawStock } from './types';
 
-const INITIAL_STOCKS = [
-  { symbol: 'AAPL', name: 'Apple Inc.', sector: 'Technology' },
-  { symbol: 'NVDA', name: 'NVIDIA Corporation', sector: 'Technology' },
-  { symbol: 'MSFT', name: 'Microsoft Corporation', sector: 'Technology' },
-  { symbol: 'GOOGL', name: 'Alphabet Inc.', sector: 'Communication Services' },
-  { symbol: 'AMZN', name: 'Amazon.com Inc.', sector: 'Consumer Cyclical' },
-  { symbol: 'META', name: 'Meta Platforms', sector: 'Communication Services' },
-  { symbol: 'TSLA', name: 'Tesla Inc.', sector: 'Consumer Cyclical' },
-  { symbol: 'JNJ', name: 'Johnson & Johnson', sector: 'Healthcare' },
-  { symbol: 'XOM', name: 'Exxon Mobil', sector: 'Energy' },
-  { symbol: 'JPM', name: 'JPMorgan Chase', sector: 'Financial Services' },
-  { symbol: 'V', name: 'Visa Inc.', sector: 'Financial Services' },
-  { symbol: 'UNH', name: 'UnitedHealth Group', sector: 'Healthcare' },
-  { symbol: 'HD', name: 'Home Depot', sector: 'Consumer Cyclical' },
-  { symbol: 'PG', name: 'Procter & Gamble', sector: 'Consumer Defensive' },
-  { symbol: 'DIS', name: 'Walt Disney', sector: 'Communication Services' },
-];
-
 @Injectable()
-export class StockService implements OnModuleInit {
+export class StockService {
   private readonly logger = new Logger(StockService.name);
 
   constructor(
     @InjectRepository(StockEntity)
     private readonly stockRepo: Repository<StockEntity>,
   ) {}
-
-  async onModuleInit() {
-    const count = await this.stockRepo.count();
-    if (count === 0) {
-      this.logger.log('Seeding initial stocks...');
-      await this.stockRepo.save(INITIAL_STOCKS);
-      this.logger.log(`Successfully seeded ${INITIAL_STOCKS.length} stocks.`);
-    }
-  }
 
   async getStocksBySymbols(symbols: string[]): Promise<Stock[]> {
     if (!symbols || symbols.length === 0) return [];
