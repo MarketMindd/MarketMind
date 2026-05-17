@@ -1,22 +1,29 @@
 import { Briefcase, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { PortfolioItem } from '@market-mind/common';
+import { PortfolioItemWithStock } from '@market-mind/common';
 import { Button } from '@/components/elements/button';
 import { Input } from '@/components/elements/input';
-import { availableStocksForPortfolio } from '@/data/mockStocks';
+import { useClientQueries } from '@/hooks/useClientQueries';
 import { cn } from '@/utils/tailwindUtils';
 
 interface PortfolioInputProps {
-  portfolio: PortfolioItem[];
-  onChange: (portfolio: PortfolioItem[]) => void;
+  portfolio: PortfolioItemWithStock[];
+  onChange: (portfolio: PortfolioItemWithStock[]) => void;
   compact?: boolean;
 }
 
+type EditablePortfolioField = keyof Pick<PortfolioItemWithStock, 'shares' | 'avgPrice'>;
+
 const PortfolioInput = ({ portfolio, onChange, compact = false }: PortfolioInputProps) => {
+  const {
+    stocks: { useGetAllStocks },
+  } = useClientQueries();
   const [searchTerm, setSearchTerm] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const { data: availableStocks = [] } = useGetAllStocks();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -31,40 +38,48 @@ const PortfolioInput = ({ portfolio, onChange, compact = false }: PortfolioInput
     };
   }, []);
 
-  const filteredStocks = availableStocksForPortfolio.filter(
+  const filteredStocks = availableStocks.filter(
     (stock) =>
-      !portfolio.some((p) => p.ticker === stock.ticker) &&
-      (stock.ticker.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      !portfolio.some((p) => p.ticker === stock.symbol) &&
+      (stock.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
         stock.name.toLowerCase().includes(searchTerm.toLowerCase())),
   );
 
   const addStock = (ticker: string) => {
-    onChange([...portfolio, { ticker, shares: 0, avgPrice: 0 }]);
+    const stockDetails = availableStocks.find((s) => s.symbol === ticker);
+    const stockObj = stockDetails
+      ? {
+          symbol: stockDetails.symbol,
+          name: stockDetails.name,
+          sector: stockDetails.sector,
+          marketData: {
+            price: stockDetails.marketData?.price ?? 0,
+          },
+        }
+      : undefined;
+
+    onChange([...portfolio, { ticker, shares: 0, avgPrice: 0, stock: stockObj }]);
     setSearchTerm('');
     setShowDropdown(false);
     setHighlightedIndex(0);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!showDropdown || filteredStocks.length === 0) return;
-
-    const maxIndex = Math.min(filteredStocks.length, 5) - 1;
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!showDropdown || !searchTerm || filteredStocks.length === 0) return;
 
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setHighlightedIndex((prev) => (prev < maxIndex ? prev + 1 : 0));
+      setHighlightedIndex((prev) =>
+        prev < Math.min(filteredStocks.length, 5) - 1 ? prev + 1 : prev,
+      );
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : maxIndex));
+      setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : prev));
     } else if (e.key === 'Enter') {
       e.preventDefault();
-      if (maxIndex >= 0) {
-        addStock(filteredStocks[highlightedIndex].ticker);
-      }
+      addStock(filteredStocks[highlightedIndex].symbol);
     } else if (e.key === 'Escape') {
-      e.preventDefault();
       setShowDropdown(false);
-      setHighlightedIndex(0);
     }
   };
 
@@ -72,8 +87,13 @@ const PortfolioInput = ({ portfolio, onChange, compact = false }: PortfolioInput
     onChange(portfolio.filter((s) => s.ticker !== ticker));
   };
 
-  const updateStock = (ticker: string, field: 'shares' | 'avgPrice', value: number) => {
-    onChange(portfolio.map((s) => (s.ticker === ticker ? { ...s, [field]: value } : s)));
+  const updateStock = (ticker: string, field: EditablePortfolioField, valueStr: string) => {
+    if (valueStr.length > 10) return;
+
+    const numValue = valueStr === '' ? 0 : Number(valueStr);
+    if (isNaN(numValue) || numValue < 0) return;
+
+    onChange(portfolio.map((s) => (s.ticker === ticker ? { ...s, [field]: numValue } : s)));
   };
 
   return (
@@ -99,15 +119,15 @@ const PortfolioInput = ({ portfolio, onChange, compact = false }: PortfolioInput
           <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto">
             {filteredStocks.slice(0, 5).map((stock, index) => (
               <button
-                key={stock.ticker}
+                key={stock.symbol}
                 type="button"
-                onClick={() => addStock(stock.ticker)}
+                onClick={() => addStock(stock.symbol)}
                 className={cn(
                   'w-full px-4 py-2 text-left flex items-center justify-between text-sm transition-colors',
                   highlightedIndex === index ? 'bg-secondary' : 'hover:bg-secondary/50',
                 )}
               >
-                <span className="font-mono text-primary">{stock.ticker}</span>
+                <span className="font-mono text-primary">{stock.symbol}</span>
                 <span className="text-muted-foreground text-xs">{stock.name}</span>
               </button>
             ))}
@@ -118,7 +138,7 @@ const PortfolioInput = ({ portfolio, onChange, compact = false }: PortfolioInput
       {portfolio.length > 0 && (
         <div className={cn('space-y-2', compact && 'space-y-1.5')}>
           {portfolio.map((stock) => {
-            const stockInfo = availableStocksForPortfolio.find((s) => s.ticker === stock.ticker);
+            const stockInfo = availableStocks.find((s) => s.symbol === stock.ticker);
             return (
               <div
                 key={stock.ticker}
@@ -145,9 +165,7 @@ const PortfolioInput = ({ portfolio, onChange, compact = false }: PortfolioInput
                         type="number"
                         min="0"
                         value={stock.shares || ''}
-                        onChange={(e) =>
-                          updateStock(stock.ticker, 'shares', Number(e.target.value))
-                        }
+                        onChange={(e) => updateStock(stock.ticker, 'shares', e.target.value)}
                         className={cn('h-8 text-sm mt-0.5', compact && 'h-7')}
                         placeholder="0"
                       />
@@ -159,9 +177,7 @@ const PortfolioInput = ({ portfolio, onChange, compact = false }: PortfolioInput
                         min="0"
                         step="0.01"
                         value={stock.avgPrice || ''}
-                        onChange={(e) =>
-                          updateStock(stock.ticker, 'avgPrice', Number(e.target.value))
-                        }
+                        onChange={(e) => updateStock(stock.ticker, 'avgPrice', e.target.value)}
                         className={cn('h-8 text-sm mt-0.5', compact && 'h-7')}
                         placeholder="0.00"
                       />

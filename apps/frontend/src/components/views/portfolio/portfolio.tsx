@@ -1,8 +1,7 @@
 import { Briefcase, DollarSign, Save, TrendingDown, TrendingUp } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { PortfolioItem } from '@market-mind/common';
+import { PortfolioItemWithStock } from '@market-mind/common';
 import { Button } from '@/components/elements/button';
-import { mockStocks } from '@/data/mockStocks';
 import { useClientQueries } from '@/hooks/useClientQueries';
 import { cn } from '@/utils/tailwindUtils';
 import PortfolioInput from './portfolioInput';
@@ -20,7 +19,7 @@ export const Portfolio = () => {
     },
   });
 
-  const [localPortfolio, setLocalPortfolio] = useState<PortfolioItem[]>([]);
+  const [localPortfolio, setLocalPortfolio] = useState<PortfolioItemWithStock[]>([]);
   const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
@@ -28,7 +27,6 @@ export const Portfolio = () => {
   }, [portfolio]);
 
   useEffect(() => {
-    // Simple deep comparison for changes
     const changed = JSON.stringify(localPortfolio) !== JSON.stringify(portfolio);
     setHasChanges(changed);
   }, [localPortfolio, portfolio]);
@@ -37,10 +35,13 @@ export const Portfolio = () => {
     savePortfolio({ items: localPortfolio });
   };
 
+  const getStockPrice = (stock: PortfolioItemWithStock) => {
+    return stock.stock?.marketData?.price || stock.avgPrice;
+  };
+
   // Calculate portfolio metrics
   const portfolioValue = localPortfolio.reduce((sum, stock) => {
-    const currentStock = mockStocks.find((s) => s.ticker === stock.ticker);
-    const currentPrice = currentStock?.price || stock.avgPrice;
+    const currentPrice = getStockPrice(stock);
     return sum + stock.shares * currentPrice;
   }, 0);
 
@@ -50,8 +51,8 @@ export const Portfolio = () => {
 
   return (
     <div className="flex-1 flex flex-col bg-background">
-      <div className="pt-8 sm:pt-6 pb-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
-        <div className="flex items-center justify-between mb-8 animate-fade-in">
+      <div className="pt-8 sm:pt-6 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+        <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-foreground mb-2 flex items-center gap-3">
               <Briefcase className="w-8 h-8 text-primary" />
@@ -73,15 +74,15 @@ export const Portfolio = () => {
         </div>
 
         {localPortfolio.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 animate-fade-in stagger-1">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             <div className="glass-card p-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
                   <DollarSign className="w-5 h-5 text-primary" />
                 </div>
-                <div>
+                <div className="min-w-0 flex-1">
                   <p className="text-sm text-muted-foreground">Total Value</p>
-                  <p className="text-xl font-bold text-foreground">
+                  <p className="text-xl font-bold text-foreground break-all">
                     $
                     {portfolioValue.toLocaleString(undefined, {
                       minimumFractionDigits: 2,
@@ -106,11 +107,11 @@ export const Portfolio = () => {
                     <TrendingDown className="w-5 h-5 text-destructive" />
                   )}
                 </div>
-                <div>
+                <div className="min-w-0 flex-1">
                   <p className="text-sm text-muted-foreground">Total Gain/Loss</p>
                   <p
                     className={cn(
-                      'text-xl font-bold',
+                      'text-xl font-bold break-all',
                       totalGainLoss >= 0 ? 'text-success' : 'text-destructive',
                     )}
                   >
@@ -138,11 +139,11 @@ export const Portfolio = () => {
                     <TrendingDown className="w-5 h-5 text-destructive" />
                   )}
                 </div>
-                <div>
+                <div className="min-w-0 flex-1">
                   <p className="text-sm text-muted-foreground">Return %</p>
                   <p
                     className={cn(
-                      'text-xl font-bold',
+                      'text-xl font-bold break-all',
                       totalGainLossPercent >= 0 ? 'text-success' : 'text-destructive',
                     )}
                   >
@@ -155,13 +156,13 @@ export const Portfolio = () => {
           </div>
         )}
 
-        <div className="glass-card p-6 animate-fade-in stagger-2">
+        <div className="glass-card p-6">
           <h2 className="text-lg font-semibold text-foreground mb-4">Your Holdings</h2>
           <PortfolioInput portfolio={localPortfolio} onChange={setLocalPortfolio} />
         </div>
 
         {localPortfolio.length > 0 && (
-          <div className="glass-card p-6 mt-6 animate-fade-in stagger-3">
+          <div className="glass-card p-6 mt-6">
             <h2 className="text-lg font-semibold text-foreground mb-4">Holdings Summary</h2>
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -186,7 +187,11 @@ export const Portfolio = () => {
                 </thead>
                 <tbody>
                   {localPortfolio.map((stock) => (
-                    <PortfolioStockRow key={stock.ticker} stock={stock} />
+                    <PortfolioStockRow
+                      key={stock.ticker}
+                      stock={stock}
+                      currentPrice={getStockPrice(stock)}
+                    />
                   ))}
                 </tbody>
               </table>

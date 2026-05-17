@@ -9,7 +9,7 @@ import {
 import React, { createContext, useContext, useState } from 'react';
 import type {
   AuthResponse,
-  PortfolioItem,
+  PortfolioItemWithStock,
   SavePortfolioPayload,
   SignInPayload,
   SignUpPayload,
@@ -22,7 +22,7 @@ type ClientQueriesContext = {
   dataProvider: iDataProvider;
 };
 
-const ClientQueriesDataContext = createContext<ClientQueriesContext | null>(null);
+export const ClientQueriesDataContext = createContext<ClientQueriesContext | null>(null);
 
 export const ClientQueriesProvider = ({
   dataProvider,
@@ -72,25 +72,48 @@ export const useClientQueries = (): iClientQueriesProvider => {
   ) => {
     return useQuery<Stock, Error>({
       queryKey: ['stock', symbol],
-      queryFn: () => ctx.dataProvider.stocks.getStock(symbol),
+      queryFn: async () => {
+        const res = await ctx.dataProvider.stocks.getStocks([symbol]);
+        if (!res || res.length === 0) throw new Error('Stock not found');
+        return res[0];
+      },
       ...options,
     });
   };
 
   const useGetStocks = (
+    symbols: string[],
     options?: Omit<UseQueryOptions<Stock[], Error>, 'queryKey' | 'queryFn'>,
   ) => {
     return useQuery<Stock[], Error>({
-      queryKey: ['stocks'],
-      queryFn: () => ctx.dataProvider.stocks.getStocks(),
+      queryKey: ['stocks', symbols],
+      queryFn: async () => {
+        if (!ctx.dataProvider || symbols.length === 0) return [];
+        return ctx.dataProvider.stocks.getStocks(symbols);
+      },
+      enabled: symbols.length > 0 && !!ctx.dataProvider,
+      ...options,
+    });
+  };
+
+  const useGetAllStocks = (
+    options?: Omit<UseQueryOptions<Stock[], Error>, 'queryKey' | 'queryFn'>,
+  ) => {
+    return useQuery<Stock[], Error>({
+      queryKey: ['allStocks'],
+      queryFn: async () => {
+        if (!ctx.dataProvider) return [];
+        return ctx.dataProvider.stocks.getAllStocks();
+      },
+      enabled: !!ctx.dataProvider,
       ...options,
     });
   };
 
   const usePortfolio = (
-    options?: Omit<UseQueryOptions<PortfolioItem[], Error>, 'queryKey' | 'queryFn'>,
+    options?: Omit<UseQueryOptions<PortfolioItemWithStock[], Error>, 'queryKey' | 'queryFn'>,
   ) => {
-    return useQuery<PortfolioItem[], Error>({
+    return useQuery<PortfolioItemWithStock[], Error>({
       queryKey: ['portfolio'],
       queryFn: () => ctx.dataProvider.portfolio.getPortfolio(),
       ...options,
@@ -108,7 +131,7 @@ export const useClientQueries = (): iClientQueriesProvider => {
 
   return {
     auth: { useSignIn, useSignUp, useSignOut },
-    stocks: { useGetStock, useGetStocks },
+    stocks: { useGetStock, useGetStocks, useGetAllStocks },
     portfolio: { usePortfolio, useSavePortfolio },
   };
 };

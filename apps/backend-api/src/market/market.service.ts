@@ -5,7 +5,7 @@ import { CronJob } from 'cron';
 import { Repository } from 'typeorm';
 import YahooFinance from 'yahoo-finance2';
 import { retry } from '@market-mind/common';
-import { MarketDataEntity, PortfolioEntity } from '@market-mind/database';
+import { MarketDataEntity, PortfolioEntity, StockEntity } from '@market-mind/database';
 import { PipelineService } from '../pipeline/pipeline.service';
 import { MarketSnapshot } from './market.types';
 
@@ -27,10 +27,10 @@ export class MarketService implements OnModuleInit {
   constructor(
     private readonly schedulerRegistry: SchedulerRegistry,
     private readonly pipelineService: PipelineService,
-    @InjectRepository(PortfolioEntity)
-    private readonly portfolioRepo: Repository<PortfolioEntity>,
     @InjectRepository(MarketDataEntity)
     private readonly marketDataRepo: Repository<MarketDataEntity>,
+    @InjectRepository(StockEntity)
+    private readonly stockRepo: Repository<StockEntity>,
   ) {}
 
   onModuleInit(): void {
@@ -92,12 +92,12 @@ export class MarketService implements OnModuleInit {
   }
 
   private async getTrackedSymbols(): Promise<string[]> {
-    const rows = await this.portfolioRepo
-      .createQueryBuilder('portfolio')
-      .select('DISTINCT portfolio.stockSymbol', 'symbol')
+    const symbols = await this.stockRepo
+      .createQueryBuilder('stocks')
+      .select('stocks.symbol', 'symbol')
       .getRawMany<{ symbol: string }>();
 
-    return rows
+    return symbols
       .map(({ symbol }) => symbol?.trim())
       .filter((symbol): symbol is string => Boolean(symbol));
   }

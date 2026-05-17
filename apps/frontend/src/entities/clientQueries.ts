@@ -6,7 +6,7 @@ import type {
 } from '@tanstack/react-query';
 import type {
   AuthResponse,
-  PortfolioItem,
+  PortfolioItemWithStock,
   SavePortfolioPayload,
   SignInPayload,
   SignUpPayload,
@@ -31,13 +31,17 @@ export type iClientQueriesProvider = {
       options?: Omit<UseQueryOptions<Stock, Error>, 'queryKey' | 'queryFn'>,
     ) => UseQueryResult<Stock, Error>;
     useGetStocks: (
+      symbols: string[],
+      options?: Omit<UseQueryOptions<Stock[], Error>, 'queryKey' | 'queryFn'>,
+    ) => UseQueryResult<Stock[], Error>;
+    useGetAllStocks: (
       options?: Omit<UseQueryOptions<Stock[], Error>, 'queryKey' | 'queryFn'>,
     ) => UseQueryResult<Stock[], Error>;
   };
   portfolio: {
     usePortfolio: (
-      options?: Omit<UseQueryOptions<PortfolioItem[], Error>, 'queryKey' | 'queryFn'>,
-    ) => UseQueryResult<PortfolioItem[], Error>;
+      options?: Omit<UseQueryOptions<PortfolioItemWithStock[], Error>, 'queryKey' | 'queryFn'>,
+    ) => UseQueryResult<PortfolioItemWithStock[], Error>;
     useSavePortfolio: (
       options?: UseMutationOptions<{ success: boolean }, Error, SavePortfolioPayload>,
     ) => UseMutationResult<{ success: boolean }, Error, SavePortfolioPayload>;

@@ -5,7 +5,6 @@ import {
   SavePortfolioPayload,
   SignInPayload,
   SignUpPayload,
-  Stock,
 } from '@market-mind/common';
 import { appConfig } from '@/config/appConfig';
 import { iDataProvider } from '@/entities/dataProvider';
@@ -128,18 +127,19 @@ export const createFetchDataProvider = (): iDataProvider => {
     }
   };
 
-  const getStock = async (symbol: string) => {
+  const getStocks = async (symbols: string[]) => {
     try {
-      const res = await apiClient.get(`/stocks/${symbol}`);
+      if (symbols.length === 0) return [];
+      const res = await apiClient.get(`/stocks?symbols=${symbols.join(',')}`);
       return res.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Request failed');
     }
   };
 
-  const getStocks = async () => {
+  const getAllStocks = async () => {
     try {
-      const res = await apiClient.get<Stock[]>('/stocks');
+      const res = await apiClient.get('/stocks');
       return res.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Request failed');
@@ -170,8 +170,8 @@ export const createFetchDataProvider = (): iDataProvider => {
       signout,
     },
     stocks: {
-      getStock,
       getStocks,
+      getAllStocks,
     },
     portfolio: {
       getPortfolio: async () => {

@@ -45,7 +45,7 @@ export const StockDetails = () => {
 
   return (
     <div className="flex-1 flex flex-col bg-background">
-      <div className="pt-8 sm:pt-6 pb-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
+      <div className="pt-8 sm:pt-6 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
         <Link to="/dashboard">
           <Button variant="ghost" className="mb-6 animate-fade-in">
             <ArrowLeft size={18} />

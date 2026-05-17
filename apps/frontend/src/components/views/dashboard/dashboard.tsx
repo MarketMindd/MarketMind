@@ -19,12 +19,12 @@ export const Dashboard = () => {
   const navigate = useNavigate();
   const {
     portfolio: { usePortfolio },
-    stocks: { useGetStocks },
+    stocks: { useGetAllStocks },
   } = useClientQueries();
   const [filter, setFilter] = useState<'All' | RecommendationStatus>('All');
   const { data: portfolio = [] } = usePortfolio();
   const portfolioTickers = portfolio.map((p) => p.ticker);
-  const { data: stocks = [] } = useGetStocks();
+  const { data: stocks = [] } = useGetAllStocks();
   const portfolioStocks = stocks.filter((stock) => portfolioTickers.includes(stock.symbol));
   const recommendedStocks = stocks.filter((stock) => !portfolioTickers.includes(stock.symbol));
 

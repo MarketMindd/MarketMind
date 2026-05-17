@@ -10,4 +10,7 @@ export interface Stock {
   aiRecommendation: AiResponse;
 }
 
-export const getStockBySymbolParamSchema = z.string().min(1, 'Symbol is required');
+export const getSymbolsQuerySchema = z
+  .string()
+  .optional()
+  .transform((val) => (val ? val.split(',').filter(Boolean) : []));

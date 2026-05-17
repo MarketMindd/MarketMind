@@ -1,6 +1,6 @@
 import type {
   AuthResponse,
-  PortfolioItem,
+  PortfolioItemWithStock,
   SavePortfolioPayload,
   SignInPayload,
   SignUpPayload,
@@ -14,11 +14,11 @@ export interface iDataProvider {
     signout: () => Promise<void>;
   };
   stocks: {
-    getStock: (symbol: string) => Promise<Stock>;
-    getStocks: () => Promise<Stock[]>;
+    getStocks: (symbols: string[]) => Promise<Stock[]>;
+    getAllStocks: () => Promise<Stock[]>;
   };
   portfolio: {
-    getPortfolio: () => Promise<PortfolioItem[]>;
+    getPortfolio: () => Promise<PortfolioItemWithStock[]>;
     savePortfolio: (payload: SavePortfolioPayload) => Promise<{ success: boolean }>;
   };
 }

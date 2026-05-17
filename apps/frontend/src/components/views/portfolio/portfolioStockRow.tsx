@@ -1,25 +1,22 @@
-import { PortfolioItem } from '@market-mind/common';
-import { availableStocksForPortfolio, mockStocks } from '@/data/mockStocks';
+import { PortfolioItemWithStock } from '@market-mind/common';
 import { cn } from '@/utils/tailwindUtils';
 
 interface PortfolioStockRowProps {
-  stock: PortfolioItem;
+  stock: PortfolioItemWithStock;
+  currentPrice: number;
 }
 
-export const PortfolioStockRow = ({ stock }: PortfolioStockRowProps) => {
-  const currentStock = mockStocks.find((s) => s.ticker === stock.ticker);
-  const currentPrice = currentStock?.price || stock.avgPrice;
+export const PortfolioStockRow = ({ stock, currentPrice }: PortfolioStockRowProps) => {
   const gainLoss = (currentPrice - stock.avgPrice) * stock.shares;
   const gainLossPercent =
     stock.avgPrice > 0 ? ((currentPrice - stock.avgPrice) / stock.avgPrice) * 100 : 0;
-  const stockInfo = availableStocksForPortfolio.find((s) => s.ticker === stock.ticker);
 
   return (
     <tr className="border-b border-border/50">
       <td className="py-3 px-2">
         <div>
           <span className="font-mono text-primary font-medium">{stock.ticker}</span>
-          <p className="text-xs text-muted-foreground">{stockInfo?.name}</p>
+          <p className="text-xs text-muted-foreground">{stock.stock?.name}</p>
         </div>
       </td>
       <td className="text-right py-3 px-2 font-medium">{stock.shares}</td>
