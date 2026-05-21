@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { AiRecommendation, RiskTolerance } from '@market-mind/common';
+import { AiRecommendation, PortfolioItemWithStock, RiskTolerance } from '@market-mind/common';
 import { FilteredSnapshot } from '../filter/filter.types';
 import { GeminiClientService } from './gemini-client.service';
 import { PromptBuilderService } from './prompt-builder.service';
@@ -42,5 +42,38 @@ export class AiService {
     }
 
     return recommendations;
+  }
+
+  async generateMarketSummary(
+    portfolio: PortfolioItemWithStock[],
+    riskTolerance: RiskTolerance,
+  ): Promise<string> {
+    try {
+      const prompt = this.promptBuilder.buildMarketSummaryPrompt(portfolio, riskTolerance);
+      const rawText = await this.geminiClient.generateRecommendation(prompt, {
+        type: 'object',
+        properties: {
+          summary: { type: 'string' },
+        },
+        required: ['summary'],
+      });
+
+      let text = rawText.trim();
+      const fenceMatch = text.match(/^```(?:json)?\s*([\s\S]*?)```$/);
+      if (fenceMatch) {
+        text = fenceMatch[1].trim();
+      }
+
+      const parsed = JSON.parse(text);
+      if (parsed && typeof parsed.summary === 'string') {
+        return parsed.summary;
+      }
+      return 'Market summary unavailable at this time.';
+    } catch (error) {
+      this.logger.error(
+        `Failed to generate market summary: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      return 'Market summary unavailable at this time.';
+    }
   }
 }

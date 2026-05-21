@@ -11,13 +11,16 @@ const GEMINI_RETRY_DELAYS_MS = [1000, 2000] as const;
 export class GeminiClientService {
   private readonly logger = new Logger(GeminiClientService.name);
 
-  async generateRecommendation(prompt: string): Promise<string> {
+  async generateRecommendation(
+    prompt: string,
+    customSchema?: Record<string, any>,
+  ): Promise<string> {
     if (!appConfig.geminiApiKey) {
       throw new Error('GEMINI_API_KEY is not configured');
     }
 
     const ai = new GoogleGenAI({ apiKey: appConfig.geminiApiKey });
-    const responseSchema = z.toJSONSchema(aiResponseSchema);
+    const responseSchema = customSchema || z.toJSONSchema(aiResponseSchema);
 
     return retry(
       async () => {
