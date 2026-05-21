@@ -1,14 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import type { PortfolioItemWithStock, SavePortfolioPayload } from '@market-mind/common';
-import { MarketDataEntity, PortfolioEntity, StockEntity } from '@market-mind/database';
+import { MarketDataEntity, PortfolioEntity, StockEntity, UserProfileEntity } from '@market-mind/database';
+import { AiService } from '../ai/ai.service';
 
 @Injectable()
 export class PortfolioService {
   constructor(
     @InjectRepository(PortfolioEntity)
     private readonly portfolioRepo: Repository<PortfolioEntity>,
+    @InjectRepository(UserProfileEntity)
+    private readonly userRepo: Repository<UserProfileEntity>,
+    private readonly aiService: AiService,
   ) {}
 
   async getPortfolio(userId: string): Promise<PortfolioItemWithStock[]> {
@@ -90,5 +94,16 @@ export class PortfolioService {
     if (itemsToSave.length > 0) {
       await this.portfolioRepo.save(itemsToSave);
     }
+  }
+
+  async getAiMarketSummary(userId: string): Promise<string> {
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const portfolio = await this.getPortfolio(userId);
+    const summary = await this.aiService.generateMarketSummary(portfolio, user.riskTolerance);
+    return summary;
   }
 }

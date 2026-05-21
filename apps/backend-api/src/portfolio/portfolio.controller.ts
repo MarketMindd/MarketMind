@@ -24,4 +24,11 @@ export class PortfolioController {
     await this.portfolioService.savePortfolio(userId, body);
     return { success: true };
   }
+
+  @Get('market-summary')
+  async getAiMarketSummary(@Request() req: any): Promise<{ summary: string }> {
+    const userId = req.user.id;
+    const summary = await this.portfolioService.getAiMarketSummary(userId);
+    return { summary };
+  }
 }
