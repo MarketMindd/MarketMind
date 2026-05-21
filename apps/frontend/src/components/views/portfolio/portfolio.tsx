@@ -7,11 +7,13 @@ import { cn } from '@/utils/tailwindUtils';
 import PortfolioInput from './portfolioInput';
 import { PortfolioStockRow } from './portfolioStockRow';
 
+const EMPTY_PORTFOLIO: PortfolioItemWithStock[] = [];
+
 export const Portfolio = () => {
   const {
     portfolio: { usePortfolio, useSavePortfolio },
   } = useClientQueries();
-  const { data: portfolio = [], refetch } = usePortfolio();
+  const { data: portfolio = EMPTY_PORTFOLIO, refetch } = usePortfolio();
   const { mutate: savePortfolio, isPending } = useSavePortfolio({
     onSuccess: () => {
       setHasChanges(false);

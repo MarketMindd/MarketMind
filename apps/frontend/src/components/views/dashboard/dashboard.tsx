@@ -18,11 +18,12 @@ import { cn } from '@/utils/tailwindUtils';
 export const Dashboard = () => {
   const navigate = useNavigate();
   const {
-    portfolio: { usePortfolio },
+    portfolio: { usePortfolio, useAiMarketSummary },
     stocks: { useGetAllStocks },
   } = useClientQueries();
   const [filter, setFilter] = useState<'All' | RecommendationStatus>('All');
   const { data: portfolio = [] } = usePortfolio();
+  const { data: marketSummary, isLoading: isSummaryLoading } = useAiMarketSummary();
   const portfolioTickers = portfolio.map((p) => p.ticker);
   const { data: stocks = [] } = useGetAllStocks();
   const portfolioStocks = stocks.filter((stock) => portfolioTickers.includes(stock.symbol));
@@ -76,23 +77,27 @@ export const Dashboard = () => {
           </p>
         </div>
 
-        {/*<div className="glass-card p-6 mb-8 animate-fade-in stagger-1">*/}
-        {/*  <div className="flex items-start gap-4">*/}
-        {/*    <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">*/}
-        {/*      <Sparkles className="w-5 h-5 text-primary" />*/}
-        {/*    </div>*/}
-        {/*    <div>*/}
-        {/*      <h2 className="font-semibold text-foreground mb-2">AI Market Summary</h2>*/}
-        {/*      <p className="text-muted-foreground text-sm leading-relaxed">*/}
-        {/*        Based on your <span className="text-primary">moderate risk profile</span> and*/}
-        {/*        interest in technology, I recommend focusing on established tech leaders with strong*/}
-        {/*        cash flows. Microsoft and Apple remain top picks, while caution is advised on*/}
-        {/*        high-volatility names like Tesla. The market shows cautious optimism with the S&P*/}
-        {/*        500 up 12% YTD.*/}
-        {/*      </p>*/}
-        {/*    </div>*/}
-        {/*  </div>*/}
-        {/*</div>*/}
+        <div className="glass-card p-6 mb-8 animate-fade-in stagger-1">
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
+              <Sparkles className="w-5 h-5 text-primary" />
+            </div>
+            <div className="flex-1 w-full">
+              <h2 className="font-semibold text-foreground mb-2">AI Market Summary</h2>
+              {isSummaryLoading ? (
+                <div className="animate-pulse space-y-2 mt-2">
+                  <div className="h-4 bg-muted rounded w-3/4"></div>
+                  <div className="h-4 bg-muted rounded w-full"></div>
+                  <div className="h-4 bg-muted rounded w-5/6"></div>
+                </div>
+              ) : (
+                <p className="text-muted-foreground text-sm leading-relaxed whitespace-pre-wrap">
+                  {marketSummary?.summary || 'No summary available.'}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
           <div className="lg:col-span-3 grid grid-cols-3 gap-4">
