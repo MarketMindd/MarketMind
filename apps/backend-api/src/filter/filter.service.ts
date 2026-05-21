@@ -191,7 +191,7 @@ export class FilterService {
       title: a.title,
       description: a.description ?? null,
       publishedAt: new Date(a.publishedAt),
-      source: a.source?.name ?? 'Unknown' + 'newsApi',
+      source: a.source?.name ?? 'NewsApi',
     }));
   }
 
@@ -200,7 +200,7 @@ export class FilterService {
       title: a.title,
       description: a.summary ?? null,
       publishedAt: this.parseAlphaVantageDate(a.time_published),
-      source: a.source_domain ?? 'AlphaVantage' + 'alphaVantage',
+      source: a.source_domain ?? 'AlphaVantage',
     }));
   }
 
