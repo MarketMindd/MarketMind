@@ -45,5 +45,8 @@ export type iClientQueriesProvider = {
     useSavePortfolio: (
       options?: UseMutationOptions<{ success: boolean }, Error, SavePortfolioPayload>,
     ) => UseMutationResult<{ success: boolean }, Error, SavePortfolioPayload>;
+    useAiMarketSummary: (
+      options?: Omit<UseQueryOptions<{ summary: string }, Error>, 'queryKey' | 'queryFn'>,
+    ) => UseQueryResult<{ summary: string }, Error>;
   };
 };

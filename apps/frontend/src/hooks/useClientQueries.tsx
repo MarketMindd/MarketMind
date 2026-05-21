@@ -129,9 +129,19 @@ export const useClientQueries = (): iClientQueriesProvider => {
     });
   };
 
+  const useAiMarketSummary = (
+    options?: Omit<UseQueryOptions<{ summary: string }, Error>, 'queryKey' | 'queryFn'>,
+  ) => {
+    return useQuery<{ summary: string }, Error>({
+      queryKey: ['portfolio', 'market-summary'],
+      queryFn: () => ctx.dataProvider.portfolio.getAiMarketSummary(),
+      ...options,
+    });
+  };
+
   return {
     auth: { useSignIn, useSignUp, useSignOut },
     stocks: { useGetStock, useGetStocks, useGetAllStocks },
-    portfolio: { usePortfolio, useSavePortfolio },
+    portfolio: { usePortfolio, useSavePortfolio, useAiMarketSummary },
   };
 };

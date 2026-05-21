@@ -20,5 +20,6 @@ export interface iDataProvider {
   portfolio: {
     getPortfolio: () => Promise<PortfolioItemWithStock[]>;
     savePortfolio: (payload: SavePortfolioPayload) => Promise<{ success: boolean }>;
+    getAiMarketSummary: () => Promise<{ summary: string }>;
   };
 }

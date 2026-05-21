@@ -182,6 +182,10 @@ export const createFetchDataProvider = (): iDataProvider => {
         const res = await apiClient.put<{ success: boolean }>('/portfolio', payload);
         return res.data;
       },
+      getAiMarketSummary: async () => {
+        const res = await apiClient.get<{ summary: string }>('/portfolio/market-summary');
+        return res.data;
+      },
     },
   };
 };
