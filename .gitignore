@@ -48,3 +48,5 @@ vite.config.*.timestamp*
 .github
 
 .env*
+
+loveable-uis
