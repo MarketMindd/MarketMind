@@ -11,7 +11,13 @@ import {
 } from '@market-mind/database';
 import { appConfig } from '../config/appConfig';
 import { MarketSnapshot } from '../market/market.types';
-import { FilteredSnapshot, NewsArticle, UserContext } from './filter.types';
+import {
+  AlphaVantageFeedItem,
+  AlphaVantageResponse,
+  FilteredSnapshot,
+  NewsArticle,
+  UserContext,
+} from './filter.types';
 
 // Gate 1 — noise floor: ignore moves smaller than this vs the last AI-triggered priceChange.
 // Prevents redundant processing when price barely changes.
@@ -110,36 +116,104 @@ export class FilterService {
 
   private async fetchNews(symbol: string): Promise<NewsArticle[]> {
     try {
-      const response = await retry(
-        () =>
-          this.newsApi.v2.everything({
-            q: symbol,
-            pageSize: 5,
-            sortBy: 'publishedAt',
-            language: 'en',
-          }),
-        {
-          delaysMs: NEWS_RETRY_DELAYS_MS,
-          onRetry: (attempt, delayMs) => {
-            this.logger.warn(
-              `News fetch for ${symbol} failed (attempt ${attempt}); retrying in ${delayMs}ms`,
-            );
+      const [newsApiResult, alphaVantageResult] = await Promise.allSettled([
+        retry(
+          () =>
+            this.newsApi.v2.everything({
+              q: symbol,
+              pageSize: 5,
+              sortBy: 'publishedAt',
+              language: 'en',
+            }),
+          {
+            delaysMs: NEWS_RETRY_DELAYS_MS,
+            onRetry: (attempt, delayMs) => {
+              this.logger.warn(
+                `NewsAPI fetch for ${symbol} failed (attempt ${attempt}); retrying in ${delayMs}ms`,
+              );
+            },
           },
-        },
-      );
+        ),
+        retry(
+          async (): Promise<AlphaVantageResponse> => {
+            const url = `https://www.alphavantage.co/query?function=NEWS_SENTIMENT&tickers=${symbol}&limit=5&sort=LATEST&apikey=${appConfig.alphaVantageApiKey}`;
+            const res = await fetch(url);
+            if (!res.ok) {
+              throw new Error(`Alpha Vantage API error: ${res.statusText}`);
+            }
+            return res.json() as Promise<AlphaVantageResponse>;
+          },
+          {
+            delaysMs: NEWS_RETRY_DELAYS_MS,
+            onRetry: (attempt, delayMs) => {
+              this.logger.warn(
+                `Alpha Vantage fetch for ${symbol} failed (attempt ${attempt}); retrying in ${delayMs}ms`,
+              );
+            },
+          },
+        ),
+      ]);
 
-      return (response.articles ?? []).map((a) => ({
-        title: a.title,
-        description: a.description ?? null,
-        publishedAt: new Date(a.publishedAt),
-        source: a.source?.name ?? 'Unknown',
-      }));
+      let articles: NewsArticle[] = [];
+
+      if (newsApiResult.status === 'fulfilled') {
+        const response = newsApiResult.value;
+        articles = articles.concat(this.mapNewsApiArticles(response.articles ?? []));
+      } else {
+        this.logger.warn(`NewsAPI fetch failed completely for ${symbol}: ${newsApiResult.reason}`);
+      }
+
+      if (alphaVantageResult.status === 'fulfilled') {
+        const response = alphaVantageResult.value;
+        articles = articles.concat(this.mapAlphaVantageArticles(response.feed ?? []));
+      } else {
+        this.logger.warn(
+          `Alpha Vantage fetch failed completely for ${symbol}: ${alphaVantageResult.reason}`,
+        );
+      }
+
+      return articles.sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
     } catch (error) {
       this.logger.warn(
-        `News fetch failed for ${symbol}: ${error instanceof Error ? error.message : String(error)}`,
+        `Failed to combine news fetch for ${symbol}: ${error instanceof Error ? error.message : String(error)}`,
       );
       return [];
     }
+  }
+
+  // Use inferred ReturnType array from newsapi EverythingResponse articles
+  private mapNewsApiArticles(
+    articles: NonNullable<
+      Awaited<ReturnType<InstanceType<typeof NewsAPI>['v2']['everything']>>['articles']
+    >,
+  ): NewsArticle[] {
+    return articles.map((a) => ({
+      title: a.title,
+      description: a.description ?? null,
+      publishedAt: new Date(a.publishedAt),
+      source: a.source?.name ?? 'Unknown' + 'newsApi',
+    }));
+  }
+
+  private mapAlphaVantageArticles(feed: AlphaVantageFeedItem[]): NewsArticle[] {
+    return feed.map((a) => ({
+      title: a.title,
+      description: a.summary ?? null,
+      publishedAt: this.parseAlphaVantageDate(a.time_published),
+      source: a.source_domain ?? 'AlphaVantage' + 'alphaVantage',
+    }));
+  }
+
+  private parseAlphaVantageDate(timeStr: string): Date {
+    if (!timeStr) return new Date();
+    // typical format: "20231010T121500" -> "2023-10-10T12:15:00Z"
+    const year = timeStr.slice(0, 4);
+    const month = timeStr.slice(4, 6);
+    const day = timeStr.slice(6, 8);
+    const hour = timeStr.slice(9, 11);
+    const min = timeStr.slice(11, 13);
+    const sec = timeStr.slice(13, 15);
+    return new Date(`${year}-${month}-${day}T${hour}:${min}:${sec}Z`);
   }
 
   private async loadUserContexts(symbol: string): Promise<UserContext[]> {

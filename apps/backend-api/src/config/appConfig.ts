@@ -22,6 +22,7 @@ export const appConfig = {
     maxActiveSessions: parseInt(process.env.MAX_ACTIVE_SESSIONS || '5', 10),
   },
   newsApiKey: process.env.NEWSAPI_KEY ?? 'empty',
+  alphaVantageApiKey: process.env.ALPHA_VANTAGE_API_KEY ?? 'empty',
   geminiApiKey: process.env.GEMINI_API_KEY ?? '',
   stock: {
     maxStocksCount:
