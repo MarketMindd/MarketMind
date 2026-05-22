@@ -4,7 +4,7 @@ import { config } from 'dotenv';
 import { parseBoolean, parseNumber } from '../utils/parse.utils';
 
 const _dirname =
-  typeof __dirname !== 'undefined' ? __dirname : dirname(fileURLToPath(import.meta.url));
+  typeof __dirname !== 'undefined' ? __dirname : dirname(fileURLToPath(eval('import.meta.url')));
 
 config({ path: resolve(_dirname, '../../../../.env') });
 config({ path: resolve(_dirname, '../.env') });

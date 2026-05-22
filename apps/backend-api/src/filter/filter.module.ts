@@ -6,6 +6,7 @@ import {
   SymbolFilterStateEntity,
   UserProfileEntity,
 } from '@market-mind/database';
+import { NewsModule } from '../news/news.module';
 import { FilterService } from './filter.service';
 
 @Module({
@@ -16,6 +17,7 @@ import { FilterService } from './filter.service';
       UserProfileEntity,
       RecommendationEntity,
     ]),
+    NewsModule,
   ],
   providers: [FilterService],
   exports: [FilterService],

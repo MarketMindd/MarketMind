@@ -1,23 +1,17 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import NewsAPI from 'newsapi';
 import { Repository } from 'typeorm';
-import { retry, RiskTolerance } from '@market-mind/common';
+import { RiskTolerance } from '@market-mind/common';
 import {
   PortfolioEntity,
   RecommendationEntity,
   SymbolFilterStateEntity,
   UserProfileEntity,
 } from '@market-mind/database';
-import { appConfig } from '../config/appConfig';
 import { MarketSnapshot } from '../market/market.types';
-import {
-  AlphaVantageFeedItem,
-  AlphaVantageResponse,
-  FilteredSnapshot,
-  NewsArticle,
-  UserContext,
-} from './filter.types';
+import { AlphaVantageService } from '../news/alpha-vantage.service';
+import { NewsApiService } from '../news/news-api.service';
+import { FilteredSnapshot, NewsArticle, UserContext } from './filter.types';
 
 // Gate 1 — noise floor: ignore moves smaller than this vs the last AI-triggered priceChange.
 // Prevents redundant processing when price barely changes.
@@ -34,12 +28,9 @@ const RECENT_NEWS_WINDOW_MS = 20 * 60 * 1000;
 // from a previous trading day is a different baseline. Treat it as stale after 1 day.
 const STALE_FORWARD_THRESHOLD_MS = 24 * 60 * 60 * 1000;
 
-const NEWS_RETRY_DELAYS_MS = [1000, 2000] as const;
-
 @Injectable()
 export class FilterService {
   private readonly logger = new Logger(FilterService.name);
-  private readonly newsApi = new NewsAPI(appConfig.newsApiKey);
 
   constructor(
     @InjectRepository(SymbolFilterStateEntity)
@@ -50,6 +41,8 @@ export class FilterService {
     private readonly userProfileRepo: Repository<UserProfileEntity>,
     @InjectRepository(RecommendationEntity)
     private readonly recommendationRepo: Repository<RecommendationEntity>,
+    private readonly newsApiService: NewsApiService,
+    private readonly alphaVantageService: AlphaVantageService,
   ) {}
 
   async filter(snapshot: MarketSnapshot): Promise<FilteredSnapshot | null> {
@@ -117,55 +110,20 @@ export class FilterService {
   private async fetchNews(symbol: string): Promise<NewsArticle[]> {
     try {
       const [newsApiResult, alphaVantageResult] = await Promise.allSettled([
-        retry(
-          () =>
-            this.newsApi.v2.everything({
-              q: symbol,
-              pageSize: 5,
-              sortBy: 'publishedAt',
-              language: 'en',
-            }),
-          {
-            delaysMs: NEWS_RETRY_DELAYS_MS,
-            onRetry: (attempt, delayMs) => {
-              this.logger.warn(
-                `NewsAPI fetch for ${symbol} failed (attempt ${attempt}); retrying in ${delayMs}ms`,
-              );
-            },
-          },
-        ),
-        retry(
-          async (): Promise<AlphaVantageResponse> => {
-            const url = `https://www.alphavantage.co/query?function=NEWS_SENTIMENT&tickers=${symbol}&limit=5&sort=LATEST&apikey=${appConfig.alphaVantageApiKey}`;
-            const res = await fetch(url);
-            if (!res.ok) {
-              throw new Error(`Alpha Vantage API error: ${res.statusText}`);
-            }
-            return res.json() as Promise<AlphaVantageResponse>;
-          },
-          {
-            delaysMs: NEWS_RETRY_DELAYS_MS,
-            onRetry: (attempt, delayMs) => {
-              this.logger.warn(
-                `Alpha Vantage fetch for ${symbol} failed (attempt ${attempt}); retrying in ${delayMs}ms`,
-              );
-            },
-          },
-        ),
+        this.newsApiService.getNews(symbol),
+        this.alphaVantageService.getNews(symbol),
       ]);
 
       let articles: NewsArticle[] = [];
 
       if (newsApiResult.status === 'fulfilled') {
-        const response = newsApiResult.value;
-        articles = articles.concat(this.mapNewsApiArticles(response.articles ?? []));
+        articles = articles.concat(newsApiResult.value);
       } else {
         this.logger.warn(`NewsAPI fetch failed completely for ${symbol}: ${newsApiResult.reason}`);
       }
 
       if (alphaVantageResult.status === 'fulfilled') {
-        const response = alphaVantageResult.value;
-        articles = articles.concat(this.mapAlphaVantageArticles(response.feed ?? []));
+        articles = articles.concat(alphaVantageResult.value);
       } else {
         this.logger.warn(
           `Alpha Vantage fetch failed completely for ${symbol}: ${alphaVantageResult.reason}`,
@@ -179,41 +137,6 @@ export class FilterService {
       );
       return [];
     }
-  }
-
-  // Use inferred ReturnType array from newsapi EverythingResponse articles
-  private mapNewsApiArticles(
-    articles: NonNullable<
-      Awaited<ReturnType<InstanceType<typeof NewsAPI>['v2']['everything']>>['articles']
-    >,
-  ): NewsArticle[] {
-    return articles.map((a) => ({
-      title: a.title,
-      description: a.description ?? null,
-      publishedAt: new Date(a.publishedAt),
-      source: a.source?.name ?? 'NewsApi',
-    }));
-  }
-
-  private mapAlphaVantageArticles(feed: AlphaVantageFeedItem[]): NewsArticle[] {
-    return feed.map((a) => ({
-      title: a.title,
-      description: a.summary ?? null,
-      publishedAt: this.parseAlphaVantageDate(a.time_published),
-      source: a.source_domain ?? 'AlphaVantage',
-    }));
-  }
-
-  private parseAlphaVantageDate(timeStr: string): Date {
-    if (!timeStr) return new Date();
-    // typical format: "20231010T121500" -> "2023-10-10T12:15:00Z"
-    const year = timeStr.slice(0, 4);
-    const month = timeStr.slice(4, 6);
-    const day = timeStr.slice(6, 8);
-    const hour = timeStr.slice(9, 11);
-    const min = timeStr.slice(11, 13);
-    const sec = timeStr.slice(13, 15);
-    return new Date(`${year}-${month}-${day}T${hour}:${min}:${sec}Z`);
   }
 
   private async loadUserContexts(symbol: string): Promise<UserContext[]> {
