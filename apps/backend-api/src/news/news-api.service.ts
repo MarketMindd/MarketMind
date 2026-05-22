@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { appConfig } from '../config/appConfig';
 import { NewsArticle } from '../filter/filter.types';
 import { NetworkService } from '../network/network.service';
+import { NewsProviderService } from './news.interface';
 
 interface NewsApiResponse {
   status: string;
@@ -10,13 +11,20 @@ interface NewsApiResponse {
 }
 
 @Injectable()
-export class NewsApiService {
+export class NewsApiService implements NewsProviderService {
   private readonly logger = new Logger(NewsApiService.name);
 
   constructor(private readonly networkService: NetworkService) {}
 
   async getNews(symbol: string): Promise<NewsArticle[]> {
-    const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(symbol)}&pageSize=5&sortBy=publishedAt&language=en&apiKey=${appConfig.newsApiKey}`;
+    const params = new URLSearchParams({
+      q: symbol,
+      pageSize: '5',
+      sortBy: 'publishedAt',
+      language: 'en',
+      apiKey: appConfig.newsApiKey,
+    });
+    const url = `https://newsapi.org/v2/everything?${params.toString()}`;
 
     try {
       return await this.networkService.get<NewsApiResponse, NewsArticle[]>(url, (res) =>

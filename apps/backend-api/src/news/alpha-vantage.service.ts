@@ -2,15 +2,23 @@ import { Injectable, Logger } from '@nestjs/common';
 import { appConfig } from '../config/appConfig';
 import { AlphaVantageFeedItem, AlphaVantageResponse, NewsArticle } from '../filter/filter.types';
 import { NetworkService } from '../network/network.service';
+import { NewsProviderService } from './news.interface';
 
 @Injectable()
-export class AlphaVantageService {
+export class AlphaVantageService implements NewsProviderService {
   private readonly logger = new Logger(AlphaVantageService.name);
 
   constructor(private readonly networkService: NetworkService) {}
 
   async getNews(symbol: string): Promise<NewsArticle[]> {
-    const url = `https://www.alphavantage.co/query?function=NEWS_SENTIMENT&tickers=${symbol}&limit=5&sort=LATEST&apikey=${appConfig.alphaVantageApiKey}`;
+    const params = new URLSearchParams({
+      function: 'NEWS_SENTIMENT',
+      tickers: symbol,
+      limit: '5',
+      sort: 'LATEST',
+      apikey: appConfig.alphaVantageApiKey,
+    });
+    const url = `https://www.alphavantage.co/query?${params.toString()}`;
 
     try {
       return await this.networkService.get<AlphaVantageResponse, NewsArticle[]>(url, (res) =>
