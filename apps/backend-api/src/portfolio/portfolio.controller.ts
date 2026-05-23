@@ -1,6 +1,10 @@
 import { Body, Controller, Get, Put, Request } from '@nestjs/common';
 import { savePortfolioPayloadSchema } from '@market-mind/common';
-import type { PortfolioItemWithStock, SavePortfolioPayload } from '@market-mind/common';
+import type {
+  MarketSummaryResult,
+  PortfolioItemWithStock,
+  SavePortfolioPayload,
+} from '@market-mind/common';
 import { ZodValidationPipe } from '../pipes/zodValidatorPipe';
 import { PortfolioService } from './portfolio.service';
 
@@ -26,9 +30,8 @@ export class PortfolioController {
   }
 
   @Get('market-summary')
-  async getAiMarketSummary(@Request() req: any): Promise<{ summary: string }> {
+  async getAiMarketSummary(@Request() req: any): Promise<MarketSummaryResult> {
     const userId = req.user.id;
-    const summary = await this.portfolioService.getAiMarketSummary(userId);
-    return { summary };
+    return this.portfolioService.getAiMarketSummary(userId);
   }
 }
