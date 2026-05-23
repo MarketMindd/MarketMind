@@ -15,9 +15,10 @@ describe('StockService', () => {
     innerJoin: jest.fn().mockReturnThis(),
     select: jest.fn().mockReturnThis(),
     where: jest.fn().mockReturnThis(),
+    distinctOn: jest.fn().mockReturnThis(),
     orderBy: jest.fn().mockReturnThis(),
     addOrderBy: jest.fn().mockReturnThis(),
-    getRawOne: jest.fn(),
+    getRawMany: jest.fn(),
   };
 
   const mockRepository = {
@@ -43,13 +44,11 @@ describe('StockService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('getStockBySymbol', () => {
-    it('should throw NotFoundException if stock is not found', async () => {
-      mockQueryBuilder.getRawOne.mockResolvedValueOnce(null);
-
-      await expect(service.getStockBySymbol('AAPL')).rejects.toThrow(
-        new NotFoundException('Stock with symbol AAPL not found'),
-      );
+  describe('getStocksBySymbols', () => {
+    it('should return empty array if no symbols provided', async () => {
+      const result = await service.getStocksBySymbols([]);
+      expect(result).toEqual([]);
+      expect(mockRepository.createQueryBuilder).not.toHaveBeenCalled();
     });
 
     it('should return mapped stock with AI recommendation', async () => {
@@ -65,9 +64,9 @@ describe('StockService', () => {
         rationale: 'Good financials',
       };
 
-      mockQueryBuilder.getRawOne.mockResolvedValueOnce(mockRawData);
+      mockQueryBuilder.getRawMany.mockResolvedValueOnce([mockRawData]);
 
-      const result = await service.getStockBySymbol('AAPL');
+      const result = await service.getStocksBySymbols(['AAPL']);
 
       const MOCK_STOCK: Stock = {
         symbol: 'AAPL',
@@ -80,12 +79,12 @@ describe('StockService', () => {
         },
         aiRecommendation: {
           status: 'Invest',
-          confidence: 8, // 0.8 * 10
+          confidence: 80,
           rationale: 'Good financials',
         },
       };
 
-      expect(result).toEqual(MOCK_STOCK);
+      expect(result).toEqual([MOCK_STOCK]);
     });
 
     it('should return mapped stock with default recommendation if status is empty', async () => {
@@ -101,9 +100,9 @@ describe('StockService', () => {
         rationale: null,
       };
 
-      mockQueryBuilder.getRawOne.mockResolvedValueOnce(mockRawData);
+      mockQueryBuilder.getRawMany.mockResolvedValueOnce([mockRawData]);
 
-      const result = await service.getStockBySymbol('TSLA');
+      const result = await service.getStocksBySymbols(['TSLA']);
 
       const MOCK_STOCK: Stock = {
         symbol: 'TSLA',
@@ -117,7 +116,7 @@ describe('StockService', () => {
         aiRecommendation: DEFAULT_STOCK_RECOMMENDATION,
       };
 
-      expect(result).toEqual(MOCK_STOCK);
+      expect(result).toEqual([MOCK_STOCK]);
     });
   });
 });

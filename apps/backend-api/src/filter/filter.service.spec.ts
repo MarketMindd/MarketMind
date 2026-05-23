@@ -9,6 +9,7 @@ import {
 } from '@market-mind/database';
 import { MarketSnapshot } from '../market/market.types';
 import { AlphaVantageService } from '../news/alpha-vantage.service';
+import { MassiveApiService } from '../news/massive.service';
 import { NewsApiService } from '../news/news-api.service';
 import { FilterService } from './filter.service';
 
@@ -35,6 +36,7 @@ describe('FilterService', () => {
   let service: FilterService;
   let mockGetNewsApiNews: jest.Mock;
   let mockGetAlphaVantageNews: jest.Mock;
+  let mockGetMassiveNews: jest.Mock;
 
   const mockFilterStateRepo = {
     findOne: jest.fn(),
@@ -85,6 +87,12 @@ describe('FilterService', () => {
             getNews: jest.fn().mockResolvedValue([]),
           },
         },
+        {
+          provide: MassiveApiService,
+          useValue: {
+            getNews: jest.fn().mockResolvedValue([]),
+          },
+        },
       ],
     }).compile();
 
@@ -92,8 +100,10 @@ describe('FilterService', () => {
 
     mockGetNewsApiNews = module.get(NewsApiService).getNews as jest.Mock;
     mockGetAlphaVantageNews = module.get(AlphaVantageService).getNews as jest.Mock;
+    mockGetMassiveNews = module.get(MassiveApiService).getNews as jest.Mock;
     mockGetNewsApiNews.mockResolvedValue([]);
     mockGetAlphaVantageNews.mockResolvedValue([]);
+    mockGetMassiveNews.mockResolvedValue([]);
   });
 
   it('cold start passes dedup when no prior state exists', async () => {
