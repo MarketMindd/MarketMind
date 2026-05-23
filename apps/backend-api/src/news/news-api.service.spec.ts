@@ -74,7 +74,7 @@ describe('NewsApiService', () => {
           title: '',
           description: null,
           publishedAt: new Date(publishedAtStr),
-          source: 'NewsApi',
+          source: 'NewsAPI',
         },
       ]);
     });
