@@ -7,15 +7,10 @@ import {
   SymbolFilterStateEntity,
   UserProfileEntity,
 } from '@market-mind/database';
-import type { MarketSnapshot } from '../market/market.types';
+import { MarketSnapshot } from '../market/market.types';
+import { AlphaVantageService } from '../news/alpha-vantage.service';
+import { NewsApiService } from '../news/news-api.service';
 import { FilterService } from './filter.service';
-
-jest.mock('newsapi', () => ({
-  __esModule: true,
-  default: jest.fn().mockImplementation(() => ({
-    v2: { everything: jest.fn() },
-  })),
-}));
 
 const makeSnapshot = (priceChange: number, fetchedAt = new Date()): MarketSnapshot => ({
   symbol: 'AAPL',
@@ -27,7 +22,6 @@ const makeSnapshot = (priceChange: number, fetchedAt = new Date()): MarketSnapsh
 
 const mockUser = { id: 'user-1', riskTolerance: RiskTolerance.MEDIUM };
 const mockPortfolio = { userId: 'user-1' };
-const noNewsResponse = { status: 'ok', articles: [] };
 const noRecommendations: Pick<RecommendationEntity, 'riskTolerance'>[] = [];
 
 // Builds a SymbolFilterStateEntity-shaped row with a recent updatedAt by default
@@ -39,7 +33,8 @@ const makeStateRow = (lastForwardedPriceChange: number, ageMs = 15 * 60 * 1000) 
 
 describe('FilterService', () => {
   let service: FilterService;
-  let mockNewsEverything: jest.Mock;
+  let mockGetNewsApiNews: jest.Mock;
+  let mockGetAlphaVantageNews: jest.Mock;
 
   const mockFilterStateRepo = {
     findOne: jest.fn(),
@@ -78,14 +73,27 @@ describe('FilterService', () => {
         { provide: getRepositoryToken(PortfolioEntity), useValue: mockPortfolioRepo },
         { provide: getRepositoryToken(UserProfileEntity), useValue: mockUserProfileRepo },
         { provide: getRepositoryToken(RecommendationEntity), useValue: mockRecommendationRepo },
+        {
+          provide: NewsApiService,
+          useValue: {
+            getNews: jest.fn().mockResolvedValue([]),
+          },
+        },
+        {
+          provide: AlphaVantageService,
+          useValue: {
+            getNews: jest.fn().mockResolvedValue([]),
+          },
+        },
       ],
     }).compile();
 
     service = module.get<FilterService>(FilterService);
 
-    mockNewsEverything = (service as unknown as { newsApi: { v2: { everything: jest.Mock } } })
-      .newsApi.v2.everything;
-    mockNewsEverything.mockResolvedValue(noNewsResponse);
+    mockGetNewsApiNews = module.get(NewsApiService).getNews as jest.Mock;
+    mockGetAlphaVantageNews = module.get(AlphaVantageService).getNews as jest.Mock;
+    mockGetNewsApiNews.mockResolvedValue([]);
+    mockGetAlphaVantageNews.mockResolvedValue([]);
   });
 
   it('cold start passes dedup when no prior state exists', async () => {
@@ -155,7 +163,7 @@ describe('FilterService', () => {
       publishedAt: new Date().toISOString(),
       source: { id: null, name: 'Reuters' },
     };
-    mockNewsEverything.mockResolvedValue({ status: 'ok', articles: [recentArticle] });
+    mockGetNewsApiNews.mockResolvedValue([recentArticle]);
 
     const result = await service.filter(makeSnapshot(2.6));
     expect(result).not.toBeNull();
@@ -171,7 +179,7 @@ describe('FilterService', () => {
       publishedAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
       source: { id: null, name: 'Reuters' },
     };
-    mockNewsEverything.mockResolvedValue({ status: 'ok', articles: [oldArticle] });
+    mockGetNewsApiNews.mockResolvedValue([oldArticle]);
 
     const result = await service.filter(makeSnapshot(2.6));
     expect(result).toBeNull();
@@ -187,7 +195,7 @@ describe('FilterService', () => {
       publishedAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
       source: { id: null, name: 'Reuters' },
     };
-    mockNewsEverything.mockResolvedValue({ status: 'ok', articles: [oldArticle] });
+    mockGetNewsApiNews.mockResolvedValue([oldArticle]);
 
     const result = await service.filter(makeSnapshot(2.6));
     expect(result).not.toBeNull();
@@ -216,7 +224,7 @@ describe('FilterService', () => {
       publishedAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
       source: { id: null, name: 'Reuters' },
     };
-    mockNewsEverything.mockResolvedValue({ status: 'ok', articles: [oldArticle] });
+    mockGetNewsApiNews.mockResolvedValue([oldArticle]);
 
     const result = await service.filter(makeSnapshot(2.6));
     expect(result).not.toBeNull();
@@ -244,7 +252,7 @@ describe('FilterService', () => {
       publishedAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
       source: { id: null, name: 'Reuters' },
     };
-    mockNewsEverything.mockResolvedValue({ status: 'ok', articles: [oldArticle] });
+    mockGetNewsApiNews.mockResolvedValue([oldArticle]);
 
     const result = await service.filter(makeSnapshot(2.6));
     expect(result).toBeNull();
@@ -253,12 +261,12 @@ describe('FilterService', () => {
   it('returns null and skips news API when no users track the symbol', async () => {
     mockPortfolioRepo.find.mockResolvedValueOnce([]);
     await service.filter(makeSnapshot(5));
-    expect(mockNewsEverything).not.toHaveBeenCalled();
+    expect(mockGetNewsApiNews).not.toHaveBeenCalled();
   });
 
   it('news fetch failure is non-fatal — pipeline continues with empty articles', async () => {
     mockFilterStateRepo.findOne.mockResolvedValue(null);
-    mockNewsEverything.mockRejectedValue(new Error('Network error'));
+    mockGetNewsApiNews.mockRejectedValue(new Error('Network error'));
 
     const result = await service.filter(makeSnapshot(5));
     expect(result).not.toBeNull();

@@ -1,16 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import NewsAPI from 'newsapi';
 import { Repository } from 'typeorm';
-import { retry, RiskTolerance } from '@market-mind/common';
+import { RiskTolerance } from '@market-mind/common';
 import {
   PortfolioEntity,
   RecommendationEntity,
   SymbolFilterStateEntity,
   UserProfileEntity,
 } from '@market-mind/database';
-import { appConfig } from '../config/appConfig';
 import { MarketSnapshot } from '../market/market.types';
+import { AlphaVantageService } from '../news/alpha-vantage.service';
+import { NewsApiService } from '../news/news-api.service';
 import { FilteredSnapshot, NewsArticle, UserContext } from './filter.types';
 
 // Gate 1 — noise floor: ignore moves smaller than this vs the last AI-triggered priceChange.
@@ -28,12 +28,9 @@ const RECENT_NEWS_WINDOW_MS = 20 * 60 * 1000;
 // from a previous trading day is a different baseline. Treat it as stale after 1 day.
 const STALE_FORWARD_THRESHOLD_MS = 24 * 60 * 60 * 1000;
 
-const NEWS_RETRY_DELAYS_MS = [1000, 2000] as const;
-
 @Injectable()
 export class FilterService {
   private readonly logger = new Logger(FilterService.name);
-  private readonly newsApi = new NewsAPI(appConfig.newsApiKey);
 
   constructor(
     @InjectRepository(SymbolFilterStateEntity)
@@ -44,6 +41,8 @@ export class FilterService {
     private readonly userProfileRepo: Repository<UserProfileEntity>,
     @InjectRepository(RecommendationEntity)
     private readonly recommendationRepo: Repository<RecommendationEntity>,
+    private readonly newsApiService: NewsApiService,
+    private readonly alphaVantageService: AlphaVantageService,
   ) {}
 
   async filter(snapshot: MarketSnapshot): Promise<FilteredSnapshot | null> {
@@ -110,33 +109,31 @@ export class FilterService {
 
   private async fetchNews(symbol: string): Promise<NewsArticle[]> {
     try {
-      const response = await retry(
-        () =>
-          this.newsApi.v2.everything({
-            q: symbol,
-            pageSize: 5,
-            sortBy: 'publishedAt',
-            language: 'en',
-          }),
-        {
-          delaysMs: NEWS_RETRY_DELAYS_MS,
-          onRetry: (attempt, delayMs) => {
-            this.logger.warn(
-              `News fetch for ${symbol} failed (attempt ${attempt}); retrying in ${delayMs}ms`,
-            );
-          },
-        },
-      );
+      const [newsApiResult, alphaVantageResult] = await Promise.allSettled([
+        this.newsApiService.getNews(symbol),
+        this.alphaVantageService.getNews(symbol),
+      ]);
 
-      return (response.articles ?? []).map((a) => ({
-        title: a.title,
-        description: a.description ?? null,
-        publishedAt: new Date(a.publishedAt),
-        source: a.source?.name ?? 'Unknown',
-      }));
+      let articles: NewsArticle[] = [];
+
+      if (newsApiResult.status === 'fulfilled') {
+        articles = articles.concat(newsApiResult.value);
+      } else {
+        this.logger.warn(`NewsAPI fetch failed completely for ${symbol}: ${newsApiResult.reason}`);
+      }
+
+      if (alphaVantageResult.status === 'fulfilled') {
+        articles = articles.concat(alphaVantageResult.value);
+      } else {
+        this.logger.warn(
+          `Alpha Vantage fetch failed completely for ${symbol}: ${alphaVantageResult.reason}`,
+        );
+      }
+
+      return articles.sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
     } catch (error) {
       this.logger.warn(
-        `News fetch failed for ${symbol}: ${error instanceof Error ? error.message : String(error)}`,
+        `Failed to combine news fetch for ${symbol}: ${error instanceof Error ? error.message : String(error)}`,
       );
       return [];
     }

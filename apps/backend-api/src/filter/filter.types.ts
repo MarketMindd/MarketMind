@@ -18,3 +18,14 @@ export interface FilteredSnapshot {
   news: NewsArticle[];
   users: UserContext[];
 }
+
+export interface AlphaVantageFeedItem {
+  title: string;
+  summary: string;
+  time_published: string;
+  source_domain: string;
+}
+
+export interface AlphaVantageResponse {
+  feed?: AlphaVantageFeedItem[];
+}
