@@ -38,6 +38,7 @@ export interface MassiveFeedItem {
     name: string;
   };
   title: string;
+  insights?: { sentiment: string; sentiment_reasoning: string; ticker: string }[];
 }
 
 export interface MassiveResponse {

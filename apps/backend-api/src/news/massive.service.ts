@@ -20,7 +20,7 @@ export class MassiveApiService implements NewsProviderService {
 
     try {
       return await this.networkService.get<MassiveResponse, NewsArticle[]>(url, (res) =>
-        this.mapData(res.results ?? []),
+        this.mapData(res.results ?? [], symbol),
       );
     } catch (error) {
       this.logger.warn(
@@ -30,12 +30,25 @@ export class MassiveApiService implements NewsProviderService {
     }
   }
 
-  private mapData(results: MassiveFeedItem[]): NewsArticle[] {
-    return results.map((a) => ({
-      title: a.title,
-      description: a.description ?? null,
-      publishedAt: new Date(a.published_utc),
-      source: a.publisher?.name ?? 'Massive API',
-    }));
+  private mapData(results: MassiveFeedItem[], symbol: string): NewsArticle[] {
+    return results.map((a) => {
+      let description = a.description ?? '';
+
+      const relevantInsights = a.insights?.filter((i) => i.ticker === symbol) ?? [];
+
+      if (relevantInsights.length > 0) {
+        const insightsText = relevantInsights
+          .map((i) => `Sentiment: ${i.sentiment.toUpperCase()}\nReasoning: ${i.sentiment_reasoning}`)
+          .join('\n\n');
+        description = [description, `--- Extracted Insights for ${symbol} ---\n${insightsText}`].filter(Boolean).join('\n\n');
+      }
+
+      return {
+        title: a.title,
+        description: description || null,
+        publishedAt: new Date(a.published_utc),
+        source: a.publisher?.name ?? 'Massive API',
+      };
+    });
   }
 }
