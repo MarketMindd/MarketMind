@@ -40,6 +40,9 @@ Respond with a JSON object only. No markdown, no explanation outside the JSON.
 The JSON must have exactly these fields:
 - "status": one of "Invest", "Hold", or "Exit"
 - "confidence": a number between 0 and 1
-- "rationale": a concise explanation of your recommendation`;
+- "rationale": a detailed explanation of your recommendation (3-5 sentences)
+- "aiSummary": a single concise sentence (max 20 words) summarising the recommendation for a card preview
+- "shortTermOutlook": 1-2 sentences on the near-term price outlook and catalysts (next 1-3 months)
+- "longTermOutlook": 1-2 sentences on the long-term growth potential (1-2 year horizon)`;
   }
 }

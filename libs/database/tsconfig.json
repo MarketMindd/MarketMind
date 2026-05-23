@@ -7,11 +7,9 @@
   "ts-node": {
     "esm": true
   },
-  "include": ["src/**/*.ts"],
+  "files": [],
+  "include": [],
   "references": [
-    {
-      "path": "../common"
-    },
     {
       "path": "./tsconfig.lib.json"
     }

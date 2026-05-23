@@ -13,7 +13,14 @@ describe('ResponseParserService', () => {
     service = module.get<ResponseParserService>(ResponseParserService);
   });
 
-  const validPayload = { status: 'Invest', confidence: 0.8, rationale: 'Strong momentum' };
+  const validPayload = {
+    status: 'Invest',
+    confidence: 0.8,
+    rationale: 'Strong momentum',
+    aiSummary: 'Invest with confidence on improving momentum.',
+    shortTermOutlook: 'Near-term catalysts support upside over the next quarter.',
+    longTermOutlook: 'Long-term growth remains attractive over the next one to two years.',
+  };
   const validJson = JSON.stringify(validPayload);
 
   it('parses valid JSON successfully', () => {
@@ -21,6 +28,13 @@ describe('ResponseParserService', () => {
     expect(result.status).toBe('Invest');
     expect(result.confidence).toBe(0.8);
     expect(result.rationale).toBe('Strong momentum');
+    expect(result.aiSummary).toBe('Invest with confidence on improving momentum.');
+    expect(result.shortTermOutlook).toBe(
+      'Near-term catalysts support upside over the next quarter.',
+    );
+    expect(result.longTermOutlook).toBe(
+      'Long-term growth remains attractive over the next one to two years.',
+    );
     expect(result.symbol).toBe('AAPL');
     expect(result.riskTolerance).toBe(RiskTolerance.MEDIUM);
     expect(result.generatedAt).toBeInstanceOf(Date);
@@ -60,6 +74,32 @@ describe('ResponseParserService', () => {
   it('throws when rationale is empty', () => {
     const bad = JSON.stringify({ status: 'Hold', confidence: 0.5, rationale: '' });
     expect(() => service.parse(bad, 'AAPL', RiskTolerance.MEDIUM)).toThrow(/schema validation/);
+  });
+
+  it('accepts responses that omit optional outlook fields', () => {
+    const legacyPayload = JSON.stringify({
+      status: 'Hold',
+      confidence: 0.6,
+      rationale: 'Stable fundamentals',
+    });
+
+    const result = service.parse(legacyPayload, 'MSFT', RiskTolerance.MEDIUM);
+
+    expect(result.status).toBe('Hold');
+    expect(result.aiSummary).toBeUndefined();
+    expect(result.shortTermOutlook).toBeUndefined();
+    expect(result.longTermOutlook).toBeUndefined();
+  });
+
+  it('accepts an empty aiSummary string', () => {
+    const payload = JSON.stringify({
+      ...validPayload,
+      aiSummary: '',
+    });
+
+    const result = service.parse(payload, 'AAPL', RiskTolerance.MEDIUM);
+
+    expect(result.aiSummary).toBe('');
   });
 
   it('trims surrounding whitespace before parsing', () => {

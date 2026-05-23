@@ -62,6 +62,9 @@ describe('StockService', () => {
         status: StockRecommendation.INVEST,
         confidence: '0.8',
         rationale: 'Good financials',
+        aiSummary: 'Good financials support upside.',
+        shortTermOutlook: 'Near-term momentum looks positive.',
+        longTermOutlook: 'Long-term fundamentals remain strong.',
       };
 
       mockQueryBuilder.getRawMany.mockResolvedValueOnce([mockRawData]);
@@ -81,6 +84,9 @@ describe('StockService', () => {
           status: StockRecommendation.INVEST,
           confidence: 80,
           rationale: 'Good financials',
+          aiSummary: 'Good financials support upside.',
+          shortTermOutlook: 'Near-term momentum looks positive.',
+          longTermOutlook: 'Long-term fundamentals remain strong.',
         },
       };
 
@@ -98,6 +104,9 @@ describe('StockService', () => {
         status: null,
         confidence: null,
         rationale: null,
+        aiSummary: null,
+        shortTermOutlook: null,
+        longTermOutlook: null,
       };
 
       mockQueryBuilder.getRawMany.mockResolvedValueOnce([mockRawData]);

@@ -10,6 +10,9 @@ const makeRec = (overrides: Partial<AiRecommendation> = {}): AiRecommendation =>
   status: 'Invest',
   confidence: 0.85,
   rationale: 'Strong fundamentals',
+  aiSummary: 'Strong setup.',
+  shortTermOutlook: 'Near-term outlook is constructive.',
+  longTermOutlook: 'Long-term outlook remains positive.',
   generatedAt: new Date(),
   ...overrides,
 });
@@ -50,6 +53,9 @@ describe('ProcessingService', () => {
         status: rec.status,
         confidenceScore: rec.confidence,
         rationale: rec.rationale,
+        aiSummary: rec.aiSummary,
+        shortTermOutlook: rec.shortTermOutlook,
+        longTermOutlook: rec.longTermOutlook,
       },
       ['stockSymbol', 'riskTolerance'],
     );
