@@ -10,6 +10,7 @@ import {
 } from '@market-mind/database';
 import { MarketSnapshot } from '../market/market.types';
 import { AlphaVantageService } from '../news/alpha-vantage.service';
+import { MassiveApiService } from '../news/massive.service';
 import { NewsApiService } from '../news/news-api.service';
 import { FilteredSnapshot, NewsArticle, UserContext } from './filter.types';
 
@@ -43,6 +44,7 @@ export class FilterService {
     private readonly recommendationRepo: Repository<RecommendationEntity>,
     private readonly newsApiService: NewsApiService,
     private readonly alphaVantageService: AlphaVantageService,
+    private readonly massiveApiService: MassiveApiService,
   ) {}
 
   async filter(snapshot: MarketSnapshot): Promise<FilteredSnapshot | null> {
@@ -109,24 +111,33 @@ export class FilterService {
 
   private async fetchNews(symbol: string): Promise<NewsArticle[]> {
     try {
-      const [newsApiResult, alphaVantageResult] = await Promise.allSettled([
+      const [newsApiResult, alphaVantageResult, massiveResult] = await Promise.allSettled([
         this.newsApiService.getNews(symbol),
         this.alphaVantageService.getNews(symbol),
+        this.massiveApiService.getNews(symbol),
       ]);
 
-      let articles: NewsArticle[] = [];
+      const articles: NewsArticle[] = [];
 
       if (newsApiResult.status === 'fulfilled') {
-        articles = articles.concat(newsApiResult.value);
+        articles.push(...newsApiResult.value);
       } else {
         this.logger.warn(`NewsAPI fetch failed completely for ${symbol}: ${newsApiResult.reason}`);
       }
 
       if (alphaVantageResult.status === 'fulfilled') {
-        articles = articles.concat(alphaVantageResult.value);
+        articles.push(...alphaVantageResult.value);
       } else {
         this.logger.warn(
           `Alpha Vantage fetch failed completely for ${symbol}: ${alphaVantageResult.reason}`,
+        );
+      }
+
+      if (massiveResult.status === 'fulfilled') {
+        articles.push(...massiveResult.value);
+      } else {
+        this.logger.warn(
+          `Massive API fetch failed completely for ${symbol}: ${massiveResult.reason}`,
         );
       }
 
