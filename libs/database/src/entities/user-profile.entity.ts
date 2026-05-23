@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { RiskTolerance } from '@market-mind/common';
+import { SectorInterest } from '@market-mind/common';
 
 @Entity({ name: 'user_profiles' })
 export class UserProfileEntity {
@@ -26,6 +27,14 @@ export class UserProfileEntity {
     default: RiskTolerance.MEDIUM,
   })
   riskTolerance!: RiskTolerance;
+
+  @Column({
+    type: 'enum',
+    enum: SectorInterest,
+    array: true,
+    default: '{}',
+  })
+  interests!: SectorInterest[];
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt!: Date;
