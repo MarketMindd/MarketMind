@@ -9,11 +9,13 @@ import {
 import React, { createContext, useContext, useState } from 'react';
 import type {
   AuthResponse,
+  MarketSummaryResult,
   PortfolioItemWithStock,
   SavePortfolioPayload,
   SignInPayload,
   SignUpPayload,
   Stock,
+  UpdateProfilePayload,
 } from '@market-mind/common';
 import type { iClientQueriesProvider } from '@/entities/clientQueries';
 import type { iDataProvider } from '@/entities/dataProvider';
@@ -62,6 +64,15 @@ export const useClientQueries = (): iClientQueriesProvider => {
   const useSignOut = (options?: UseMutationOptions<void, Error, void>) => {
     return useMutation<void, Error, void>({
       mutationFn: () => ctx.dataProvider.auth.signout(),
+      ...options,
+    });
+  };
+
+  const useUpdateProfile = (
+    options?: UseMutationOptions<{ success: boolean }, Error, UpdateProfilePayload>,
+  ) => {
+    return useMutation<{ success: boolean }, Error, UpdateProfilePayload>({
+      mutationFn: (payload) => ctx.dataProvider.profile.updateProfile(payload),
       ...options,
     });
   };
@@ -129,9 +140,23 @@ export const useClientQueries = (): iClientQueriesProvider => {
     });
   };
 
+  const useAiMarketSummary = (
+    options?: Omit<UseQueryOptions<MarketSummaryResult, Error>, 'queryKey' | 'queryFn'>,
+  ) => {
+    return useQuery<MarketSummaryResult, Error>({
+      queryKey: ['portfolio', 'market-summary'],
+      queryFn: () => ctx.dataProvider.portfolio.getAiMarketSummary(),
+      staleTime: 5 * 60 * 1000,
+      refetchOnWindowFocus: false,
+      retry: 1,
+      ...options,
+    });
+  };
+
   return {
     auth: { useSignIn, useSignUp, useSignOut },
+    profile: { useUpdateProfile },
     stocks: { useGetStock, useGetStocks, useGetAllStocks },
-    portfolio: { usePortfolio, useSavePortfolio },
+    portfolio: { usePortfolio, useSavePortfolio, useAiMarketSummary },
   };
 };

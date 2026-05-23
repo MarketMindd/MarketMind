@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { RiskTolerance } from '@market-mind/common';
+import { PortfolioItemWithStock, RiskTolerance, SectorInterest } from '@market-mind/common';
 import { FilteredSnapshot } from '../filter/filter.types';
 
 const RISK_GUIDANCE: Record<RiskTolerance, string> = {
@@ -41,5 +41,58 @@ The JSON must have exactly these fields:
 - "status": one of "Invest", "Hold", or "Exit"
 - "confidence": a number between 0 and 1
 - "rationale": a concise explanation of your recommendation`;
+  }
+
+  buildMarketSummaryPrompt(
+    portfolio: PortfolioItemWithStock[],
+    riskTolerance: RiskTolerance,
+    interests: SectorInterest[],
+    availableStocks: string[],
+  ): string {
+    const portfolioSection =
+      portfolio.length === 0
+        ? 'No active investments in portfolio.'
+        : portfolio
+            .map((item) => {
+              const currentPrice = item.stock?.marketData?.price || item.avgPrice;
+              const gainLoss = (currentPrice - item.avgPrice) * item.shares;
+              const sectorInfo = item.stock?.sector ? ` [Sector: ${item.stock.sector}]` : '';
+              return `- ${item.ticker}${sectorInfo}: ${item.shares} shares, Avg Cost: $${item.avgPrice.toFixed(2)}, Current Price: $${currentPrice.toFixed(2)}, Gain/Loss: $${gainLoss.toFixed(2)}`;
+            })
+            .join('\n');
+
+    const interestsSection =
+      interests.length > 0 ? interests.join(', ') : 'None specified';
+
+    const stocksSection =
+      availableStocks.length > 0
+        ? availableStocks.join('\n')
+        : 'No stocks available.';
+
+    return `You are a financial advisory AI. Your task is to provide an overarching "AI Market Summary" and personalized recommendations.
+
+USER PROFILE:
+- Risk Tolerance: ${riskTolerance}
+- Risk Strategy: ${RISK_GUIDANCE[riskTolerance]}
+- Interested Sectors: ${interestsSection}
+
+CURRENT PORTFOLIO:
+${portfolioSection}
+
+AVAILABLE STOCKS TO CONSIDER:
+${stocksSection}
+
+INSTRUCTIONS:
+1. Provide a very brief, general market overview based on your latest internal knowledge.
+2. Provide personalized recommendations tailored specifically to the user's Risk Tolerance and their current holdings.
+3. Explicitly, but briefly, explain your reasoning combining market knowledge and the user's data.
+4. IMPORTANT: Address the user directly in the second person (e.g., "Based on your moderate risk profile..."). Do NOT refer to them in the third person.
+5. Keep the summary CONCISE. Maximum 3-4 sentences.
+6. From the AVAILABLE STOCKS list, pick 1-2 ticker symbols the user should look into. Choose stocks that align with their risk tolerance and sector interests, and that are NOT already in their portfolio. Return ONLY the raw ticker symbols (e.g., "AAPL", not "AAPL (Apple Inc - Technology)").
+
+Respond with a JSON object only. No markdown, no explanation outside the JSON.
+The JSON must have exactly these fields:
+- "summary": a short, single-paragraph AI Market Summary speaking directly to the user.
+- "suggestedStocks": an array of 1-2 ticker symbols from the available stocks list.`;
   }
 }

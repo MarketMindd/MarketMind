@@ -1,11 +1,13 @@
 import { z } from 'zod';
 import { RiskTolerance } from '../enums/risk-tolerance';
+import { SectorInterest } from '../enums/sector-interest';
 
 export const userProfileSchema = z.object({
   id: z.uuid(),
   email: z.email(),
   fullName: z.string(),
   riskTolerance: z.enum(RiskTolerance),
+  interests: z.array(z.enum(SectorInterest)),
 });
 
 export const signUpPayloadSchema = z.object({
@@ -25,6 +27,12 @@ export const signInPayloadSchema = z.object({
 export type UserProfile = z.infer<typeof userProfileSchema>;
 export type SignUpPayload = z.infer<typeof signUpPayloadSchema>;
 export type SignInPayload = z.infer<typeof signInPayloadSchema>;
+
+export const updateProfileSchema = z.object({
+  riskTolerance: z.enum(RiskTolerance).optional(),
+  interests: z.array(z.enum(SectorInterest)).optional(),
+});
+export type UpdateProfilePayload = z.infer<typeof updateProfileSchema>;
 
 export const authResponseSchema = z.object({
   accessToken: z.string(),
