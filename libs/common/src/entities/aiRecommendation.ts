@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { StockRecommendation } from '../enums/command.js';
+import { StockRecommendation } from '../enums/command';
 import { RiskTolerance } from '../enums/risk-tolerance';
 
 export const recommendationStatusSchema = z.enum(StockRecommendation);
@@ -8,6 +8,9 @@ export const aiResponseSchema = z.object({
   status: recommendationStatusSchema,
   confidence: z.number().min(0).max(1),
   rationale: z.string().min(1),
+  aiSummary: z.string().optional(),
+  shortTermOutlook: z.string().optional(),
+  longTermOutlook: z.string().optional(),
 });
 
 export const aiRecommendationSchema = aiResponseSchema.extend({

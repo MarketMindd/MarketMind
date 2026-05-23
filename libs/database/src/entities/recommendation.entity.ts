@@ -32,6 +32,15 @@ export class RecommendationEntity {
   @Column({ type: 'text' })
   rationale!: string;
 
+  @Column({ type: 'text', nullable: true })
+  aiSummary!: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  shortTermOutlook!: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  longTermOutlook!: string | null;
+
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt!: Date;
 

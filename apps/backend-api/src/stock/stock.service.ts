@@ -34,6 +34,9 @@ export class StockService {
         'recommendation.status as "status"',
         'recommendation.confidenceScore AS "confidence"',
         'recommendation.rationale as "rationale"',
+        'recommendation.aiSummary AS "aiSummary"',
+        'recommendation.shortTermOutlook AS "shortTermOutlook"',
+        'recommendation.longTermOutlook AS "longTermOutlook"',
       ])
       .where('stocks.symbol IN (:...symbols)', { symbols })
       .distinctOn(['stocks.symbol'])
@@ -64,6 +67,9 @@ export class StockService {
         'recommendation.status as "status"',
         'recommendation.confidenceScore AS "confidence"',
         'recommendation.rationale as "rationale"',
+        'recommendation.aiSummary AS "aiSummary"',
+        'recommendation.shortTermOutlook AS "shortTermOutlook"',
+        'recommendation.longTermOutlook AS "longTermOutlook"',
       ])
       .distinctOn(['stocks.symbol'])
       .orderBy('stocks.symbol')
@@ -89,6 +95,9 @@ export class StockService {
             status: rawStock.status,
             confidence: Number(rawStock.confidence ?? 0) * 100,
             rationale: rawStock.rationale ?? '',
+            aiSummary: rawStock.aiSummary ?? undefined,
+            shortTermOutlook: rawStock.shortTermOutlook ?? undefined,
+            longTermOutlook: rawStock.longTermOutlook ?? undefined,
           }
         : DEFAULT_STOCK_RECOMMENDATION,
     };

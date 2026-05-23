@@ -25,6 +25,9 @@ export class ProcessingService {
             status: rec.status,
             confidenceScore: rec.confidence,
             rationale: rec.rationale,
+            aiSummary: rec.aiSummary,
+            shortTermOutlook: rec.shortTermOutlook,
+            longTermOutlook: rec.longTermOutlook,
           },
           ['stockSymbol', 'riskTolerance'],
         );
