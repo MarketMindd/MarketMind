@@ -12,6 +12,7 @@ import { MarketSnapshot } from '../market/market.types';
 import { AlphaVantageService } from '../news/alpha-vantage.service';
 import { MassiveApiService } from '../news/massive.service';
 import { NewsApiService } from '../news/news-api.service';
+import { NewsProviderService } from '../news/news.interface';
 import { FilteredSnapshot, NewsArticle, UserContext } from './filter.types';
 
 // Gate 1 — noise floor: ignore moves smaller than this vs the last AI-triggered priceChange.
@@ -111,35 +112,25 @@ export class FilterService {
 
   private async fetchNews(symbol: string): Promise<NewsArticle[]> {
     try {
-      const [newsApiResult, alphaVantageResult, massiveResult] = await Promise.allSettled([
-        this.newsApiService.getNews(symbol),
-        this.alphaVantageService.getNews(symbol),
-        this.massiveApiService.getNews(symbol),
-      ]);
+      const sources: NewsProviderService[] = [
+        this.newsApiService,
+        this.alphaVantageService,
+        this.massiveApiService,
+      ];
+
+      const results = await Promise.allSettled(sources.map(({ getNews }) => getNews(symbol)));
 
       const articles: NewsArticle[] = [];
 
-      if (newsApiResult.status === 'fulfilled') {
-        articles.push(...newsApiResult.value);
-      } else {
-        this.logger.warn(`NewsAPI fetch failed completely for ${symbol}: ${newsApiResult.reason}`);
-      }
-
-      if (alphaVantageResult.status === 'fulfilled') {
-        articles.push(...alphaVantageResult.value);
-      } else {
-        this.logger.warn(
-          `Alpha Vantage fetch failed completely for ${symbol}: ${alphaVantageResult.reason}`,
-        );
-      }
-
-      if (massiveResult.status === 'fulfilled') {
-        articles.push(...massiveResult.value);
-      } else {
-        this.logger.warn(
-          `Massive API fetch failed completely for ${symbol}: ${massiveResult.reason}`,
-        );
-      }
+      results.forEach((result, index) => {
+        if (result.status === 'fulfilled') {
+          articles.push(...result.value);
+        } else {
+          this.logger.warn(
+            `${sources[index].name} fetch failed completely for ${symbol}: ${result.reason}`,
+          );
+        }
+      });
 
       return articles.sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
     } catch (error) {

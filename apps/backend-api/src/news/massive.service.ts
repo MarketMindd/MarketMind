@@ -6,6 +6,7 @@ import { NewsProviderService } from './news.interface';
 
 @Injectable()
 export class MassiveApiService implements NewsProviderService {
+  readonly name = 'Massive API';
   private readonly logger = new Logger(MassiveApiService.name);
 
   constructor(private readonly networkService: NetworkService) {}
@@ -24,7 +25,7 @@ export class MassiveApiService implements NewsProviderService {
       );
     } catch (error) {
       this.logger.warn(
-        `Massive API fetch failed completely for ${symbol}: ${error instanceof Error ? error.message : String(error)}`,
+        `${this.name} fetch failed completely for ${symbol}: ${error instanceof Error ? error.message : String(error)}`,
       );
       return [];
     }
@@ -47,7 +48,7 @@ export class MassiveApiService implements NewsProviderService {
         title: a.title,
         description: description || null,
         publishedAt: new Date(a.published_utc),
-        source: a.publisher?.name ?? 'Massive API',
+        source: a.publisher?.name ?? this.name,
       };
     });
   }

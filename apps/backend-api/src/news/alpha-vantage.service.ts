@@ -6,6 +6,7 @@ import { NewsProviderService } from './news.interface';
 
 @Injectable()
 export class AlphaVantageService implements NewsProviderService {
+  readonly name = 'Alpha Vantage';
   private readonly logger = new Logger(AlphaVantageService.name);
 
   constructor(private readonly networkService: NetworkService) {}
@@ -26,7 +27,7 @@ export class AlphaVantageService implements NewsProviderService {
       );
     } catch (error) {
       this.logger.warn(
-        `Alpha Vantage fetch failed completely for ${symbol}: ${error instanceof Error ? error.message : String(error)}`,
+        `${this.name} fetch failed completely for ${symbol}: ${error instanceof Error ? error.message : String(error)}`,
       );
       return [];
     }
@@ -37,7 +38,7 @@ export class AlphaVantageService implements NewsProviderService {
       title: a.title,
       description: a.summary ?? null,
       publishedAt: this.parseAlphaVantageDate(a.time_published),
-      source: a.source_domain ?? 'AlphaVantage',
+      source: a.source_domain ?? this.name,
     }));
   }
 
