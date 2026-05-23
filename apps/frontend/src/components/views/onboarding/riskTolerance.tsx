@@ -33,7 +33,7 @@ export const RiskTolerance: React.FC = () => {
 
   const handleContinue = () => {
     if (!selectedRisk) return;
-    navigate(APP_ROUTES.INTERESTS);
+    navigate(APP_ROUTES.INTERESTS, { state: { riskTolerance: selectedRisk } });
   };
 
   return (

@@ -1,10 +1,12 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import {
   AuthResponse,
+  MarketSummaryResult,
   PortfolioItem,
   SavePortfolioPayload,
   SignInPayload,
   SignUpPayload,
+  UpdateProfilePayload,
 } from '@market-mind/common';
 import { appConfig } from '@/config/appConfig';
 import { iDataProvider } from '@/entities/dataProvider';
@@ -163,11 +165,23 @@ export const createFetchDataProvider = (): iDataProvider => {
     }
   };
 
+  const updateProfile = async (payload: UpdateProfilePayload) => {
+    try {
+      const res = await apiClient.patch<{ success: boolean }>('/profile', payload);
+      return res.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || 'Request failed');
+    }
+  };
+
   return {
     auth: {
       signin,
       signup,
       signout,
+    },
+    profile: {
+      updateProfile,
     },
     stocks: {
       getStocks,
@@ -180,6 +194,10 @@ export const createFetchDataProvider = (): iDataProvider => {
       },
       savePortfolio: async (payload: SavePortfolioPayload) => {
         const res = await apiClient.put<{ success: boolean }>('/portfolio', payload);
+        return res.data;
+      },
+      getAiMarketSummary: async () => {
+        const res = await apiClient.get<MarketSummaryResult>('/portfolio/market-summary');
         return res.data;
       },
     },
