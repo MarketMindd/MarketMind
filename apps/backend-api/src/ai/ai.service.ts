@@ -1,9 +1,17 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { AiRecommendation, PortfolioItemWithStock, RiskTolerance } from '@market-mind/common';
+import {
+  AiRecommendation,
+  MarketSummaryResult,
+  PortfolioItemWithStock,
+  RiskTolerance,
+  SectorInterest,
+} from '@market-mind/common';
 import { FilteredSnapshot } from '../filter/filter.types';
 import { GeminiClientService } from './gemini-client.service';
 import { PromptBuilderService } from './prompt-builder.service';
 import { ResponseParserService } from './response-parser.service';
+
+const STRIP_MARKDOWN_JSON_WRAPPER_REGEX = /^```(?:json)?\s*([\s\S]*?)```$/;
 
 @Injectable()
 export class AiService {
@@ -28,7 +36,7 @@ export class AiService {
     for (const riskTolerance of uniqueRiskLevels) {
       try {
         const prompt = this.promptBuilder.build(filtered, riskTolerance);
-        const rawText = await this.geminiClient.generateRecommendation(prompt);
+        const rawText = await this.geminiClient.generateContent(prompt);
         const recommendation = this.responseParser.parse(rawText, symbol, riskTolerance);
         recommendations.push(recommendation);
         this.logger.log(
@@ -47,33 +55,42 @@ export class AiService {
   async generateMarketSummary(
     portfolio: PortfolioItemWithStock[],
     riskTolerance: RiskTolerance,
-  ): Promise<string> {
-    try {
-      const prompt = this.promptBuilder.buildMarketSummaryPrompt(portfolio, riskTolerance);
-      const rawText = await this.geminiClient.generateRecommendation(prompt, {
-        type: 'object',
-        properties: {
-          summary: { type: 'string' },
+    interests: SectorInterest[],
+    availableStocks: string[],
+  ): Promise<Pick<MarketSummaryResult, 'summary' | 'suggestedStocks'>> {
+    const prompt = this.promptBuilder.buildMarketSummaryPrompt(
+      portfolio,
+      riskTolerance,
+      interests,
+      availableStocks,
+    );
+    const rawText = await this.geminiClient.generateContent(prompt, {
+      type: 'object',
+      properties: {
+        summary: { type: 'string' },
+        suggestedStocks: {
+          type: 'array',
+          items: { type: 'string' },
         },
-        required: ['summary'],
-      });
+      },
+      required: ['summary', 'suggestedStocks'],
+    });
 
-      let text = rawText.trim();
-      const fenceMatch = text.match(/^```(?:json)?\s*([\s\S]*?)```$/);
-      if (fenceMatch) {
-        text = fenceMatch[1].trim();
-      }
+    let text = rawText.trim();
+    const fenceMatch = text.match(STRIP_MARKDOWN_JSON_WRAPPER_REGEX);
 
-      const parsed = JSON.parse(text);
-      if (parsed && typeof parsed.summary === 'string') {
-        return parsed.summary;
-      }
-      return 'Market summary unavailable at this time.';
-    } catch (error) {
-      this.logger.error(
-        `Failed to generate market summary: ${error instanceof Error ? error.message : String(error)}`,
-      );
-      return 'Market summary unavailable at this time.';
+    if (fenceMatch) {
+      text = fenceMatch[1].trim();
     }
+
+    const parsed = JSON.parse(text);
+    return {
+      summary: typeof parsed.summary === 'string'
+        ? parsed.summary
+        : 'Market summary unavailable at this time.',
+      suggestedStocks: Array.isArray(parsed.suggestedStocks)
+        ? parsed.suggestedStocks.filter((s: unknown) => typeof s === 'string')
+        : [],
+    };
   }
 }

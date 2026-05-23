@@ -11,7 +11,7 @@ const GEMINI_RETRY_DELAYS_MS = [1000, 2000] as const;
 export class GeminiClientService {
   private readonly logger = new Logger(GeminiClientService.name);
 
-  async generateRecommendation(
+  async generateContent(
     prompt: string,
     customSchema?: Record<string, any>,
   ): Promise<string> {
