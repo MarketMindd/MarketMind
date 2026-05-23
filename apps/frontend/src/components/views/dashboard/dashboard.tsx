@@ -52,10 +52,7 @@ const highlightText = (text: string, riskTolerance: string, interests: string[])
 
         if (matchesAnyTerm) {
           return (
-            <span
-              key={i}
-              className="px-1.5 py-0.5 mx-0.5 rounded bg-primary/15 text-primary font-semibold"
-            >
+            <span key={i} className="text-primary font-semibold">
               {part}
             </span>
           );
