@@ -1,13 +1,11 @@
-import { dirname, resolve } from 'path';
-import { fileURLToPath } from 'url';
+import { resolve } from 'path';
 import { config } from 'dotenv';
 import { parseBoolean, parseNumber } from '../utils/parse.utils';
 
-const _dirname =
-  typeof __dirname !== 'undefined' ? __dirname : dirname(fileURLToPath(import.meta.url));
+const cwd = process.cwd();
 
-config({ path: resolve(_dirname, '../../../../.env') });
-config({ path: resolve(_dirname, '../.env') });
+config({ path: resolve(cwd, '.env') });
+config({ path: resolve(cwd, '../../.env') });
 
 export interface DatabaseEnvironment {
   host: string;
