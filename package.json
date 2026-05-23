@@ -7,6 +7,7 @@
     "build:frontend": "nx build frontend",
     "start:api": "nx serve backend-api --no-tui",
     "build:api": "nx build backend-api",
+    "simulate:recommendation": "node -r tsconfig-paths/register -r @swc-node/register ./apps/backend-api/src/recommendation-simulator/main.ts",
     "db:migrate": "npm run db:migrate -w @market-mind/database",
     "db:migration:revert": "npm run db:migration:revert -w @market-mind/database",
     "db:migration:show": "npm run db:migration:show -w @market-mind/database",
@@ -30,6 +31,7 @@
     "@swc/core": "~1.15.5",
     "@swc/helpers": "~0.5.18",
     "@types/jest": "^30.0.0",
+    "@types/nodemailer": "^7.0.1",
     "@types/node": "20.19.9",
     "eslint": "^9.8.0",
     "eslint-config-prettier": "^10.0.0",
@@ -48,6 +50,7 @@
     "apps/*"
   ],
   "dependencies": {
+    "nodemailer": "^7.0.3",
     "react-ts-tradingview-widgets": "^1.2.8"
   }
 }

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { StockRecommendation } from '../enums/command.js';
+import { StockRecommendation } from '../enums/command';
 import { RiskTolerance } from '../enums/risk-tolerance';
 
 export const recommendationStatusSchema = z.enum(StockRecommendation);
