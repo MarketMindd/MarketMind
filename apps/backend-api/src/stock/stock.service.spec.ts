@@ -1,7 +1,7 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import type { Stock } from '@market-mind/common';
+import { StockRecommendation, type Stock } from '@market-mind/common';
 import { StockEntity } from '@market-mind/database';
 import { DEFAULT_STOCK_RECOMMENDATION } from './consts';
 import { StockService } from './stock.service';
@@ -15,9 +15,10 @@ describe('StockService', () => {
     innerJoin: jest.fn().mockReturnThis(),
     select: jest.fn().mockReturnThis(),
     where: jest.fn().mockReturnThis(),
+    distinctOn: jest.fn().mockReturnThis(),
     orderBy: jest.fn().mockReturnThis(),
     addOrderBy: jest.fn().mockReturnThis(),
-    getRawOne: jest.fn(),
+    getRawMany: jest.fn(),
   };
 
   const mockRepository = {
@@ -43,13 +44,11 @@ describe('StockService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('getStockBySymbol', () => {
-    it('should throw NotFoundException if stock is not found', async () => {
-      mockQueryBuilder.getRawOne.mockResolvedValueOnce(null);
-
-      await expect(service.getStockBySymbol('AAPL')).rejects.toThrow(
-        new NotFoundException('Stock with symbol AAPL not found'),
-      );
+  describe('getStocksBySymbols', () => {
+    it('should return empty array if no symbols provided', async () => {
+      const result = await service.getStocksBySymbols([]);
+      expect(result).toEqual([]);
+      expect(mockRepository.createQueryBuilder).not.toHaveBeenCalled();
     });
 
     it('should return mapped stock with AI recommendation', async () => {
@@ -60,14 +59,17 @@ describe('StockService', () => {
         price: '150.00',
         volume: '10000',
         priceChange: '2.50',
-        status: 'Invest',
+        status: StockRecommendation.INVEST,
         confidence: '0.8',
         rationale: 'Good financials',
+        aiSummary: 'Good financials support upside.',
+        shortTermOutlook: 'Near-term momentum looks positive.',
+        longTermOutlook: 'Long-term fundamentals remain strong.',
       };
 
-      mockQueryBuilder.getRawOne.mockResolvedValueOnce(mockRawData);
+      mockQueryBuilder.getRawMany.mockResolvedValueOnce([mockRawData]);
 
-      const result = await service.getStockBySymbol('AAPL');
+      const result = await service.getStocksBySymbols(['AAPL']);
 
       const MOCK_STOCK: Stock = {
         symbol: 'AAPL',
@@ -79,13 +81,16 @@ describe('StockService', () => {
           priceChange: 2.5,
         },
         aiRecommendation: {
-          status: 'Invest',
-          confidence: 8, // 0.8 * 10
+          status: StockRecommendation.INVEST,
+          confidence: 80,
           rationale: 'Good financials',
+          aiSummary: 'Good financials support upside.',
+          shortTermOutlook: 'Near-term momentum looks positive.',
+          longTermOutlook: 'Long-term fundamentals remain strong.',
         },
       };
 
-      expect(result).toEqual(MOCK_STOCK);
+      expect(result).toEqual([MOCK_STOCK]);
     });
 
     it('should return mapped stock with default recommendation if status is empty', async () => {
@@ -99,11 +104,14 @@ describe('StockService', () => {
         status: null,
         confidence: null,
         rationale: null,
+        aiSummary: null,
+        shortTermOutlook: null,
+        longTermOutlook: null,
       };
 
-      mockQueryBuilder.getRawOne.mockResolvedValueOnce(mockRawData);
+      mockQueryBuilder.getRawMany.mockResolvedValueOnce([mockRawData]);
 
-      const result = await service.getStockBySymbol('TSLA');
+      const result = await service.getStocksBySymbols(['TSLA']);
 
       const MOCK_STOCK: Stock = {
         symbol: 'TSLA',
@@ -117,7 +125,7 @@ describe('StockService', () => {
         aiRecommendation: DEFAULT_STOCK_RECOMMENDATION,
       };
 
-      expect(result).toEqual(MOCK_STOCK);
+      expect(result).toEqual([MOCK_STOCK]);
     });
   });
 });

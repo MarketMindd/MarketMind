@@ -73,7 +73,7 @@ describe('AlphaVantageService', () => {
           title: 'Test Title 2',
           description: null,
           publishedAt: expect.any(Date),
-          source: 'AlphaVantage',
+          source: 'Alpha Vantage',
         },
       ]);
     });

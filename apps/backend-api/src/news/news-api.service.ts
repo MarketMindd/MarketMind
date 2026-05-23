@@ -12,6 +12,7 @@ interface NewsApiResponse {
 
 @Injectable()
 export class NewsApiService implements NewsProviderService {
+  readonly name = 'NewsAPI';
   private readonly logger = new Logger(NewsApiService.name);
 
   constructor(private readonly networkService: NetworkService) {}
@@ -32,7 +33,7 @@ export class NewsApiService implements NewsProviderService {
       );
     } catch (error) {
       this.logger.warn(
-        `NewsAPI fetch failed completely for ${symbol}: ${error instanceof Error ? error.message : String(error)}`,
+        `${this.name} fetch failed completely for ${symbol}: ${error instanceof Error ? error.message : String(error)}`,
       );
       return [];
     }
@@ -43,7 +44,7 @@ export class NewsApiService implements NewsProviderService {
       title: (a.title as string) ?? '',
       description: (a.description as string) ?? null,
       publishedAt: new Date(a.publishedAt as string),
-      source: (a.source as Record<string, string>)?.name ?? 'NewsApi',
+      source: (a.source as Record<string, string>)?.name ?? this.name,
     }));
   }
 }

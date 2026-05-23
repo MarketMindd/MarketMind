@@ -24,6 +24,13 @@
           }
         }
       },
+      "test": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "jest --config jest.config.ts",
+          "cwd": "apps/backend-api"
+        }
+      },
       "prune-lockfile": {
         "dependsOn": [
           "build"

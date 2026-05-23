@@ -29,3 +29,18 @@ export interface AlphaVantageFeedItem {
 export interface AlphaVantageResponse {
   feed?: AlphaVantageFeedItem[];
 }
+
+export interface MassiveFeedItem {
+  article_url: string;
+  description: string | null;
+  published_utc: string;
+  publisher: {
+    name: string;
+  };
+  title: string;
+  insights?: { sentiment: string; sentiment_reasoning: string; ticker: string }[];
+}
+
+export interface MassiveResponse {
+  results?: MassiveFeedItem[];
+}

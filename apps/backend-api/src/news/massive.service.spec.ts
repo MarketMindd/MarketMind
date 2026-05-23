@@ -1,21 +1,21 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NetworkService } from '../network/network.service';
-import { NewsApiService } from './news-api.service';
+import { MassiveApiService } from './massive.service';
 
 jest.mock('../config/appConfig', () => ({
   appConfig: {
-    newsApiKey: 'test-news-key',
+    massiveApiKey: 'test-massive-key',
   },
 }));
 
-describe('NewsApiService', () => {
-  let service: NewsApiService;
+describe('MassiveApiService', () => {
+  let service: MassiveApiService;
   let networkService: NetworkService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        NewsApiService,
+        MassiveApiService,
         {
           provide: NetworkService,
           useValue: {
@@ -25,7 +25,7 @@ describe('NewsApiService', () => {
       ],
     }).compile();
 
-    service = module.get<NewsApiService>(NewsApiService);
+    service = module.get<MassiveApiService>(MassiveApiService);
     networkService = module.get<NetworkService>(NetworkService);
   });
 
@@ -34,22 +34,27 @@ describe('NewsApiService', () => {
   });
 
   describe('getNews', () => {
-    it('should fetch and map news correctly', async () => {
-      const publishedAtStr = '2023-10-10T12:15:00Z';
+    it('should fetch and map news correctly with insights formatting', async () => {
+      const publishedUtcStr = '2024-06-24T18:33:53Z';
       (networkService.get as jest.Mock).mockImplementation(async (url, mapper) => {
         const mockResponse = {
-          articles: [
+          results: [
             {
               title: 'Test Title 1',
               description: 'Test Description 1',
-              publishedAt: publishedAtStr,
-              source: { name: 'Test Source 1' },
+              published_utc: publishedUtcStr,
+              publisher: { name: 'Test Source 1' },
+              insights: [
+                { sentiment: 'positive', sentiment_reasoning: 'Good news for AAPL', ticker: 'AAPL' },
+                { sentiment: 'negative', sentiment_reasoning: 'Bad news for MSFT', ticker: 'MSFT' },
+              ],
             },
             {
-              title: undefined,
-              description: undefined,
-              publishedAt: publishedAtStr,
-              source: undefined,
+              title: 'Test Title 2',
+              description: null,
+              published_utc: publishedUtcStr,
+              publisher: undefined,
+              insights: [],
             },
           ],
         };
@@ -59,22 +64,22 @@ describe('NewsApiService', () => {
       const result = await service.getNews('AAPL');
 
       expect(networkService.get).toHaveBeenCalledWith(
-        `https://newsapi.org/v2/everything?q=AAPL&pageSize=5&sortBy=publishedAt&language=en&apiKey=test-news-key`,
+        'https://api.massive.com/v2/reference/news?ticker=AAPL&limit=5&apiKey=test-massive-key',
         expect.any(Function),
       );
 
       expect(result).toEqual([
         {
           title: 'Test Title 1',
-          description: 'Test Description 1',
-          publishedAt: new Date(publishedAtStr),
+          description: 'Test Description 1\n\n--- Extracted Insights for AAPL ---\nSentiment: POSITIVE\nReasoning: Good news for AAPL',
+          publishedAt: new Date(publishedUtcStr),
           source: 'Test Source 1',
         },
         {
-          title: '',
+          title: 'Test Title 2',
           description: null,
-          publishedAt: new Date(publishedAtStr),
-          source: 'NewsAPI',
+          publishedAt: new Date(publishedUtcStr),
+          source: 'Massive API',
         },
       ]);
     });
@@ -85,7 +90,7 @@ describe('NewsApiService', () => {
       expect(result).toEqual([]);
     });
 
-    it('should handle missing articles gracefully', async () => {
+    it('should handle missing results by returning empty array', async () => {
       (networkService.get as jest.Mock).mockImplementation(async (url, mapper) => mapper({}));
       const result = await service.getNews('AAPL');
       expect(result).toEqual([]);

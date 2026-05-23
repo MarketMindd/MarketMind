@@ -4,5 +4,5 @@ type UnMappedRawStock = Omit<Stock, 'marketData' | 'aiRecommendation'> & MarketD
 
 export type RawStock = Nullable<
   StringMapper<UnMappedRawStock, 'status'>,
-  'status' | 'confidence' | 'rationale'
+  'status' | 'confidence' | 'rationale' | 'aiSummary' | 'shortTermOutlook' | 'longTermOutlook'
 >;

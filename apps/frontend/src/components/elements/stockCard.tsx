@@ -84,9 +84,11 @@ export const StockCard = ({ stock, onClick, className, portfolioData }: StockCar
         )}
       </div>
 
-      <p className="text-sm text-muted-foreground leading-relaxed">
-        {stock.aiRecommendation.rationale}
-      </p>
+      {stock.aiRecommendation.aiSummary && (
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          {stock.aiRecommendation.aiSummary}
+        </p>
+      )}
 
       {portfolioData && (
         <div className="mt-4 pt-4 border-t border-border/50">

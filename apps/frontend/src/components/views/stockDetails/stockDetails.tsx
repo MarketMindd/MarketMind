@@ -1,4 +1,12 @@
-import { ArrowDownRight, ArrowLeft, ArrowUpRight, Brain, LineChart } from 'lucide-react';
+import {
+  ArrowDownRight,
+  ArrowLeft,
+  ArrowUpRight,
+  Brain,
+  Clock,
+  LineChart,
+  Target,
+} from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import { AdvancedRealTimeChart } from 'react-ts-tradingview-widgets';
 import { calculatePriceChange, StockRecommendation } from '@market-mind/common';
@@ -149,6 +157,37 @@ export const StockDetails = () => {
             {stock.aiRecommendation.rationale}
           </p>
         </div>
+
+        {(stock.aiRecommendation.shortTermOutlook || stock.aiRecommendation.longTermOutlook) && (
+          <div className="grid md:grid-cols-2 gap-6 mb-6 animate-fade-in stagger-4">
+            {stock.aiRecommendation.shortTermOutlook && (
+              <div className="glass-card p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-lg bg-warning/20 flex items-center justify-center">
+                    <Clock className="w-5 h-5 text-warning" />
+                  </div>
+                  <h3 className="font-semibold text-foreground">Short-Term Outlook</h3>
+                </div>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  {stock.aiRecommendation.shortTermOutlook}
+                </p>
+              </div>
+            )}
+            {stock.aiRecommendation.longTermOutlook && (
+              <div className="glass-card p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-lg bg-success/20 flex items-center justify-center">
+                    <Target className="w-5 h-5 text-success" />
+                  </div>
+                  <h3 className="font-semibold text-foreground">Long-Term Outlook</h3>
+                </div>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  {stock.aiRecommendation.longTermOutlook}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
