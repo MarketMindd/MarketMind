@@ -1,7 +1,7 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import type { Stock } from '@market-mind/common';
+import { StockRecommendation, type Stock } from '@market-mind/common';
 import { StockEntity } from '@market-mind/database';
 import { DEFAULT_STOCK_RECOMMENDATION } from './consts';
 import { StockService } from './stock.service';
@@ -59,7 +59,7 @@ describe('StockService', () => {
         price: '150.00',
         volume: '10000',
         priceChange: '2.50',
-        status: 'Invest',
+        status: StockRecommendation.INVEST,
         confidence: '0.8',
         rationale: 'Good financials',
       };
@@ -78,7 +78,7 @@ describe('StockService', () => {
           priceChange: 2.5,
         },
         aiRecommendation: {
-          status: 'Invest',
+          status: StockRecommendation.INVEST,
           confidence: 80,
           rationale: 'Good financials',
         },
