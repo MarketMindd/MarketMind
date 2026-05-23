@@ -1,26 +1,50 @@
-import { ArrowLeft, Check, Sparkles, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Check, Loader2, Sparkles, TrendingUp } from 'lucide-react';
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { RiskTolerance, SectorInterest } from '@market-mind/common';
 import { Button } from '@/components/elements/button';
 import { APP_ROUTES } from '@/consts/routes';
+import { useClientQueries } from '@/hooks/useClientQueries';
+import { useToast } from '@/hooks/useToast';
 import { cn } from '@/utils/tailwindUtils';
 
-const sectors = [
-  { id: 'tech', name: 'Technology', icon: '💻' },
-  { id: 'healthcare', name: 'Healthcare', icon: '🏥' },
-  { id: 'finance', name: 'Finance', icon: '🏦' },
-  { id: 'energy', name: 'Energy', icon: '⚡' },
-  { id: 'consumer', name: 'Consumer', icon: '🛒' },
-  { id: 'industrial', name: 'Industrial', icon: '🏭' },
-  { id: 'realestate', name: 'Real Estate', icon: '🏠' },
-  { id: 'materials', name: 'Materials', icon: '🔧' },
+const sectors: { id: SectorInterest; name: string; icon: string }[] = [
+  { id: SectorInterest.TECHNOLOGY, name: 'Technology', icon: '💻' },
+  { id: SectorInterest.HEALTHCARE, name: 'Healthcare', icon: '🏥' },
+  { id: SectorInterest.FINANCE, name: 'Finance', icon: '🏦' },
+  { id: SectorInterest.ENERGY, name: 'Energy', icon: '⚡' },
+  { id: SectorInterest.CONSUMER, name: 'Consumer', icon: '🛒' },
+  { id: SectorInterest.INDUSTRIAL, name: 'Industrial', icon: '🏭' },
+  { id: SectorInterest.REAL_ESTATE, name: 'Real Estate', icon: '🏠' },
+  { id: SectorInterest.MATERIALS, name: 'Materials', icon: '🔧' },
 ];
 
 export const Interests: React.FC = () => {
-  const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
+  const [selectedSectors, setSelectedSectors] = useState<SectorInterest[]>([]);
   const navigate = useNavigate();
+  const location = useLocation();
+  const { toast } = useToast();
 
-  const toggleSector = (sectorId: string) => {
+  const riskTolerance =
+    (location.state as { riskTolerance?: RiskTolerance } | null)?.riskTolerance ?? null;
+
+  const {
+    profile: { useUpdateProfile },
+  } = useClientQueries();
+
+  const updateProfile = useUpdateProfile({
+    onSuccess: () => {
+      navigate(APP_ROUTES.DASHBOARD);
+    },
+    onError: (err: Error) =>
+      toast({
+        title: 'Failed to save preferences',
+        description: err.message,
+        variant: 'destructive',
+      }),
+  });
+
+  const toggleSector = (sectorId: SectorInterest) => {
     setSelectedSectors((prev) =>
       prev.includes(sectorId) ? prev.filter((id) => id !== sectorId) : [...prev, sectorId],
     );
@@ -30,7 +54,10 @@ export const Interests: React.FC = () => {
 
   const handleContinue = () => {
     if (!canProceed) return;
-    navigate(APP_ROUTES.DASHBOARD);
+    updateProfile.mutate({
+      ...(riskTolerance ? { riskTolerance } : {}),
+      interests: selectedSectors,
+    });
   };
 
   const handleBack = () => {
@@ -109,9 +136,17 @@ export const Interests: React.FC = () => {
               <ArrowLeft size={18} />
               Back
             </Button>
-            <Button variant="glow" disabled={!canProceed} onClick={handleContinue}>
-              <Sparkles size={18} />
-              Start Investing
+            <Button
+              variant="glow"
+              disabled={!canProceed || updateProfile.isPending}
+              onClick={handleContinue}
+            >
+              {updateProfile.isPending ? (
+                <Loader2 size={18} className="animate-spin" />
+              ) : (
+                <Sparkles size={18} />
+              )}
+              {updateProfile.isPending ? 'Saving...' : 'Start Investing'}
             </Button>
           </div>
         </div>

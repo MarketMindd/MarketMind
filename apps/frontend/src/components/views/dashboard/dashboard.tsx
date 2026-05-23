@@ -2,8 +2,11 @@ import {
   Activity,
   Briefcase,
   ChevronRight,
+  Eye,
   Filter,
+  Shield,
   Sparkles,
+  Tag,
   TrendingDown,
   TrendingUp,
 } from 'lucide-react';
@@ -15,14 +18,60 @@ import { StockCard } from '@/components/elements/stockCard';
 import { useClientQueries } from '@/hooks/useClientQueries';
 import { cn } from '@/utils/tailwindUtils';
 
+const highlightText = (text: string, riskTolerance: string, interests: string[]) => {
+  if (!text) return text;
+
+  const escapeRegExp = (string: string) => {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  };
+
+  const terms = [riskTolerance, ...interests].filter(Boolean);
+  if (terms.length === 0) return text;
+
+  const searchTerms: string[] = [];
+  for (const term of terms) {
+    searchTerms.push(escapeRegExp(term));
+    const splitTerm = term.replace(/([A-Z])/g, ' $1').trim();
+    if (splitTerm !== term) {
+      searchTerms.push(escapeRegExp(splitTerm));
+    }
+  }
+
+  const pattern = new RegExp(`\\b(${searchTerms.join('|')})\\b`, 'gi');
+  const parts = text.split(pattern);
+
+  if (parts.length === 1) return text;
+
+  return (
+    <>
+      {parts.map((part, i) => {
+        const lowercasePart = part.toLowerCase();
+        const matchesAnyTerm = searchTerms.some(
+          (st) => lowercasePart === st.toLowerCase().replace(/\\/g, ''),
+        );
+
+        if (matchesAnyTerm) {
+          return (
+            <span key={i} className="text-primary font-semibold">
+              {part}
+            </span>
+          );
+        }
+        return part;
+      })}
+    </>
+  );
+};
+
 export const Dashboard = () => {
   const navigate = useNavigate();
   const {
-    portfolio: { usePortfolio },
+    portfolio: { usePortfolio, useAiMarketSummary },
     stocks: { useGetAllStocks },
   } = useClientQueries();
   const [filter, setFilter] = useState<'All' | RecommendationStatus>('All');
   const { data: portfolio = [] } = usePortfolio();
+  const { data: marketSummary, isLoading: isSummaryLoading } = useAiMarketSummary();
   const portfolioTickers = portfolio.map((p) => p.ticker);
   const { data: stocks = [] } = useGetAllStocks();
   const portfolioStocks = stocks.filter((stock) => portfolioTickers.includes(stock.symbol));
@@ -76,23 +125,55 @@ export const Dashboard = () => {
           </p>
         </div>
 
-        {/*<div className="glass-card p-6 mb-8 animate-fade-in stagger-1">*/}
-        {/*  <div className="flex items-start gap-4">*/}
-        {/*    <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">*/}
-        {/*      <Sparkles className="w-5 h-5 text-primary" />*/}
-        {/*    </div>*/}
-        {/*    <div>*/}
-        {/*      <h2 className="font-semibold text-foreground mb-2">AI Market Summary</h2>*/}
-        {/*      <p className="text-muted-foreground text-sm leading-relaxed">*/}
-        {/*        Based on your <span className="text-primary">moderate risk profile</span> and*/}
-        {/*        interest in technology, I recommend focusing on established tech leaders with strong*/}
-        {/*        cash flows. Microsoft and Apple remain top picks, while caution is advised on*/}
-        {/*        high-volatility names like Tesla. The market shows cautious optimism with the S&P*/}
-        {/*        500 up 12% YTD.*/}
-        {/*      </p>*/}
-        {/*    </div>*/}
-        {/*  </div>*/}
-        {/*</div>*/}
+        <div className="glass-card p-6 mb-8 animate-fade-in stagger-1">
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
+              <Sparkles className="w-5 h-5 text-primary" />
+            </div>
+            <div className="flex-1 w-full">
+              <h2 className="font-semibold text-foreground mb-2">AI Market Summary</h2>
+              {isSummaryLoading ? (
+                <div className="animate-pulse space-y-2 mt-2">
+                  <div className="h-4 bg-muted rounded w-3/4"></div>
+                  <div className="h-4 bg-muted rounded w-full"></div>
+                  <div className="h-4 bg-muted rounded w-5/6"></div>
+                </div>
+              ) : (
+                <>
+                  <p className="text-muted-foreground text-sm leading-relaxed whitespace-pre-wrap mb-3">
+                    {marketSummary
+                      ? highlightText(
+                          marketSummary.summary,
+                          marketSummary.riskTolerance,
+                          marketSummary.interests,
+                        )
+                      : 'No summary available.'}
+                  </p>
+                  {marketSummary?.suggestedStocks && marketSummary.suggestedStocks.length > 0 && (
+                    <div className="mt-4 pt-3 border-t border-border/50 flex flex-wrap items-center gap-x-4 gap-y-2">
+                      <div className="flex items-center gap-2">
+                        <Eye className="w-4 h-4 text-primary" />
+                        <span className="text-sm font-medium text-foreground">Stocks to Watch</span>
+                      </div>
+                      <div className="flex gap-2 flex-wrap">
+                        {marketSummary.suggestedStocks.map((ticker) => (
+                          <button
+                            key={ticker}
+                            onClick={() => navigate(`/stock/${ticker}`)}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors duration-200"
+                          >
+                            {ticker}
+                            <ChevronRight size={14} />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
           <div className="lg:col-span-3 grid grid-cols-3 gap-4">
@@ -181,7 +262,12 @@ export const Dashboard = () => {
           <div className="flex items-center gap-2 mb-6">
             <Filter size={18} className="text-muted-foreground" />
             <div className="flex gap-2">
-              {['All', StockRecommendation.INVEST, StockRecommendation.HOLD, StockRecommendation.EXIT].map((f) => (
+              {[
+                'All',
+                StockRecommendation.INVEST,
+                StockRecommendation.HOLD,
+                StockRecommendation.EXIT,
+              ].map((f) => (
                 <Button
                   key={f}
                   variant={filter === f ? 'default' : 'ghost'}

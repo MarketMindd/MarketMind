@@ -7,3 +7,4 @@ export * from './1777100000000-add-symbol-filter-state';
 export * from './1777200000000-add-recommendations';
 export * from './1777400000000-add-initial-stocks';
 export * from './1777500000000-add-outlook-fields';
+export * from './1777500000000-add-user-interests';

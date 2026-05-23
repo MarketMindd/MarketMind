@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import { AdvancedRealTimeChart } from 'react-ts-tradingview-widgets';
-import { calculatePriceChange } from '@market-mind/common';
+import { calculatePriceChange, StockRecommendation } from '@market-mind/common';
 import { Button } from '@/components/elements/button';
 import RecommendationBadge from '@/components/elements/recommendationBadge';
 import { Size } from '@/enums/recommendationBadge';
@@ -50,6 +50,7 @@ export const StockDetails = () => {
   }
 
   const isPositive = stock.marketData.priceChange >= 0;
+  const isAnalyzed = stock.aiRecommendation.status !== StockRecommendation.NOT_ANALYZED;
 
   return (
     <div className="flex-1 flex flex-col bg-background">
@@ -64,9 +65,9 @@ export const StockDetails = () => {
         <div className="glass-card p-6 mb-6 animate-fade-in stagger-1">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
-              <div className="flex items-center gap-3 mb-2">
+              <div className="flex flex-wrap items-center gap-3 mb-2">
                 <span className="font-mono text-2xl text-primary font-bold">{stock.symbol}</span>
-                <span className="text-sm text-muted-foreground px-3 py-1 bg-secondary rounded-full">
+                <span className="text-sm text-muted-foreground px-3 py-1 bg-secondary rounded-full whitespace-nowrap">
                   {stock.sector}
                 </span>
               </div>
@@ -101,27 +102,29 @@ export const StockDetails = () => {
               </div>
             </div>
 
-            <div className="ml-auto">
-              <span className="text-sm text-muted-foreground block mb-2">AI Confidence</span>
-              <div className="flex items-center gap-3">
-                <div className="w-32 h-2 bg-secondary rounded-full overflow-hidden">
-                  <div
-                    className={cn(
-                      'h-full rounded-full transition-all duration-700',
-                      stock.aiRecommendation.confidence >= 80
-                        ? 'bg-success'
-                        : stock.aiRecommendation.confidence >= 60
-                          ? 'bg-warning'
-                          : 'bg-destructive',
-                    )}
-                    style={{ width: `${stock.aiRecommendation.confidence}%` }}
-                  />
+            {isAnalyzed && (
+              <div className="ml-auto">
+                <span className="text-sm text-muted-foreground block mb-2">AI Confidence</span>
+                <div className="flex items-center gap-3">
+                  <div className="w-32 h-2 bg-secondary rounded-full overflow-hidden">
+                    <div
+                      className={cn(
+                        'h-full rounded-full transition-all duration-700',
+                        stock.aiRecommendation.confidence >= 80
+                          ? 'bg-success'
+                          : stock.aiRecommendation.confidence >= 60
+                            ? 'bg-warning'
+                            : 'bg-destructive',
+                      )}
+                      style={{ width: `${stock.aiRecommendation.confidence}%` }}
+                    />
+                  </div>
+                  <span className="text-lg font-mono font-semibold">
+                    {stock.aiRecommendation.confidence}%
+                  </span>
                 </div>
-                <span className="text-lg font-mono font-semibold">
-                  {stock.aiRecommendation.confidence}%
-                </span>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
@@ -133,7 +136,13 @@ export const StockDetails = () => {
             <h2 className="text-lg font-semibold text-foreground">Price History (30 Days)</h2>
           </div>
           <div style={{ height: '500px', width: '100%' }}>
-            <AdvancedRealTimeChart symbol={stock.symbol} interval="D" theme="dark" autosize />
+            <AdvancedRealTimeChart
+              symbol={stock.symbol}
+              range="1M"
+              interval="D"
+              theme="dark"
+              autosize
+            />
           </div>
         </div>
 

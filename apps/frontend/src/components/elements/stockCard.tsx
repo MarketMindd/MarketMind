@@ -1,5 +1,5 @@
 import { ArrowDownRight, ArrowUpRight, Briefcase } from 'lucide-react';
-import { calculatePriceChange, PortfolioItem, Stock } from '@market-mind/common';
+import { calculatePriceChange, PortfolioItem, Stock, StockRecommendation } from '@market-mind/common';
 import RecommendationBadge from '@/components/elements/recommendationBadge';
 import { cn } from '@/utils/tailwindUtils';
 
@@ -12,6 +12,7 @@ interface StockCardProps {
 
 export const StockCard = ({ stock, onClick, className, portfolioData }: StockCardProps) => {
   const isPositive = stock.marketData.priceChange >= 0;
+  const isAnalyzed = stock.aiRecommendation.status !== StockRecommendation.NOT_ANALYZED;
 
   const dollarChange = calculatePriceChange(stock.marketData.price, stock.marketData.priceChange);
 
@@ -20,15 +21,15 @@ export const StockCard = ({ stock, onClick, className, portfolioData }: StockCar
       onClick={onClick}
       className={cn('glass-card p-5 hover-lift cursor-pointer group', className)}
     >
-      <div className="flex items-start justify-between mb-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
+      <div className="flex items-start justify-between gap-4 mb-4">
+        <div className="min-w-0">
+          <div className="flex flex-col items-start gap-1 mb-1.5">
             <span className="font-mono text-primary font-semibold">{stock.symbol}</span>
-            <span className="text-xs text-muted-foreground px-2 py-0.5 bg-secondary rounded-full">
+            <span className="text-xs text-muted-foreground px-2 py-0.5 bg-secondary rounded-full whitespace-nowrap">
               {stock.sector}
             </span>
           </div>
-          <h3 className="font-medium text-foreground group-hover:text-primary transition-colors">
+          <h3 className="font-medium text-foreground group-hover:text-primary transition-colors truncate">
             {stock.name}
           </h3>
         </div>
@@ -58,27 +59,29 @@ export const StockCard = ({ stock, onClick, className, portfolioData }: StockCar
             </span>
           </div>
         </div>
-        <div className="text-right">
-          <span className="text-xs text-muted-foreground">Confidence</span>
-          <div className="flex items-center gap-2 mt-1">
-            <div className="w-16 h-1.5 bg-secondary rounded-full overflow-hidden">
-              <div
-                className={cn(
-                  'h-full rounded-full transition-all duration-500',
-                  stock.aiRecommendation.confidence >= 80
-                    ? 'bg-success'
-                    : stock.aiRecommendation.confidence >= 60
-                      ? 'bg-warning'
-                      : 'bg-destructive',
-                )}
-                style={{ width: `${stock.aiRecommendation.confidence}%` }}
-              />
+        {isAnalyzed && (
+          <div className="text-right">
+            <span className="text-xs text-muted-foreground">Confidence</span>
+            <div className="flex items-center gap-2 mt-1">
+              <div className="w-16 h-1.5 bg-secondary rounded-full overflow-hidden">
+                <div
+                  className={cn(
+                    'h-full rounded-full transition-all duration-500',
+                    stock.aiRecommendation.confidence >= 80
+                      ? 'bg-success'
+                      : stock.aiRecommendation.confidence >= 60
+                        ? 'bg-warning'
+                        : 'bg-destructive',
+                  )}
+                  style={{ width: `${stock.aiRecommendation.confidence}%` }}
+                />
+              </div>
+              <span className="text-sm font-mono text-muted-foreground">
+                {stock.aiRecommendation.confidence}%
+              </span>
             </div>
-            <span className="text-sm font-mono text-muted-foreground">
-              {stock.aiRecommendation.confidence}%
-            </span>
           </div>
-        </div>
+        )}
       </div>
 
       {stock.aiRecommendation.aiSummary && (

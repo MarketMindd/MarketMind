@@ -5,5 +5,6 @@ export * from './entities/marketData';
 export * from './entities/portfolio';
 export * from './enums/command';
 export * from './enums/risk-tolerance';
-export * from './utils/index';
-export * from './types/index';
+export * from './enums/sector-interest';
+export * from './utils';
+export * from './types';

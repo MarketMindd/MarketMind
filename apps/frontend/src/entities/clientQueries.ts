@@ -6,11 +6,13 @@ import type {
 } from '@tanstack/react-query';
 import type {
   AuthResponse,
+  MarketSummaryResult,
   PortfolioItemWithStock,
   SavePortfolioPayload,
   SignInPayload,
   SignUpPayload,
   Stock,
+  UpdateProfilePayload,
 } from '@market-mind/common';
 
 export type iClientQueriesProvider = {
@@ -24,6 +26,11 @@ export type iClientQueriesProvider = {
     useSignOut: (
       options?: UseMutationOptions<void, Error, void>,
     ) => UseMutationResult<void, Error, void>;
+  };
+  profile: {
+    useUpdateProfile: (
+      options?: UseMutationOptions<{ success: boolean }, Error, UpdateProfilePayload>,
+    ) => UseMutationResult<{ success: boolean }, Error, UpdateProfilePayload>;
   };
   stocks: {
     useGetStock: (
@@ -45,5 +52,8 @@ export type iClientQueriesProvider = {
     useSavePortfolio: (
       options?: UseMutationOptions<{ success: boolean }, Error, SavePortfolioPayload>,
     ) => UseMutationResult<{ success: boolean }, Error, SavePortfolioPayload>;
+    useAiMarketSummary: (
+      options?: Omit<UseQueryOptions<MarketSummaryResult, Error>, 'queryKey' | 'queryFn'>,
+    ) => UseQueryResult<MarketSummaryResult, Error>;
   };
 };
