@@ -1,3 +1,5 @@
+import { parseBoolean } from "libs/database/src/utils/parse.utils";
+
 const getJwtSecret = (defaultSecret: string) => {
   const secret = process.env.JWT_SECRET;
   if (!secret) {
@@ -9,19 +11,14 @@ const getJwtSecret = (defaultSecret: string) => {
   return secret;
 };
 
-const parseBooleanEnv = (value: string | undefined, defaultValue: boolean) => {
-  if (value === undefined) return defaultValue;
-  return value.toLowerCase() === 'true';
-};
-
 export const appConfig = {
   port: parseInt(process.env.PORT || '3000', 10),
   clientUrl: process.env.CLIENT_URL || 'http://localhost:4200',
   email: {
     smtpHost: process.env.SMTP_HOST ?? '',
     smtpPort: parseInt(process.env.SMTP_PORT || '465', 10),
-    smtpSecure: parseBooleanEnv(process.env.SMTP_SECURE, true),
-    smtpAllowSelfSigned: parseBooleanEnv(process.env.SMTP_ALLOW_SELF_SIGNED, false),
+    smtpSecure: parseBoolean(process.env.SMTP_SECURE, true),
+    smtpAllowSelfSigned: parseBoolean(process.env.SMTP_ALLOW_SELF_SIGNED, false),
     smtpUser: process.env.SMTP_USER ?? '',
     smtpPass: process.env.SMTP_PASS ?? '',
     from: process.env.EMAIL_FROM ?? '',

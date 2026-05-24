@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { RecommendationStatus, RiskTolerance } from '@market-mind/common';
+import { RecommendationStatus, RiskTolerance, StockRecommendation } from '@market-mind/common';
 import { PortfolioEntity, UserProfileEntity } from '@market-mind/database';
 import * as nodemailer from 'nodemailer';
 import { Repository } from 'typeorm';
@@ -109,11 +109,11 @@ export class NotificationService {
     rationale: string,
   ): string {
     switch (status) {
-      case 'Invest':
+      case StockRecommendation.INVEST:
         return `Right now, ${stockSymbol} looks like a strong opportunity. Based on our latest analysis, this may be a good time to invest because ${rationale}`;
-      case 'Hold':
+      case StockRecommendation.HOLD:
         return `Our suggestion for now is to hold ${stockSymbol}. The current outlook suggests staying put because ${rationale}`;
-      case 'Exit':
+      case StockRecommendation.EXIT:
         return `At this stage, it may be worth stepping away from ${stockSymbol}. We're seeing signs that support an exit because ${rationale}`;
       default:
         return `Our latest suggestion for ${stockSymbol} is ${status} because ${rationale}`;
