@@ -64,13 +64,10 @@ The JSON must have exactly these fields:
             })
             .join('\n');
 
-    const interestsSection =
-      interests.length > 0 ? interests.join(', ') : 'None specified';
+    const interestsSection = interests.length > 0 ? interests.join(', ') : 'None specified';
 
     const stocksSection =
-      availableStocks.length > 0
-        ? availableStocks.join('\n')
-        : 'No stocks available.';
+      availableStocks.length > 0 ? availableStocks.join('\n') : 'No stocks available.';
 
     return `You are a financial advisory AI. Your task is to provide an overarching "AI Market Summary" and personalized recommendations.
 
@@ -97,5 +94,112 @@ Respond with a JSON object only. No markdown, no explanation outside the JSON.
 The JSON must have exactly these fields:
 - "summary": a short, single-paragraph AI Market Summary speaking directly to the user.
 - "suggestedStocks": an array of 1-2 ticker symbols from the available stocks list.`;
+  }
+
+  buildChatPrompt(
+    profile: { riskTolerance: RiskTolerance; interests: SectorInterest[] },
+    portfolio: PortfolioItemWithStock[],
+    history: { role: 'user' | 'model'; content: string }[],
+    latestMessage: string,
+    stockContext?: {
+      symbol: string;
+      name: string;
+      sector: string;
+      price: number;
+      priceChange: number;
+      recommendationStatus?: string;
+      recommendationRationale?: string;
+      news: Array<{ title: string; source: string; description?: string }>;
+    },
+    shouldGenerateTitle?: boolean,
+  ): string {
+    const portfolioText =
+      portfolio.length === 0
+        ? 'No active investments in portfolio.'
+        : portfolio
+            .map(
+              (item) =>
+                `- ${item.ticker}: ${item.shares} shares, Avg Cost: $${item.avgPrice.toFixed(2)}, Current Price: $${(item.stock?.marketData?.price || item.avgPrice).toFixed(2)}`,
+            )
+            .join('\n');
+
+    const historyText = history
+      .map((msg) => `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`)
+      .join('\n');
+
+    let stockSection = '';
+    if (stockContext) {
+      const newsSection =
+        stockContext.news.length === 0
+          ? 'No recent news available in system.'
+          : stockContext.news
+              .slice(0, 3)
+              .map((n) => `- [${n.source}] ${n.title}`)
+              .join('\n');
+
+      const recSection = stockContext.recommendationStatus
+        ? `- Latest System Recommendation: ${stockContext.recommendationStatus}\n- Recommendation Rationale: ${stockContext.recommendationRationale}`
+        : "- Latest System Recommendation: No recommendation has been generated for this stock yet for the user's risk profile. This may be because the user is not currently tracking it.";
+
+      stockSection = `
+SELECTED STOCK CONTEXT (from system database):
+- Symbol: ${stockContext.symbol}
+- Name: ${stockContext.name}
+- Sector: ${stockContext.sector}
+- Current Price: $${stockContext.price} (${stockContext.priceChange.toFixed(2)}% change)
+${recSection}
+- Recent News:
+${newsSection}
+`;
+    }
+
+    let titleInstruction = '';
+    if (shouldGenerateTitle) {
+      titleInstruction =
+        '\n6. IMPORTANT: Since this is the first user message in this chat session, you MUST also generate a suitable, very short title (2-4 words, e.g. "Apple Analysis" or "Portfolio Review") based on the user\'s message content. Return this title in the "title" field of the JSON response.';
+    }
+
+    const finalSchemaInstructions = shouldGenerateTitle
+      ? 'Respond with a JSON object containing two fields: "reply" (string, markdown supported) and "title" (string, 2-4 words).'
+      : 'Respond with a JSON object containing a single field "reply" (string, markdown supported).';
+
+    return `You are "MarketMind AI", MarketMind's friendly, supportive AI financial assistant. Your goal is to explain market concepts, break down complex data, and discuss stock recommendations in simple terms for retail investors.
+
+USER PROFILE:
+- Risk Profile: ${profile.riskTolerance}
+- Interested Sectors: ${profile.interests.join(', ') || 'None selected'}
+
+USER PORTFOLIO:
+${portfolioText}
+${stockSection}
+
+MARKETMIND WEBSITE STRUCTURE & CAPABILITIES:
+- Dashboard (/dashboard): General overview, customized AI Market Summary, suggested stocks, watchlist of available stocks, and your current profile summary.
+- Portfolio (/portfolio): Edit your stock holdings (shares owned, average purchase price), view total portfolio value, see net profit/loss, and view sector diversification pie charts.
+- Stock Details (/stock/<SYMBOL>): Detailed page for any stock (e.g. /stock/AAPL). Features a TradingView interactive chart, latest news articles, dynamic AI recommendations (status: Invest/Hold/Exit, confidence, short-term and long-term outlook).
+- Onboarding & Profile: Select your Risk Tolerance (Low/Medium/High) at /onboarding/risk-tolerance, and choose interested sectors (e.g. Technology, Healthcare, Energy, Financials, Consumer Discretionary) at /onboarding/interests.
+- Chat (/chat): This chat screen where you can discuss stocks, ask financial questions, and get assistance.
+
+CONVERSATION INSTRUCTIONS:
+1. Speak in the second person ("you", "your portfolio"). Keep responses friendly, educational, and structured with clear paragraphs or bullet points. Do NOT start your message with boilerplate self-introductions (such as "Hello! As MarketMind AI, ..." or "I am MarketMind AI..."). Just answer the user's question directly and naturally.
+2. DATA RULES (STRICT DATABASE GROUNDING):
+   - All financial analysis and answers regarding the user's portfolio, holdings, or stock metrics MUST be strictly based on the injected database data. If the database does not contain information for a specific stock or query, clearly inform the user that it is not available in the database.
+   - Use the data injected above (user profile, portfolio, stock context) as your primary source of truth.
+   - If stock context is provided above, you SHOULD discuss it using whatever fields are available (price, sector, recommendation, etc.). If a recommendation has not been generated yet, say so honestly and discuss the stock using the price and sector data you do have.
+   - If the user asks about a stock or topic for which NO context was injected above at all, clearly state that you don't have data on that specific stock in the system.
+   - Do not invent stock prices, recommendations, or news that are not in the injected context.
+3. If the user asks for financial advice (e.g., "should I buy AAPL?"), explain the facts from the data, refer to the system's recommendation status (if present), but strictly note that you are an AI assistant and this is not certified financial advice.
+4. If the user asks questions completely unrelated to finance, investing, stocks, or their portfolio, politely redirect them back to financial topics.
+5. WEBSITE ASSISTANCE:
+   - If the user asks how to perform actions on the website (e.g., "where can I edit my holdings?", "how to change my risk tolerance?", "how to see Apple chart?"), use the WEBSITE STRUCTURE above to guide them precisely to the correct page or URL path.
+6. You must format your reply using Markdown (headers, bold text, lists).${titleInstruction}
+
+CONVERSATION HISTORY:
+${historyText}
+
+USER'S CURRENT MESSAGE:
+${latestMessage}
+
+${finalSchemaInstructions}`;
   }
 }
