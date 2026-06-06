@@ -5,5 +5,7 @@ export * from './entities/portfolio.entity';
 export * from './entities/market-data.entity';
 export * from './entities/symbol-filter-state.entity';
 export * from './entities/recommendation.entity';
+export * from './entities/chat-session.entity';
+export * from './entities/chat-message.entity';
 export * from './config/database.config';
 export * from './datasource/datasource.options';
