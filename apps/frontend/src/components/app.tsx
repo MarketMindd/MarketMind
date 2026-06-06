@@ -11,6 +11,7 @@ import { Interests } from './views/onboarding/interests';
 import { RiskTolerance } from './views/onboarding/riskTolerance';
 import { Portfolio } from './views/portfolio/portfolio';
 import { StockDetails } from './views/stockDetails/stockDetails';
+import { Chat } from './views/chat/chat';
 
 const MainLayout = () => {
   return (
@@ -61,7 +62,22 @@ export const App = () => {
             </ProtectedRoute>
           }
         />
-        <Route path={APP_ROUTES.CHAT} element={<Navigate to={APP_ROUTES.DASHBOARD} replace />} />
+        <Route
+          path={APP_ROUTES.CHAT}
+          element={
+            <ProtectedRoute>
+              <Chat />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/chat/:sessionId"
+          element={
+            <ProtectedRoute>
+              <Chat />
+            </ProtectedRoute>
+          }
+        />
       </Route>
 
       <Route element={<AuthLayout />}>
