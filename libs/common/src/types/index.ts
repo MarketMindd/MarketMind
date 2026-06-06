@@ -1,2 +1,3 @@
 export * from './utils';
 export * from './market-summary';
+export * from './chat.types';
