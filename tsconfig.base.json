@@ -17,7 +17,6 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "es2022",
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
       "@market-mind/common": ["libs/common/src/index.ts"],
