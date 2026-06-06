@@ -112,6 +112,14 @@ The JSON must have exactly these fields:
       news: Array<{ title: string; source: string; description?: string }>;
     },
     shouldGenerateTitle?: boolean,
+    marketRecommendations?: Array<{
+      symbol: string;
+      name: string;
+      sector: string;
+      status: string;
+      confidence: number;
+      summary?: string;
+    }>,
   ): string {
     const portfolioText =
       portfolio.length === 0
@@ -153,6 +161,16 @@ ${newsSection}
 `;
     }
 
+    const recommendationsText =
+      !marketRecommendations || marketRecommendations.length === 0
+        ? 'No system stock recommendations have been generated yet.'
+        : marketRecommendations
+            .map(
+              (r) =>
+                `- ${r.symbol} (${r.name}, ${r.sector}): ${r.status}, confidence ${(r.confidence * 100).toFixed(0)}%${r.summary ? ` — ${r.summary}` : ''}`,
+            )
+            .join('\n');
+
     let titleInstruction = '';
     if (shouldGenerateTitle) {
       titleInstruction =
@@ -173,6 +191,9 @@ USER PORTFOLIO:
 ${portfolioText}
 ${stockSection}
 
+SYSTEM STOCK RECOMMENDATIONS (for your ${profile.riskTolerance} risk profile, ranked by confidence — use these when the user asks what to invest in):
+${recommendationsText}
+
 MARKETMIND WEBSITE STRUCTURE & CAPABILITIES:
 - Dashboard (/dashboard): General overview, customized AI Market Summary, suggested stocks, watchlist of available stocks, and your current profile summary.
 - Portfolio (/portfolio): Edit your stock holdings (shares owned, average purchase price), view total portfolio value, see net profit/loss, and view sector diversification pie charts.
@@ -184,7 +205,8 @@ CONVERSATION INSTRUCTIONS:
 1. Speak in the second person ("you", "your portfolio"). Keep responses friendly, educational, and structured with clear paragraphs or bullet points. Do NOT start your message with boilerplate self-introductions (such as "Hello! As MarketMind AI, ..." or "I am MarketMind AI..."). Just answer the user's question directly and naturally.
 2. DATA RULES (STRICT DATABASE GROUNDING):
    - All financial analysis and answers regarding the user's portfolio, holdings, or stock metrics MUST be strictly based on the injected database data. If the database does not contain information for a specific stock or query, clearly inform the user that it is not available in the database.
-   - Use the data injected above (user profile, portfolio, stock context) as your primary source of truth.
+   - Use the data injected above (user profile, portfolio, stock context, and system stock recommendations) as your primary source of truth.
+   - When the user asks for stock suggestions, "your best stocks", what to invest in, or to compare options, USE the SYSTEM STOCK RECOMMENDATIONS list above. Recommend the highest-confidence "Invest"-rated stocks (typically the top 3), citing each one's status and confidence. Do NOT claim you cannot recommend stocks while that list is non-empty.
    - If stock context is provided above, you SHOULD discuss it using whatever fields are available (price, sector, recommendation, etc.). If a recommendation has not been generated yet, say so honestly and discuss the stock using the price and sector data you do have.
    - If the user asks about a stock or topic for which NO context was injected above at all, clearly state that you don't have data on that specific stock in the system.
    - Do not invent stock prices, recommendations, or news that are not in the injected context.
