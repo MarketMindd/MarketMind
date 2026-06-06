@@ -24,7 +24,7 @@ export const Navigation = () => {
   const navItems = [
     { path: APP_ROUTES.DASHBOARD, label: 'Dashboard', icon: LayoutDashboard },
     { path: APP_ROUTES.PORTFOLIO, label: 'Portfolio', icon: Briefcase },
-    { path: APP_ROUTES.CHAT, label: 'AI Chat', icon: MessageSquare, disabled: true },
+    { path: APP_ROUTES.CHAT, label: 'AI Chat', icon: MessageSquare, disabled: false },
   ];
 
   return (
@@ -64,7 +64,8 @@ export const Navigation = () => {
                       to={path}
                       className={cn(
                         'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200',
-                        location.pathname === path
+                        location.pathname === path ||
+                          (path === APP_ROUTES.CHAT && location.pathname.startsWith('/chat/'))
                           ? 'bg-primary/20 text-primary'
                           : 'text-muted-foreground hover:text-foreground hover:bg-secondary',
                       )}

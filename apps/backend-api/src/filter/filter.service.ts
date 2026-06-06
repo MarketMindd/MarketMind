@@ -118,7 +118,7 @@ export class FilterService {
         this.massiveApiService,
       ];
 
-      const results = await Promise.allSettled(sources.map(({ getNews }) => getNews(symbol)));
+      const results = await Promise.allSettled(sources.map((source) => source.getNews(symbol)));
 
       const articles: NewsArticle[] = [];
 

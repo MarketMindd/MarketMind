@@ -7,7 +7,7 @@ import {
   LineChart,
   Target,
 } from 'lucide-react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { AdvancedRealTimeChart } from 'react-ts-tradingview-widgets';
 import { calculatePriceChange, StockRecommendation } from '@market-mind/common';
 import { Button } from '@/components/elements/button';
@@ -18,6 +18,7 @@ import { cn } from '@/utils/tailwindUtils';
 
 export const StockDetails = () => {
   const { stockSymbol } = useParams();
+  const navigate = useNavigate();
   const { stocks } = useClientQueries();
 
   const {
@@ -147,11 +148,21 @@ export const StockDetails = () => {
         </div>
 
         <div className="glass-card p-6 mb-6 animate-fade-in stagger-3">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
-              <Brain className="w-5 h-5 text-primary" />
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
+                <Brain className="w-5 h-5 text-primary" />
+              </div>
+              <h2 className="text-lg font-semibold text-foreground">AI Analysis</h2>
             </div>
-            <h2 className="text-lg font-semibold text-foreground">AI Analysis</h2>
+            <Button
+              variant="glow"
+              className="flex items-center gap-2"
+              onClick={() => navigate(`/chat?symbol=${stock.symbol}`)}
+            >
+              <Brain size={16} />
+              Ask AI Assistant
+            </Button>
           </div>
           <p className="text-muted-foreground leading-relaxed">
             {stock.aiRecommendation.rationale}
