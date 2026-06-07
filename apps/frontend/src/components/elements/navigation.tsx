@@ -21,10 +21,10 @@ export const Navigation = () => {
 
   const isAuthenticated = useIsAuthenticated();
 
-  const navItems = [
+  const navItems: Array<{ path: string; label: string; icon: React.ComponentType<any>; disabled?: boolean }> = [
     { path: APP_ROUTES.DASHBOARD, label: 'Dashboard', icon: LayoutDashboard },
     { path: APP_ROUTES.PORTFOLIO, label: 'Portfolio', icon: Briefcase },
-    { path: APP_ROUTES.CHAT, label: 'AI Chat', icon: MessageSquare, disabled: false },
+    { path: APP_ROUTES.CHAT, label: 'AI Chat', icon: MessageSquare },
   ];
 
   return (
@@ -45,7 +45,7 @@ export const Navigation = () => {
           {isAuthenticated ? (
             <>
               <div className="hidden sm:flex items-center gap-1">
-                {navItems.map(({ path, label, icon: Icon, disabled }) => {
+                {navItems.map(({ path, label, icon: Icon, disabled = false }) => {
                   if (disabled) {
                     return (
                       <div
@@ -104,7 +104,7 @@ export const Navigation = () => {
       </div>
       {isAuthenticated && (
         <div className="sm:hidden flex items-center justify-around py-2 border-t border-border/50">
-          {navItems.map(({ path, label, icon: Icon, disabled }) => {
+          {navItems.map(({ path, label, icon: Icon, disabled = false }) => {
             if (disabled) {
               return (
                 <div
