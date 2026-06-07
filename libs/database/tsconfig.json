@@ -5,8 +5,7 @@
     "emitDecoratorMetadata": true
   },
   "ts-node": {
-    "esm": false,
-    "experimentalResolver": true
+    "esm": true
   },
   "files": [],
   "include": [],
