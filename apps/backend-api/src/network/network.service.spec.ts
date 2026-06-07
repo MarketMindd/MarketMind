@@ -32,7 +32,7 @@ describe('NetworkService', () => {
     });
 
     const url = 'http://example.com';
-    const mapper = (data: any) => ({ mapped: data.test });
+    const mapper = (data: { test: string }) => ({ mapped: data.test });
 
     const result = await service.get(url, mapper);
 
@@ -57,7 +57,7 @@ describe('NetworkService', () => {
       });
 
     const url = 'http://example.com';
-    const mapper = (data: any) => ({ mapped: data.test });
+    const mapper = (data: { test: string }) => ({ mapped: data.test });
 
     const resultPromise = service.get(url, mapper);
 
@@ -79,7 +79,7 @@ describe('NetworkService', () => {
     });
 
     const url = 'http://example.com';
-    const mapper = (data: any) => data;
+    const mapper = (data: unknown) => data;
 
     const resultPromise = service.get(url, mapper);
     const errorCatch = resultPromise.catch((e) => e);
@@ -87,7 +87,7 @@ describe('NetworkService', () => {
     // Fast-forward timers to cover all retry delays (1000ms + 2000ms)
     await jest.advanceTimersByTimeAsync(3000);
 
-    const error = await errorCatch;
+    const error = (await errorCatch) as Error;
     expect(error.message).toBe('API error: Internal Server Error');
     expect(fetchMock).toHaveBeenCalledTimes(3);
   });

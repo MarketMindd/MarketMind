@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Body, Controller, Get, Put, Request } from '@nestjs/common';
 import { savePortfolioPayloadSchema } from '@market-mind/common';
 import type {

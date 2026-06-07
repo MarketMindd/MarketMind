@@ -6,11 +6,9 @@ import { AppService } from './app.service';
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  // example protected endpoint
   @UseGuards(AuthGuard('jwt'))
   @Get()
-  getData(@Request() req: any) {
-    // request.user will be the validated JWT payload
+  getData(@Request() req: { user: unknown }) {
     return {
       ...this.appService.getData(),
       you: req.user,

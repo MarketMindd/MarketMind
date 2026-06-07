@@ -1,10 +1,11 @@
+import { z } from 'zod';
 import {
   AiRecommendation,
   aiRecommendationSchema,
   recommendationStatusSchema,
   RiskTolerance,
+  StockRecommendation,
 } from '@market-mind/common';
-import { z } from 'zod';
 
 const supportedFlags = [
   'symbol',
@@ -74,8 +75,8 @@ export const parseRecommendationSimulationArgs = (argv: string[]): AiRecommendat
   const parsedArgs = parseArgumentMap(argv);
   const input: RecommendationSimulationInput = {
     symbol: parsedArgs.symbol,
-    riskTolerance: parsedArgs.riskTolerance as RiskTolerance | undefined,
-    status: parsedArgs.status,
+    riskTolerance: parsedArgs.riskTolerance as RiskTolerance,
+    status: parsedArgs.status as StockRecommendation,
     confidence: parsedArgs.confidence,
     rationale: parsedArgs.rationale,
     generatedAt: parsedArgs.generatedAt,

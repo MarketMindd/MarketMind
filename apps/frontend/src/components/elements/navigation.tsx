@@ -1,4 +1,4 @@
-import { ArrowRight, Briefcase, LayoutDashboard, LogOut, MessageSquare } from 'lucide-react';
+import { ArrowRight, Briefcase, LayoutDashboard, LogOut, MessageSquare, type LucideIcon } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import logo from '../../assets/logo.png';
 import { APP_ROUTES } from '../../consts/routes';
@@ -21,10 +21,11 @@ export const Navigation = () => {
 
   const isAuthenticated = useIsAuthenticated();
 
-  const navItems = [
+  type NavItem = { path: string; label: string; icon: LucideIcon; disabled?: boolean };
+  const navItems: NavItem[] = [
     { path: APP_ROUTES.DASHBOARD, label: 'Dashboard', icon: LayoutDashboard },
     { path: APP_ROUTES.PORTFOLIO, label: 'Portfolio', icon: Briefcase },
-    { path: APP_ROUTES.CHAT, label: 'AI Chat', icon: MessageSquare, disabled: true },
+    { path: APP_ROUTES.CHAT, label: 'AI Chat', icon: MessageSquare },
   ];
 
   return (
@@ -45,7 +46,7 @@ export const Navigation = () => {
           {isAuthenticated ? (
             <>
               <div className="hidden sm:flex items-center gap-1">
-                {navItems.map(({ path, label, icon: Icon, disabled }) => {
+                {navItems.map(({ path, label, icon: Icon, disabled = false }) => {
                   if (disabled) {
                     return (
                       <div
@@ -64,7 +65,8 @@ export const Navigation = () => {
                       to={path}
                       className={cn(
                         'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200',
-                        location.pathname === path
+                        location.pathname === path ||
+                          (path === APP_ROUTES.CHAT && location.pathname.startsWith('/chat/'))
                           ? 'bg-primary/20 text-primary'
                           : 'text-muted-foreground hover:text-foreground hover:bg-secondary',
                       )}
@@ -103,7 +105,7 @@ export const Navigation = () => {
       </div>
       {isAuthenticated && (
         <div className="sm:hidden flex items-center justify-around py-2 border-t border-border/50">
-          {navItems.map(({ path, label, icon: Icon, disabled }) => {
+          {navItems.map(({ path, label, icon: Icon, disabled = false }) => {
             if (disabled) {
               return (
                 <div

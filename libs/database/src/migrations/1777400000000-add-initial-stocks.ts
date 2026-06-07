@@ -24,7 +24,7 @@ export class AddInitialStocks1777400000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     for (const stock of this.initialStocks) {
       await queryRunner.query(
-        `INSERT INTO "stocks" ("symbol", "name", "sector") VALUES ($1, $2, $3) ON CONFLICT ("symbol") DO NOTHING`,
+        'INSERT INTO "stocks" ("symbol", "name", "sector") VALUES ($1, $2, $3) ON CONFLICT ("symbol") DO NOTHING',
         [stock.symbol, stock.name, stock.sector]
       );
     }

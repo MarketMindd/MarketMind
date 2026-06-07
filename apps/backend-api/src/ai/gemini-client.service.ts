@@ -11,10 +11,7 @@ const GEMINI_RETRY_DELAYS_MS = [1000, 2000] as const;
 export class GeminiClientService {
   private readonly logger = new Logger(GeminiClientService.name);
 
-  async generateContent(
-    prompt: string,
-    customSchema?: Record<string, any>,
-  ): Promise<string> {
+  async generateContent(prompt: string, customSchema?: Record<string, unknown>): Promise<string> {
     if (!appConfig.geminiApiKey) {
       throw new Error('GEMINI_API_KEY is not configured');
     }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { BadRequestException, Injectable, PipeTransform } from '@nestjs/common';
 import { z } from 'zod';
 

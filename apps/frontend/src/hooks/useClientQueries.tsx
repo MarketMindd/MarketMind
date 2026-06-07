@@ -4,14 +4,19 @@ import {
   useMutation,
   UseMutationOptions,
   useQuery,
+  useQueryClient,
   UseQueryOptions,
 } from '@tanstack/react-query';
 import React, { createContext, useContext, useState } from 'react';
 import type {
   AuthResponse,
+  ChatMessage,
+  ChatSession,
+  CreateChatSessionPayload,
   MarketSummaryResult,
   PortfolioItemWithStock,
   SavePortfolioPayload,
+  SendMessagePayload,
   SignInPayload,
   SignUpPayload,
   Stock,
@@ -153,10 +158,137 @@ export const useClientQueries = (): iClientQueriesProvider => {
     });
   };
 
+  const useGetChatSessions = (
+    options?: Omit<UseQueryOptions<ChatSession[], Error>, 'queryKey' | 'queryFn'>,
+  ) => {
+    return useQuery<ChatSession[], Error>({
+      queryKey: ['chatSessions'],
+      queryFn: () => ctx.dataProvider.chat.getSessions(),
+      ...options,
+    });
+  };
+
+  const useCreateChatSession = (
+    options?: UseMutationOptions<ChatSession, Error, CreateChatSessionPayload>,
+  ) => {
+    const queryClient = useQueryClient();
+    return useMutation<ChatSession, Error, CreateChatSessionPayload>({
+      mutationFn: (payload) => ctx.dataProvider.chat.createSession(payload),
+      ...options,
+      onSuccess: (data, variables, onMutateResult, context) => {
+        queryClient.invalidateQueries({ queryKey: ['chatSessions'] });
+        if (options?.onSuccess) {
+          options.onSuccess(data, variables, onMutateResult, context);
+        }
+      },
+    });
+  };
+
+  const useDeleteChatSession = (
+    options?: UseMutationOptions<{ success: boolean }, Error, string>,
+  ) => {
+    const queryClient = useQueryClient();
+    return useMutation<{ success: boolean }, Error, string>({
+      mutationFn: (id) => ctx.dataProvider.chat.deleteSession(id),
+      ...options,
+      onSuccess: (data, variables, onMutateResult, context) => {
+        queryClient.invalidateQueries({ queryKey: ['chatSessions'] });
+        if (options?.onSuccess) {
+          options.onSuccess(data, variables, onMutateResult, context);
+        }
+      },
+    });
+  };
+
+  const useGetChatMessages = (
+    sessionId: string,
+    options?: Omit<UseQueryOptions<ChatMessage[], Error>, 'queryKey' | 'queryFn'>,
+  ) => {
+    return useQuery<ChatMessage[], Error>({
+      queryKey: ['chatMessages', sessionId],
+      queryFn: () => ctx.dataProvider.chat.getMessages(sessionId),
+      enabled: !!sessionId,
+      ...options,
+    });
+  };
+
+  const useSendChatMessage = (
+    sessionId: string,
+    options?: UseMutationOptions<ChatMessage, Error, SendMessagePayload, unknown>,
+  ) => {
+    const queryClient = useQueryClient();
+    return useMutation<
+      ChatMessage,
+      Error,
+      SendMessagePayload,
+      { previousMessages?: ChatMessage[] }
+    >({
+      mutationFn: (payload) => ctx.dataProvider.chat.sendMessage(sessionId, payload),
+      onMutate: async (payload) => {
+        // Cancel outgoing refetches so they don't overwrite our optimistic update
+        await queryClient.cancelQueries({ queryKey: ['chatMessages', sessionId] });
+
+        // Snapshot previous messages
+        const previousMessages = queryClient.getQueryData<ChatMessage[]>([
+          'chatMessages',
+          sessionId,
+        ]);
+
+        // Optimistically add the user message
+        const optimisticMessage: ChatMessage = {
+          id: `optimistic-${Date.now()}`,
+          sessionId,
+          role: 'user',
+          content: payload.content,
+          createdAt: new Date().toISOString(),
+        };
+        queryClient.setQueryData<ChatMessage[]>(['chatMessages', sessionId], (old = []) => [
+          ...old,
+          optimisticMessage,
+        ]);
+
+        return { previousMessages };
+      },
+      ...(options as UseMutationOptions<
+        ChatMessage,
+        Error,
+        SendMessagePayload,
+        { previousMessages?: ChatMessage[] }
+      >),
+      onError: (err, variables, context, invalidate) => {
+        // Roll back on error
+        queryClient.setQueryData(['chatMessages', sessionId], context?.previousMessages ?? []);
+        if (options?.onError) {
+          options.onError(err, variables, context, invalidate);
+        }
+      },
+      onSettled: (data, error, variables, onMutateResult, context) => {
+        // Always refetch after mutation to sync with server (gets the AI reply and updated session details)
+        queryClient.invalidateQueries({ queryKey: ['chatMessages', sessionId] });
+        queryClient.invalidateQueries({ queryKey: ['chatSessions'] });
+        if (options?.onSettled) {
+          options.onSettled(data, error, variables, onMutateResult, context);
+        }
+      },
+      onSuccess: (data, variables, onMutateResult, context) => {
+        if (options?.onSuccess) {
+          options.onSuccess(data, variables, onMutateResult, context);
+        }
+      },
+    });
+  };
+
   return {
     auth: { useSignIn, useSignUp, useSignOut },
     profile: { useUpdateProfile },
     stocks: { useGetStock, useGetStocks, useGetAllStocks },
     portfolio: { usePortfolio, useSavePortfolio, useAiMarketSummary },
+    chat: {
+      useGetChatSessions,
+      useCreateChatSession,
+      useDeleteChatSession,
+      useGetChatMessages,
+      useSendChatMessage,
+    },
   };
 };

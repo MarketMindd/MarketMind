@@ -4,9 +4,7 @@ import {
   ChevronRight,
   Eye,
   Filter,
-  Shield,
   Sparkles,
-  Tag,
   TrendingDown,
   TrendingUp,
 } from 'lucide-react';

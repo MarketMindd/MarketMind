@@ -13,10 +13,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  // payload will be the data we signed in AuthService
-  async validate(payload: any) {
-    // You can extend this to fetch the latest user from database if desired
-    // For now, simply return payload (will be attached to request.user)
+  async validate(payload: Record<string, unknown>) {
     return payload;
   }
 }

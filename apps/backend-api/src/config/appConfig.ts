@@ -1,4 +1,4 @@
-import { parseBoolean } from "libs/database/src/utils/parse.utils";
+import { parseBoolean } from '@market-mind/database';
 
 const getJwtSecret = (defaultSecret: string) => {
   const secret = process.env.JWT_SECRET;

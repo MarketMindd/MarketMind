@@ -59,7 +59,7 @@ describe('NewsApiService', () => {
       const result = await service.getNews('AAPL');
 
       expect(networkService.get).toHaveBeenCalledWith(
-        `https://newsapi.org/v2/everything?q=AAPL&pageSize=5&sortBy=publishedAt&language=en&apiKey=test-news-key`,
+        'https://newsapi.org/v2/everything?q=AAPL&pageSize=5&sortBy=publishedAt&language=en&apiKey=test-news-key',
         expect.any(Function),
       );
 

@@ -7,6 +7,10 @@ import type {
   SignUpPayload,
   Stock,
   UpdateProfilePayload,
+  ChatSession,
+  ChatMessage,
+  CreateChatSessionPayload,
+  SendMessagePayload,
 } from '@market-mind/common';
 
 export interface iDataProvider {
@@ -26,5 +30,12 @@ export interface iDataProvider {
     getPortfolio: () => Promise<PortfolioItemWithStock[]>;
     savePortfolio: (payload: SavePortfolioPayload) => Promise<{ success: boolean }>;
     getAiMarketSummary: () => Promise<MarketSummaryResult>;
+  };
+  chat: {
+    getSessions: () => Promise<ChatSession[]>;
+    createSession: (payload: CreateChatSessionPayload) => Promise<ChatSession>;
+    deleteSession: (id: string) => Promise<{ success: boolean }>;
+    getMessages: (sessionId: string) => Promise<ChatMessage[]>;
+    sendMessage: (sessionId: string, payload: SendMessagePayload) => Promise<ChatMessage>;
   };
 }
