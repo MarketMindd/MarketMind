@@ -124,12 +124,14 @@ export class ChatService {
     });
     await this.messageRepo.save(userMessage);
 
-    // 2. Fetch history (limit to last 10 messages to keep context window neat)
-    const history = await this.messageRepo.find({
-      where: { sessionId },
-      order: { createdAt: 'ASC' },
-      take: 10,
-    });
+    // 2. Fetch last 10 messages in chronological order for AI context
+    const history = (
+      await this.messageRepo.find({
+        where: { sessionId },
+        order: { createdAt: 'DESC' },
+        take: 10,
+      })
+    ).reverse();
 
     // 3. Load user profile and portfolio context
     const user = await this.userRepo.findOne({ where: { id: userId } });
