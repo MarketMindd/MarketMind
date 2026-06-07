@@ -186,11 +186,14 @@ export class ChatService {
             priceChange: marketData ? Number(marketData.priceChange) : 0,
             recommendationStatus: recommendation?.status,
             recommendationRationale: recommendation?.rationale,
-            news: rawNews.slice(0, 3).map((n) => ({
-              title: n.title,
-              source: n.source,
-              description: n.description ?? undefined,
-            })),
+            news: rawNews
+              .sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime())
+              .slice(0, 3)
+              .map((n) => ({
+                title: n.title,
+                source: n.source,
+                description: n.description ?? undefined,
+              })),
           };
         }
       } catch (err) {
