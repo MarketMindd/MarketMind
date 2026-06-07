@@ -135,6 +135,7 @@ export class ChatService {
 
     // 3. Load user profile and portfolio context
     const user = await this.userRepo.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
     const portfolio = await this.portfolioService.getPortfolio(userId);
 
     // 4. Resolve stock context from session title AND user message
@@ -171,7 +172,7 @@ export class ChatService {
           });
 
           const recommendation = await this.recommendationRepo.findOne({
-            where: { stockSymbol, riskTolerance: user?.riskTolerance },
+            where: { stockSymbol, riskTolerance: user.riskTolerance },
             order: { updatedAt: 'DESC' },
           });
 
@@ -200,7 +201,7 @@ export class ChatService {
     // 4b. Load market-wide recommendations so the assistant can answer
     // "what are your best stocks to invest in?" style questions from real DB data.
     const marketRecommendations = await this.recommendationRepo.find({
-      where: user?.riskTolerance ? { riskTolerance: user.riskTolerance } : {},
+      where: { riskTolerance: user.riskTolerance },
       order: { confidenceScore: 'DESC' },
       take: 20,
     });
@@ -221,8 +222,8 @@ export class ChatService {
 
     const prompt = this.promptBuilder.buildChatPrompt(
       {
-        riskTolerance: user?.riskTolerance ?? (user as any)?.riskTolerance ?? 'Medium',
-        interests: user?.interests ?? [],
+        riskTolerance: user.riskTolerance,
+        interests: user.interests ?? [],
       },
       portfolio,
       history,
