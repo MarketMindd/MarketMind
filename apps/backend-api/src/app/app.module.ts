@@ -3,6 +3,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { createDataSourceOptions } from '@market-mind/database';
 import { AuthModule } from '../auth/auth.module';
+import { ChatModule } from '../chat/chat.module';
 import { MarketModule } from '../market/market.module';
 import { PortfolioModule } from '../portfolio/portfolio.module';
 import { ProfileModule } from '../profile/profile.module';
@@ -19,6 +20,7 @@ import { AppService } from './app.service';
     PortfolioModule,
     ProfileModule,
     StockModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],

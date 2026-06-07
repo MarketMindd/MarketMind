@@ -14,7 +14,7 @@ root.render(
   <ClientQueriesProvider dataProvider={dataProvider}>
     <Toaster />
     <StrictMode>
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <App />
       </BrowserRouter>
     </StrictMode>

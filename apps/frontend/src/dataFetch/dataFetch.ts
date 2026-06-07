@@ -1,9 +1,14 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import {
   AuthResponse,
+  ChatMessage,
+  ChatSession,
+  CreateChatSessionPayload,
   MarketSummaryResult,
   PortfolioItem,
   SavePortfolioPayload,
+  SendMessagePayload,
   SignInPayload,
   SignUpPayload,
   UpdateProfilePayload,
@@ -16,7 +21,8 @@ export const REFRESH_TOKEN_KEY = 'refreshToken';
 export const USER_ID_KEY = 'userId';
 
 let isRefreshing = false;
-let failedQueue: Array<{ resolve: (value?: unknown) => void; reject: (reason?: any) => void }> = [];
+let failedQueue: Array<{ resolve: (value?: unknown) => void; reject: (reason?: unknown) => void }> =
+  [];
 
 const processQueue = (error: Error | null, token: string | null = null) => {
   failedQueue.forEach((prom) => {
@@ -199,6 +205,38 @@ export const createFetchDataProvider = (): iDataProvider => {
       getAiMarketSummary: async () => {
         const res = await apiClient.get<MarketSummaryResult>('/portfolio/market-summary');
         return res.data;
+      },
+    },
+    chat: {
+      getSessions: async () => {
+        const res = await apiClient.get<ChatSession[]>('/chat/sessions');
+        return res.data;
+      },
+      createSession: async (payload: CreateChatSessionPayload) => {
+        const res = await apiClient.post<ChatSession>('/chat/sessions', payload);
+        return res.data;
+      },
+      deleteSession: async (id: string) => {
+        const res = await apiClient.delete<{ success: boolean }>(`/chat/sessions/${id}`);
+        return res.data;
+      },
+      getMessages: async (sessionId: string) => {
+        const res = await apiClient.get<ChatMessage[]>(`/chat/sessions/${sessionId}/messages`);
+        return res.data;
+      },
+      sendMessage: async (sessionId: string, payload: SendMessagePayload) => {
+        try {
+          const res = await apiClient.post<ChatMessage>(
+            `/chat/sessions/${sessionId}/messages`,
+            payload,
+          );
+          return res.data;
+        } catch (error: any) {
+          if (error.response?.status === 429) {
+            throw new Error('MarketMind AI is currently busy. Please wait a moment and try again.');
+          }
+          throw new Error(error.response?.data?.message || 'Failed to send message');
+        }
       },
     },
   };

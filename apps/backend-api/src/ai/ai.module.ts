@@ -6,6 +6,6 @@ import { ResponseParserService } from './response-parser.service';
 
 @Module({
   providers: [AiService, PromptBuilderService, GeminiClientService, ResponseParserService],
-  exports: [AiService],
+  exports: [AiService, PromptBuilderService, GeminiClientService],
 })
 export class AiModule {}

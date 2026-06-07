@@ -31,7 +31,12 @@ export const AuthBranding = () => {
       <div className="relative space-y-6 py-12 px-4">
         <div className="glass-card p-4 max-w-sm animate-fade-in">
           <div className="flex items-center gap-3 mb-2">
-            <span className="text-primary font-semibold">✨ AI-Powered Insights</span>
+            <span className="text-primary font-semibold">
+              <span role="img" aria-label="sparkles">
+                ✨
+              </span>{' '}
+              AI-Powered Insights
+            </span>
           </div>
           <p className="text-sm text-muted-foreground">
             Get deep analytics derived from millions of financial data points.
@@ -40,7 +45,12 @@ export const AuthBranding = () => {
 
         <div className="glass-card p-4 max-w-sm ml-12 animate-fade-in stagger-1">
           <div className="flex items-center gap-3 mb-2">
-            <span className="text-primary font-semibold">🎯 Personalized Portfolios</span>
+            <span className="text-primary font-semibold">
+              <span role="img" aria-label="target">
+                🎯
+              </span>{' '}
+              Personalized Portfolios
+            </span>
           </div>
           <p className="text-sm text-muted-foreground">
             Tailor recommendations to your exact risk tolerance and effortlessly track your

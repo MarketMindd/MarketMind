@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Body, Controller, Patch, Request } from '@nestjs/common';
 import { updateProfileSchema } from '@market-mind/common';
 import type { UpdateProfilePayload } from '@market-mind/common';

@@ -50,3 +50,8 @@ vite.config.*.timestamp*
 .env*
 
 loveable-uis
+loveable-ui
+
+.claude
+
+docs

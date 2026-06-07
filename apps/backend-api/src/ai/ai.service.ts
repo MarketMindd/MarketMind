@@ -35,7 +35,7 @@ export class AiService {
 
     for (const riskTolerance of uniqueRiskLevels) {
       try {
-        const prompt = this.promptBuilder.build(filtered, riskTolerance);
+        const prompt = this.promptBuilder.buildRecommendationPrompt(filtered, riskTolerance);
         const rawText = await this.geminiClient.generateContent(prompt);
         const recommendation = this.responseParser.parse(rawText, symbol, riskTolerance);
         recommendations.push(recommendation);

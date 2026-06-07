@@ -13,6 +13,10 @@ import type {
   SignUpPayload,
   Stock,
   UpdateProfilePayload,
+  ChatSession,
+  ChatMessage,
+  CreateChatSessionPayload,
+  SendMessagePayload,
 } from '@market-mind/common';
 
 export type iClientQueriesProvider = {
@@ -55,5 +59,24 @@ export type iClientQueriesProvider = {
     useAiMarketSummary: (
       options?: Omit<UseQueryOptions<MarketSummaryResult, Error>, 'queryKey' | 'queryFn'>,
     ) => UseQueryResult<MarketSummaryResult, Error>;
+  };
+  chat: {
+    useGetChatSessions: (
+      options?: Omit<UseQueryOptions<ChatSession[], Error>, 'queryKey' | 'queryFn'>,
+    ) => UseQueryResult<ChatSession[], Error>;
+    useCreateChatSession: (
+      options?: UseMutationOptions<ChatSession, Error, CreateChatSessionPayload>,
+    ) => UseMutationResult<ChatSession, Error, CreateChatSessionPayload>;
+    useDeleteChatSession: (
+      options?: UseMutationOptions<{ success: boolean }, Error, string>,
+    ) => UseMutationResult<{ success: boolean }, Error, string>;
+    useGetChatMessages: (
+      sessionId: string,
+      options?: Omit<UseQueryOptions<ChatMessage[], Error>, 'queryKey' | 'queryFn'>,
+    ) => UseQueryResult<ChatMessage[], Error>;
+    useSendChatMessage: (
+      sessionId: string,
+      options?: UseMutationOptions<ChatMessage, Error, SendMessagePayload>,
+    ) => UseMutationResult<ChatMessage, Error, SendMessagePayload>;
   };
 };

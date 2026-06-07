@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { AiRecommendation, RiskTolerance } from '@market-mind/common';
+import { AiRecommendation, RiskTolerance, StockRecommendation } from '@market-mind/common';
 import { RecommendationEntity } from '@market-mind/database';
 import { NotificationService } from '../notification/notification.service';
 import { ProcessingService } from './processing.service';
@@ -8,7 +8,7 @@ import { ProcessingService } from './processing.service';
 const makeRec = (overrides: Partial<AiRecommendation> = {}): AiRecommendation => ({
   symbol: 'AAPL',
   riskTolerance: RiskTolerance.MEDIUM,
-  status: 'Invest',
+  status: StockRecommendation.INVEST,
   confidence: 0.85,
   rationale: 'Strong fundamentals',
   aiSummary: 'Strong setup.',
