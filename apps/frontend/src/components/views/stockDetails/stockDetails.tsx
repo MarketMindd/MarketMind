@@ -123,6 +123,13 @@ export const StockDetails = () => {
                     {stock.aiRecommendation.confidence}%
                   </span>
                 </div>
+                <div className="mt-2 text-xs text-muted-foreground max-w-[220px] text-right ml-auto">
+                  {stock.aiRecommendation.confidence >= 80 
+                    ? "The AI is highly confident this aligns with your profile."
+                    : stock.aiRecommendation.confidence >= 60
+                    ? "The AI is moderately confident about this recommendation."
+                    : "The AI has low confidence; consider researching further."}
+                </div>
               </div>
             )}
           </div>

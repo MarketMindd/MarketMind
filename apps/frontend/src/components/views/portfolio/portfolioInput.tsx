@@ -58,7 +58,15 @@ const PortfolioInput = ({ portfolio, onChange, compact = false }: PortfolioInput
         }
       : undefined;
 
-    onChange([...portfolio, { ticker, shares: 0, avgPrice: 0, stock: stockObj }]);
+    onChange([
+      ...portfolio,
+      {
+        ticker,
+        shares: 0,
+        avgPrice: stockDetails?.marketData?.price ?? 0,
+        stock: stockObj,
+      },
+    ]);
     setSearchTerm('');
     setShowDropdown(false);
     setHighlightedIndex(0);

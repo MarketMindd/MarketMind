@@ -14,17 +14,17 @@ interface RecommendationBadgeProps {
 
 const config: Record<StockRecommendation, RecommendationBadgeConfig> = {
   [StockRecommendation.INVEST]: {
-    label: 'Invest',
+    label: 'Buy',
     icon: TrendingUp,
     className: 'bg-success/20 text-success border-success/30',
   },
   [StockRecommendation.HOLD]: {
-    label: 'Hold',
+    label: 'Watch/Wait',
     icon: Minus,
     className: 'bg-warning/20 text-warning border-warning/30',
   },
   [StockRecommendation.EXIT]: {
-    label: 'Exit',
+    label: 'Avoid/Sell',
     icon: TrendingDown,
     className: 'bg-destructive/20 text-destructive border-destructive/30',
   },

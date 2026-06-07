@@ -63,6 +63,15 @@ const highlightText = (text: string, riskTolerance: string, interests: string[])
   );
 };
 
+const getRecommendationLabel = (status: string) => {
+  switch (status) {
+    case StockRecommendation.INVEST: return 'Buy';
+    case StockRecommendation.HOLD: return 'Watch/Wait';
+    case StockRecommendation.EXIT: return 'Avoid/Sell';
+    default: return status;
+  }
+};
+
 export const Dashboard = () => {
   const navigate = useNavigate();
   const {
@@ -202,7 +211,7 @@ export const Dashboard = () => {
                   <card.icon className={cn('w-5 h-5', card.color)} />
                 </div>
                 <div className={cn('text-2xl font-bold', card.color)}>{card.count}</div>
-                <div className="text-sm text-muted-foreground">{card.label}</div>
+                <div className="text-sm text-muted-foreground">{getRecommendationLabel(card.label)}</div>
               </button>
             ))}
           </div>
@@ -275,7 +284,7 @@ export const Dashboard = () => {
                   onClick={() => setFilter(f as typeof filter)}
                   className="capitalize"
                 >
-                  {f}
+                  {getRecommendationLabel(f)}
                 </Button>
               ))}
             </div>
@@ -303,14 +312,13 @@ export const Dashboard = () => {
         {portfolio.length === 0 && (
           <div className="glass-card p-6 mt-8 text-center animate-fade-in">
             <Briefcase className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-foreground mb-2">Add Your Portfolio</h3>
+            <h3 className="text-lg font-semibold text-foreground mb-2">Start Building Your Portfolio</h3>
             <p className="text-muted-foreground text-sm mb-4 max-w-md mx-auto">
-              Track your existing holdings and get personalized recommendations based on your
-              portfolio.
+              Add stocks you own, or create a mock portfolio to practice and get personalized AI recommendations.
             </p>
             <Button variant="outline" onClick={() => navigate('/portfolio')}>
               <Briefcase size={18} />
-              Set Up Portfolio
+              Add Your First Stock
             </Button>
           </div>
         )}
