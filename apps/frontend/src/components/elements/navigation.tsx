@@ -1,4 +1,4 @@
-import { ArrowRight, Briefcase, LayoutDashboard, LogOut, MessageSquare } from 'lucide-react';
+import { ArrowRight, Briefcase, LayoutDashboard, LogOut, MessageSquare, type LucideIcon } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import logo from '../../assets/logo.png';
 import { APP_ROUTES } from '../../consts/routes';
@@ -21,7 +21,8 @@ export const Navigation = () => {
 
   const isAuthenticated = useIsAuthenticated();
 
-  const navItems: Array<{ path: string; label: string; icon: React.ComponentType<any>; disabled?: boolean }> = [
+  type NavItem = { path: string; label: string; icon: LucideIcon; disabled?: boolean };
+  const navItems: NavItem[] = [
     { path: APP_ROUTES.DASHBOARD, label: 'Dashboard', icon: LayoutDashboard },
     { path: APP_ROUTES.PORTFOLIO, label: 'Portfolio', icon: Briefcase },
     { path: APP_ROUTES.CHAT, label: 'AI Chat', icon: MessageSquare },

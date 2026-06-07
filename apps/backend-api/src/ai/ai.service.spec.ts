@@ -31,12 +31,12 @@ const makeSnapshot = (
 
 describe('AiService', () => {
   let service: AiService;
-  let mockPromptBuilder: { build: jest.Mock };
+  let mockPromptBuilder: { buildRecommendationPrompt: jest.Mock };
   let mockGeminiClient: { generateContent: jest.Mock };
   let mockResponseParser: { parse: jest.Mock };
 
   beforeEach(async () => {
-    mockPromptBuilder = { build: jest.fn().mockReturnValue('prompt') };
+    mockPromptBuilder = { buildRecommendationPrompt: jest.fn().mockReturnValue('prompt') };
     mockGeminiClient = {
       generateContent: jest
         .fn()
