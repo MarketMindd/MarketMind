@@ -11,7 +11,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { z } from 'zod';
-import { CreateChatSessionPayload, SendMessagePayload } from '@market-mind/common';
+import { CreateChatSessionPayload, RiskTolerance, SendMessagePayload } from '@market-mind/common';
 import {
   ChatMessageEntity,
   ChatSessionEntity,
@@ -36,8 +36,9 @@ const chatResponseSchema = z.object({
 });
 
 const DEFAULT_SESSION_TITLE = 'New Chat';
+const UUID_REGEX =
+  /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 
-const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 const validateSessionId = (id: string) => {
   if (!id || !UUID_REGEX.test(id)) {
     throw new NotFoundException('Session not found');
@@ -118,7 +119,6 @@ export class ChatService {
     if (!session) throw new NotFoundException('Session not found');
     if (session.userId !== userId) throw new ForbiddenException('You do not own this session');
 
-    // 1. Save user message
     const userMessage = this.messageRepo.create({
       sessionId,
       role: 'user',
@@ -126,7 +126,6 @@ export class ChatService {
     });
     await this.messageRepo.save(userMessage);
 
-    // 2. Fetch last 10 messages in chronological order for AI context
     const history = (
       await this.messageRepo.find({
         where: { sessionId },
@@ -135,101 +134,33 @@ export class ChatService {
       })
     ).reverse();
 
-    // 3. Load user profile and portfolio context
-    const user = await this.userRepo.findOne({ where: { id: userId } });
-    if (!user) throw new NotFoundException('User not found');
+    const user = await this.userRepo.findOneOrFail({ where: { id: userId } });
     const portfolio = await this.portfolioService.getPortfolio(userId);
 
-    // 4. Resolve stock context from session title AND user message
-    let stockContext: any = undefined;
-
-    // Collect candidate symbols: from session title pattern + from message text
-    const candidateSymbols = new Set<string>();
-    const tickerMatch = session.title.match(/^([A-Z0-9]+)\sDiscussion/);
-    if (tickerMatch) {
-      candidateSymbols.add(tickerMatch[1]);
-    }
-
-    // Look up all known stock symbols and match against the user's message
     const allStocks = await this.stockRepo.find({ select: ['symbol', 'name', 'sector'] });
-    const knownSymbols = new Set(allStocks.map((s) => s.symbol));
     const stockMap = new Map(allStocks.map((s) => [s.symbol, s]));
-    const messageWords = payload.content.toUpperCase().match(/\b[A-Z]{1,10}\b/g) || [];
-    for (const word of messageWords) {
-      if (knownSymbols.has(word)) {
-        candidateSymbols.add(word);
-      }
-    }
+    const knownSymbols = new Set(allStocks.map((s) => s.symbol));
 
-    // Use the first matched symbol as stock context
-    const stockSymbol = candidateSymbols.size > 0 ? [...candidateSymbols][0] : undefined;
+    const stockSymbol = this.resolveStockSymbol(session.title, payload.content, knownSymbols);
 
+    let stockContext: any = undefined;
     if (stockSymbol) {
       try {
-        const stock = await this.stockRepo.findOne({ where: { symbol: stockSymbol } });
-        if (stock) {
-          const marketData = await this.marketDataRepo.findOne({
-            where: { stockSymbol },
-            order: { time: 'DESC' },
-          });
-
-          const recommendation = await this.recommendationRepo.findOne({
-            where: { stockSymbol, riskTolerance: user.riskTolerance },
-            order: { updatedAt: 'DESC' },
-          });
-
-          const rawNews = await this.newsApiService.getNews(stockSymbol).catch(() => []);
-
-          stockContext = {
-            symbol: stock.symbol,
-            name: stock.name,
-            sector: stock.sector,
-            price: marketData ? Number(marketData.price) : 0,
-            priceChange: marketData ? Number(marketData.priceChange) : 0,
-            recommendationStatus: recommendation?.status,
-            recommendationRationale: recommendation?.rationale,
-            news: rawNews
-              .sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime())
-              .slice(0, 3)
-              .map((n) => ({
-                title: n.title,
-                source: n.source,
-                description: n.description ?? undefined,
-              })),
-          };
-        }
+        stockContext = await this.buildStockContext(stockSymbol, user.riskTolerance);
       } catch (err) {
         this.logger.warn(`Failed to resolve stock context for ${stockSymbol}: ${err}`);
       }
     }
 
-    // 4b. Load market-wide recommendations so the assistant can answer
-    // "what are your best stocks to invest in?" style questions from real DB data.
-    const marketRecommendations = await this.recommendationRepo.find({
-      where: { riskTolerance: user.riskTolerance },
-      order: { confidenceScore: 'DESC' },
-      take: 20,
-    });
-    const rankedRecommendations = marketRecommendations.map((rec) => {
-      const stock = stockMap.get(rec.stockSymbol);
-      return {
-        symbol: rec.stockSymbol,
-        name: stock?.name ?? rec.stockSymbol,
-        sector: stock?.sector ?? 'Unknown',
-        status: rec.status as string,
-        confidence: Number(rec.confidenceScore),
-        summary: rec.aiSummary ?? undefined,
-      };
-    });
+    const rankedRecommendations = await this.buildRankedRecommendations(
+      user.riskTolerance,
+      stockMap,
+    );
 
-    // 5. Generate content with Gemini using custom chat JSON schema
     const shouldGenerateTitle = history.length === 1 && session.title === DEFAULT_SESSION_TITLE;
 
     const prompt = this.promptBuilder.buildChatPrompt(
-      {
-        riskTolerance: user.riskTolerance,
-        interests: user.interests ?? [],
-      },
+      { riskTolerance: user.riskTolerance, interests: user.interests ?? [] },
       portfolio,
       history,
       payload.content,
@@ -239,6 +170,7 @@ export class ChatService {
     );
 
     const customJsonSchema = z.toJSONSchema(chatResponseSchema);
+
     let rawResultText: string;
     try {
       rawResultText = await this.geminiClient.generateContent(prompt, customJsonSchema);
@@ -259,23 +191,8 @@ export class ChatService {
       throw new InternalServerErrorException('Failed to generate AI response. Please try again.');
     }
 
-    let parsedResult: any;
-    try {
-      // Strip markdown code fences if Gemini returned it wrapped
-      let text = rawResultText.trim();
-      const fenceMatch = text.match(/^```(?:json)?\s*([\s\S]*?)```$/);
-      if (fenceMatch) {
-        text = fenceMatch[1].trim();
-      }
-      parsedResult = JSON.parse(text);
-    } catch (err) {
-      this.logger.error(`Failed to parse AI response: ${rawResultText}. Error: ${err}`);
-      parsedResult = {
-        reply: 'I apologize, but I encountered an error processing that request. Please try again.',
-      };
-    }
+    const parsedResult = this.parseAiResponse(rawResultText);
 
-    // 6. Save model reply
     const modelMessage = this.messageRepo.create({
       sessionId,
       role: 'model',
@@ -283,15 +200,108 @@ export class ChatService {
     });
     await this.messageRepo.save(modelMessage);
 
-    // Update session title if generated
     if (shouldGenerateTitle && parsedResult.title) {
       session.title = parsedResult.title.trim();
     }
 
-    // Update session timestamp
     session.updatedAt = new Date();
     await this.sessionRepo.save(session);
 
     return modelMessage;
+  }
+
+  private resolveStockSymbol(
+    sessionTitle: string,
+    messageContent: string,
+    knownSymbols: Set<string>,
+  ): string | undefined {
+    const candidates = new Set<string>();
+
+    const tickerMatch = sessionTitle.match(/^([A-Z0-9]+)\sDiscussion/);
+    if (tickerMatch) {
+      candidates.add(tickerMatch[1]);
+    }
+
+    const words = messageContent.toUpperCase().match(/\b[A-Z]{1,10}\b/g) || [];
+    for (const word of words) {
+      if (knownSymbols.has(word)) {
+        candidates.add(word);
+      }
+    }
+
+    return candidates.size > 0 ? [...candidates][0] : undefined;
+  }
+
+  private async buildStockContext(
+    stockSymbol: string,
+    riskTolerance: RiskTolerance,
+  ): Promise<any> {
+    const stock = await this.stockRepo.findOne({ where: { symbol: stockSymbol } });
+    if (!stock) return undefined;
+
+    const [marketData, recommendation, rawNews] = await Promise.all([
+      this.marketDataRepo.findOne({ where: { stockSymbol }, order: { time: 'DESC' } }),
+      this.recommendationRepo.findOne({
+        where: { stockSymbol, riskTolerance },
+        order: { updatedAt: 'DESC' },
+      }),
+      this.newsApiService.getNews(stockSymbol).catch(() => []),
+    ]);
+
+    return {
+      symbol: stock.symbol,
+      name: stock.name,
+      sector: stock.sector,
+      price: marketData ? Number(marketData.price) : 0,
+      priceChange: marketData ? Number(marketData.priceChange) : 0,
+      recommendationStatus: recommendation?.status,
+      recommendationRationale: recommendation?.rationale,
+      news: rawNews
+        .sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime())
+        .slice(0, 3)
+        .map((n) => ({
+          title: n.title,
+          source: n.source,
+          description: n.description ?? undefined,
+        })),
+    };
+  }
+
+  private async buildRankedRecommendations(
+    riskTolerance: RiskTolerance,
+    stockMap: Map<string, StockEntity>,
+  ) {
+    const recommendations = await this.recommendationRepo.find({
+      where: { riskTolerance },
+      order: { confidenceScore: 'DESC' },
+      take: 10,
+    });
+
+    return recommendations.map((rec) => {
+      const stock = stockMap.get(rec.stockSymbol);
+      return {
+        symbol: rec.stockSymbol,
+        name: stock?.name ?? rec.stockSymbol,
+        sector: stock?.sector ?? 'Unknown',
+        status: rec.status as string,
+        confidence: Number(rec.confidenceScore),
+      };
+    });
+  }
+
+  private parseAiResponse(rawText: string): { reply: string; title?: string } {
+    try {
+      let text = rawText.trim();
+      const fenceMatch = text.match(/^```(?:json)?\s*([\s\S]*?)```$/);
+      if (fenceMatch) {
+        text = fenceMatch[1].trim();
+      }
+      return JSON.parse(text);
+    } catch (err) {
+      this.logger.error(`Failed to parse AI response: ${rawText}. Error: ${err}`);
+      return {
+        reply: 'I apologize, but I encountered an error processing that request. Please try again.',
+      };
+    }
   }
 }

@@ -26,6 +26,12 @@ npm run db:migration:create         # Create empty migration file
 
 # Quality (runs across all projects)
 npx nx run-many -t lint test build typecheck
+
+# Per-project quality (faster during development)
+npx nx typecheck frontend
+npx nx typecheck backend-api
+npx nx lint frontend
+npx nx lint backend-api
 ```
 
 ## Architecture Overview
@@ -65,8 +71,12 @@ NestJS module structure under `src/`:
 | `profile/` | User profile (risk tolerance, sector interests) |
 | `filter/` | Symbol filter state management |
 | `pipeline/` | Orchestrates data refresh + AI processing |
+| `notification/` | Email alerts via nodemailer when recommendations are generated |
+| `network/` | Shared HTTP client utility (used internally by other modules) |
 
-All controllers are guarded by NestJS `AuthGuard` (JWT). The authenticated user ID is extracted from the JWT payload via a `@User()` decorator.
+All controllers are guarded by NestJS `AuthGuard` (`src/auth/auth.guard.ts`), which sets `request.user = jwtPayload`. Controllers access the user ID via `req.user.id` using the standard `@Request()` decorator. Use `@Public()` (`src/decorators/roles.decorator.ts`) to mark auth-exempt endpoints.
+
+`notification/`, `ai/`, `news/`, `processing/`, `filter/`, and `pipeline/` are **not** imported directly by `AppModule` — they are composed into `MarketModule`, `PortfolioModule`, etc.
 
 **AI pipeline flow:** `PipelineService` → `MarketModule` (fetch prices) → `NewsModule` (fetch news) → `ProcessingService` → `AiService` → `GeminiClientService` → `RecommendationEntity` saved.
 
@@ -143,3 +153,33 @@ VITE_API_BASE_URL=http://localhost:3000/api
 ## Code Style
 
 Prettier is enforced with **single quotes**, **100-char line width**, **trailing commas**, and import sorting via `@ianvs/prettier-plugin-sort-imports`. Import order: `reflect-metadata` → third-party → `@market-mind/*` → `@/*` → relative.
+
+## Project Standards
+
+These apply to all feature work:
+
+**No inline comments.** Code must be self-documenting through method and variable names. Do not add `// 1. Save user message`, `// Fetch history`, or similar narrative comments. If a block needs a label, extract it into a named private method instead.
+
+**Extract private methods for complex logic.** Public methods (controllers, service entry points) should read like a sequence of named steps. Long blocks of logic — stock context resolution, AI response parsing, ranked recommendation building — belong in `private` methods with descriptive names.
+
+**File naming reflects content type:**
+- `*.service.ts` — NestJS injectable services
+- `*.controller.ts` — NestJS REST controllers
+- `*.module.ts` — NestJS module definitions
+- `*.type.ts` — TypeScript interfaces and type aliases
+- `*.entity.ts` — TypeORM entities
+- `*.spec.ts` — Jest tests
+- `*.dto.ts` — request/response data transfer objects (prefer Zod schemas in `@market-mind/common`)
+
+**Guard clauses first.** In service methods, validate inputs and check ownership before any business logic:
+```ts
+validateSessionId(sessionId);
+const session = await this.sessionRepo.findOne(...);
+if (!session) throw new NotFoundException('Session not found');
+if (session.userId !== userId) throw new ForbiddenException('You do not own this session');
+// business logic follows
+```
+
+**Parallel async where independent.** Use `Promise.all` when multiple async calls don't depend on each other's results.
+
+**No `any` without suppression.** Use `/* eslint-disable @typescript-eslint/no-explicit-any */` at the file top only when genuinely unavoidable (e.g., dynamic AI response shapes). Prefer typed interfaces.
