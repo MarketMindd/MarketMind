@@ -13,7 +13,7 @@ const RISK_GUIDANCE: Record<RiskTolerance, string> = {
 
 @Injectable()
 export class PromptBuilderService {
-  build(snapshot: FilteredSnapshot, riskTolerance: RiskTolerance): string {
+  buildRecommendationPrompt(snapshot: FilteredSnapshot, riskTolerance: RiskTolerance): string {
     const { symbol, price, priceChange } = snapshot.snapshot;
 
     const newsSection =
