@@ -35,6 +35,8 @@ const chatResponseSchema = z.object({
     ),
 });
 
+const DEFAULT_SESSION_TITLE = 'New Chat';
+
 const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 const validateSessionId = (id: string) => {
   if (!id || !UUID_REGEX.test(id)) {
@@ -76,7 +78,7 @@ export class ChatService {
     userId: string,
     payload: CreateChatSessionPayload,
   ): Promise<ChatSessionEntity> {
-    let title = payload.title || 'New Chat';
+    let title = payload.title || DEFAULT_SESSION_TITLE;
     if (payload.symbol) {
       title = `${payload.symbol.toUpperCase()} Discussion`;
     }
@@ -221,7 +223,7 @@ export class ChatService {
     });
 
     // 5. Generate content with Gemini using custom chat JSON schema
-    const shouldGenerateTitle = history.length === 1 && session.title === 'New Chat';
+    const shouldGenerateTitle = history.length === 1 && session.title === DEFAULT_SESSION_TITLE;
 
     const prompt = this.promptBuilder.buildChatPrompt(
       {
