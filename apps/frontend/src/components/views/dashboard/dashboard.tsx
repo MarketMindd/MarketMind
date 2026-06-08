@@ -61,15 +61,6 @@ const highlightText = (text: string, riskTolerance: string, interests: string[])
   );
 };
 
-const getRecommendationLabel = (status: string) => {
-  switch (status) {
-    case StockRecommendation.INVEST: return 'Buy';
-    case StockRecommendation.HOLD: return 'Watch/Wait';
-    case StockRecommendation.EXIT: return 'Avoid/Sell';
-    default: return status;
-  }
-};
-
 export const Dashboard = () => {
   const navigate = useNavigate();
   const {
@@ -98,9 +89,16 @@ export const Dashboard = () => {
     (s) => s.aiRecommendation.status === StockRecommendation.EXIT,
   ).length;
 
+  const recommendationDisplayLabel = {
+    [StockRecommendation.INVEST]: 'Buy',
+    [StockRecommendation.HOLD]: 'Watch/Wait',
+    [StockRecommendation.EXIT]: 'Avoid/Sell',
+  };
+
   const summaryCards = [
     {
       label: StockRecommendation.INVEST,
+      displayLabel: recommendationDisplayLabel[StockRecommendation.INVEST],
       count: investCount,
       icon: TrendingUp,
       color: 'text-success',
@@ -108,6 +106,7 @@ export const Dashboard = () => {
     },
     {
       label: StockRecommendation.HOLD,
+      displayLabel: recommendationDisplayLabel[StockRecommendation.HOLD],
       count: holdCount,
       icon: Activity,
       color: 'text-warning',
@@ -115,6 +114,7 @@ export const Dashboard = () => {
     },
     {
       label: StockRecommendation.EXIT,
+      displayLabel: recommendationDisplayLabel[StockRecommendation.EXIT],
       count: exitCount,
       icon: TrendingDown,
       color: 'text-destructive',
@@ -150,10 +150,10 @@ export const Dashboard = () => {
                   <p className="text-muted-foreground text-sm leading-relaxed whitespace-pre-wrap mb-3">
                     {marketSummary
                       ? highlightText(
-                          marketSummary.summary,
-                          marketSummary.riskTolerance,
-                          marketSummary.interests,
-                        )
+                        marketSummary.summary,
+                        marketSummary.riskTolerance,
+                        marketSummary.interests,
+                      )
                       : 'No summary available.'}
                   </p>
                   {marketSummary?.suggestedStocks && marketSummary.suggestedStocks.length > 0 && (
@@ -209,7 +209,7 @@ export const Dashboard = () => {
                   <card.icon className={cn('w-5 h-5', card.color)} />
                 </div>
                 <div className={cn('text-2xl font-bold', card.color)}>{card.count}</div>
-                <div className="text-sm text-muted-foreground">{getRecommendationLabel(card.label)}</div>
+                <div className="text-sm text-muted-foreground">{card.displayLabel}</div>
               </button>
             ))}
           </div>
@@ -269,12 +269,12 @@ export const Dashboard = () => {
           <div className="flex items-center gap-2 mb-6">
             <Filter size={18} className="text-muted-foreground" />
             <div className="flex gap-2">
-              {[
+              {([
                 'All',
                 StockRecommendation.INVEST,
                 StockRecommendation.HOLD,
                 StockRecommendation.EXIT,
-              ].map((f) => (
+              ] as const).map((f) => (
                 <Button
                   key={f}
                   variant={filter === f ? 'default' : 'ghost'}
@@ -282,7 +282,7 @@ export const Dashboard = () => {
                   onClick={() => setFilter(f as typeof filter)}
                   className="capitalize"
                 >
-                  {getRecommendationLabel(f)}
+                  {f === 'All' ? 'All' : recommendationDisplayLabel[f]}
                 </Button>
               ))}
             </div>
