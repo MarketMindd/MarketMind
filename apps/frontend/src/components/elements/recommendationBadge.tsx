@@ -1,61 +1,112 @@
-import { Clock, Minus, TrendingDown, TrendingUp } from 'lucide-react';
-import { AiResponse, StockRecommendation } from '@market-mind/common';
-import { iconSizes, sizeClasses } from '@/consts/recommendationBadge';
-import { Size } from '@/enums/recommendationBadge';
-import { RecommendationBadgeConfig } from '@/types/recommendationBadge';
+import { Eye, ThumbsDown, ThumbsUp } from 'lucide-react';
+import { StockRecommendation } from '@market-mind/common';
 import { cn } from '@/utils/tailwindUtils';
+import { Term } from './term';
 
 interface RecommendationBadgeProps {
-  recommendation: AiResponse['status'];
-  confidence?: AiResponse['confidence'];
-  size?: Size;
+  recommendation: StockRecommendation;
+  confidence?: number;
+  size?: 'sm' | 'md' | 'lg';
   showConfidence?: boolean;
 }
 
-const config: Record<StockRecommendation, RecommendationBadgeConfig> = {
-  [StockRecommendation.INVEST]: {
-    label: 'Buy',
-    icon: TrendingUp,
-    className: 'bg-success/20 text-success border-success/30',
-  },
-  [StockRecommendation.HOLD]: {
-    label: 'Watch/Wait',
-    icon: Minus,
-    className: 'bg-warning/20 text-warning border-warning/30',
-  },
-  [StockRecommendation.EXIT]: {
-    label: 'Avoid/Sell',
-    icon: TrendingDown,
-    className: 'bg-destructive/20 text-destructive border-destructive/30',
-  },
-  [StockRecommendation.NOT_ANALYZED]: {
-    label: 'Not Analyzed',
-    icon: Clock,
-    className: 'bg-muted/40 text-muted-foreground border-muted-foreground/20',
-  },
+const getConfidenceLabel = (confidence: number) => {
+  if (confidence >= 80)
+    return {
+      word: 'strongly sure',
+      explain: 'The AI is very confident in this recommendation based on historical patterns.',
+    };
+  if (confidence >= 60)
+    return {
+      word: 'fairly sure',
+      explain: 'The AI is moderately confident, but there is some market uncertainty.',
+    };
+  return { word: 'somewhat sure', explain: 'The AI sees mixed signals. Proceed with caution.' };
 };
 
-const RecommendationBadge = ({
+export const RecommendationBadge = ({
   recommendation,
   confidence,
-  size = Size.MD,
+  size = 'md',
   showConfidence = false,
 }: RecommendationBadgeProps) => {
-  const { label, icon: Icon, className } = config[recommendation];
+  const normalizedRec = recommendation || StockRecommendation.NOT_ANALYZED;
+
+  // If not analyzed yet, show a subtle loading/waiting badge
+  if (normalizedRec === StockRecommendation.NOT_ANALYZED) {
+    return (
+      <div className="inline-flex items-center gap-2">
+        <div className="inline-flex items-center rounded-full border font-medium text-xs px-2.5 py-1 gap-1.5 bg-muted/50 text-muted-foreground border-border/50">
+          <Eye size={12} />
+          <span>Analyzing...</span>
+        </div>
+      </div>
+    );
+  }
+
+  const config = {
+    [StockRecommendation.INVEST]: {
+      icon: ThumbsUp,
+      className: 'bg-success/15 text-success border-success/30',
+      term: 'Buy / Invest',
+      label: 'Good to buy',
+      explain: 'The AI thinks this stock is likely to grow in value from here.',
+    },
+    [StockRecommendation.HOLD]: {
+      icon: Eye,
+      className: 'bg-warning/15 text-warning border-warning/30',
+      term: 'Hold',
+      label: 'Keep watching',
+      explain: "Don't buy more, but don't sell either — wait and watch.",
+    },
+    [StockRecommendation.EXIT]: {
+      icon: ThumbsDown,
+      className: 'bg-destructive/15 text-destructive border-destructive/30',
+      term: 'Sell / Exit',
+      label: 'Better to sell',
+      explain: 'The AI thinks the risks outweigh the upside right now.',
+    },
+  };
+
+  const recConfig = config[normalizedRec] || config[StockRecommendation.HOLD];
+  const { icon: Icon, className, term, label, explain } = recConfig;
+
+  const sizeClasses = {
+    sm: 'text-xs px-2.5 py-1 gap-1.5',
+    md: 'text-sm px-3 py-1.5 gap-1.5',
+    lg: 'text-base px-4 py-2 gap-2',
+  };
+  const iconSizes = { sm: 12, md: 14, lg: 16 };
 
   return (
-    <div
-      className={cn(
-        'inline-flex items-center rounded-full border font-medium flex-shrink-0',
-        className,
-        sizeClasses[size],
-      )}
-    >
-      <Icon size={iconSizes[size]} />
-      <span>{label}</span>
-      {showConfidence && confidence !== undefined && recommendation !== StockRecommendation.NOT_ANALYZED && (
-        <span className="opacity-70 ml-1">({confidence}%)</span>
-      )}
+    <div className="inline-flex items-center gap-2">
+      <div
+        className={cn(
+          'inline-flex items-center rounded-full border font-medium',
+          className,
+          sizeClasses[size],
+        )}
+      >
+        <Icon size={iconSizes[size]} />
+        <Term term={term} explanation={explain} hideIcon className="no-underline cursor-help">
+          {label}
+        </Term>
+      </div>
+      {showConfidence &&
+        confidence !== undefined &&
+        (() => {
+          const c = getConfidenceLabel(confidence);
+          return (
+            <Term
+              term={`Confidence: ${confidence}%`}
+              explanation={c.explain}
+              hideIcon
+              className="text-xs text-muted-foreground no-underline"
+            >
+              <span className="opacity-80">· {c.word}</span>
+            </Term>
+          );
+        })()}
     </div>
   );
 };

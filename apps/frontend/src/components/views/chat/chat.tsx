@@ -161,7 +161,7 @@ export const Chat = () => {
   };
 
   return (
-    <div className="flex-1 flex overflow-hidden bg-background relative">
+    <div className="flex-1 flex overflow-hidden bg-background relative pt-16">
       <ChatSidebar
         isSidebarCollapsed={isSidebarCollapsed}
         onToggle={() => setIsSidebarCollapsed((c) => !c)}
@@ -181,14 +181,14 @@ export const Chat = () => {
               <span className="text-sm">Retrieving message history...</span>
             </div>
           ) : !activeSessionId || messages.length === 0 ? (
-            <ChatEmptyState
-              firstName={getUserFirstName()}
-              input={input}
-              onInputChange={setInput}
-              onKeyDown={handleKeyDown}
-              onSend={handleSend}
-              isPendingSend={isPendingSend}
-            />
+              <ChatEmptyState
+                userName={getUserFirstName()}
+                input={input}
+                onInputChange={setInput}
+                onKeyDown={handleKeyDown}
+                onSend={handleSend}
+                isPendingSend={isPendingSend}
+              />
           ) : (
             <ChatMessagesList
               messages={messages}

@@ -1,6 +1,7 @@
-import { ArrowDownRight, ArrowUpRight, Briefcase } from 'lucide-react';
-import { calculatePriceChange, PortfolioItem, Stock, StockRecommendation } from '@market-mind/common';
-import RecommendationBadge from '@/components/elements/recommendationBadge';
+import { ArrowDown, ArrowUp, Briefcase } from 'lucide-react';
+import { PortfolioItem, Stock, StockRecommendation } from '@market-mind/common';
+import { RecommendationBadge } from '@/components/elements/recommendationBadge';
+import { Term } from '@/components/elements/term';
 import { cn } from '@/utils/tailwindUtils';
 
 interface StockCardProps {
@@ -12,118 +13,109 @@ interface StockCardProps {
 
 export const StockCard = ({ stock, onClick, className, portfolioData }: StockCardProps) => {
   const isPositive = stock.marketData.priceChange >= 0;
+  const directionWord = isPositive ? 'up' : 'down';
   const isAnalyzed = stock.aiRecommendation.status !== StockRecommendation.NOT_ANALYZED;
 
-  const dollarChange = calculatePriceChange(stock.marketData.price, stock.marketData.priceChange);
+  // We use aiSummary if available, else rationale, else a generic fallback.
+  const shortExplanation = stock.aiRecommendation.aiSummary || stock.aiRecommendation.rationale || "The AI is still gathering data on this stock.";
 
   return (
     <div
       onClick={onClick}
-      className={cn('glass-card p-5 hover-lift cursor-pointer group', className)}
+      className={cn('glass-card p-5 hover-lift cursor-pointer group flex flex-col', className)}
     >
-      <div className="flex items-start justify-between gap-4 mb-4">
+      {/* Name first (beginners recognize names, not tickers) */}
+      <div className="flex items-start justify-between mb-3 gap-3">
         <div className="min-w-0">
-          <div className="flex flex-col items-start gap-1 mb-1.5">
-            <span className="font-mono text-primary font-semibold">{stock.symbol}</span>
-            <span className="text-xs text-muted-foreground px-2 py-0.5 bg-secondary rounded-full whitespace-nowrap">
-              {stock.sector}
-            </span>
-          </div>
-          <h3 className="font-medium text-foreground group-hover:text-primary transition-colors truncate">
+          <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors truncate">
             {stock.name}
           </h3>
-        </div>
-        <RecommendationBadge
-          recommendation={stock.aiRecommendation.status}
-          confidence={stock.aiRecommendation.confidence}
-          showConfidence
-        />
-      </div>
-
-      <div className="flex items-end justify-between mb-4">
-        <div>
-          <span className="text-2xl font-semibold text-foreground">
-            ${stock.marketData.price.toFixed(2)}
-          </span>
-          <div
-            className={cn(
-              'flex items-center gap-1 text-sm mt-1',
-              isPositive ? 'text-success' : 'text-destructive',
-            )}
-          >
-            {isPositive ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
-            <span>
-              {isPositive ? '+' : ''}
-              {dollarChange} ({isPositive ? '+' : ''}
-              {stock.marketData.priceChange.toFixed(2)}%)
-            </span>
+          <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+            <Term
+              term={`Ticker: ${stock.symbol}`}
+              explanation="A short code that uniquely identifies a company on the stock market."
+              hideIcon
+              className="font-mono no-underline"
+            >
+              {stock.symbol}
+            </Term>
+            <span>·</span>
+            <span className="truncate">{stock.sector}</span>
           </div>
         </div>
-        {isAnalyzed && (
-          <div className="text-right">
-            <span className="text-xs text-muted-foreground">Confidence</span>
-            <div className="flex items-center gap-2 mt-1">
-              <div className="w-16 h-1.5 bg-secondary rounded-full overflow-hidden">
-                <div
-                  className={cn(
-                    'h-full rounded-full transition-all duration-500',
-                    stock.aiRecommendation.confidence >= 80
-                      ? 'bg-success'
-                      : stock.aiRecommendation.confidence >= 60
-                        ? 'bg-warning'
-                        : 'bg-destructive',
-                  )}
-                  style={{ width: `${stock.aiRecommendation.confidence}%` }}
-                />
-              </div>
-              <span className="text-sm font-mono text-muted-foreground">
-                {stock.aiRecommendation.confidence}%
+        <RecommendationBadge recommendation={stock.aiRecommendation.status} size="sm" />
+      </div>
+
+      {/* Plain summary */}
+      <p className="text-sm text-foreground/80 leading-relaxed mb-4 line-clamp-3">
+        {shortExplanation}
+      </p>
+
+      {/* Price block with plain wording */}
+      <div className="mt-auto pt-4 border-t border-border/50">
+        <div className="flex items-end justify-between">
+          <div>
+            <div className="text-2xl font-semibold text-foreground">
+              ${stock.marketData.price.toFixed(2)}
+            </div>
+            <div
+              className={cn(
+                'flex items-center gap-1 text-sm mt-1',
+                isPositive ? 'text-success' : 'text-destructive'
+              )}
+            >
+              {isPositive ? <ArrowUp size={14} /> : <ArrowDown size={14} />}
+              <span>
+                {directionWord} {Math.abs(stock.marketData.priceChange).toFixed(2)}% today
               </span>
             </div>
           </div>
-        )}
+          {isAnalyzed && (
+            <Term
+              term={`AI confidence: ${stock.aiRecommendation.confidence}%`}
+              explanation="How sure the AI is about this recommendation, based on its analysis."
+              hideIcon
+              className="text-xs text-muted-foreground text-right no-underline gap-2"
+            >
+              <span className="block">AI is</span>
+              <span className="text-foreground font-medium">
+                {stock.aiRecommendation.confidence >= 80 ? 'strongly' : stock.aiRecommendation.confidence >= 60 ? 'fairly' : 'somewhat'} sure
+              </span>
+            </Term>
+          )}
+        </div>
       </div>
-
-      {stock.aiRecommendation.aiSummary && (
-        <p className="text-sm text-muted-foreground leading-relaxed">
-          {stock.aiRecommendation.aiSummary}
-        </p>
-      )}
 
       {portfolioData && (
         <div className="mt-4 pt-4 border-t border-border/50">
           <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
             <Briefcase size={12} className="text-primary" />
-            <span>Your holding</span>
+            <span>You own this</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">
-              {portfolioData.shares} shares @ ${portfolioData.avgPrice.toFixed(2)}
+              {portfolioData.shares} shares · bought at ${portfolioData.avgPrice.toFixed(2)}
             </span>
             <span
               className={cn(
                 'font-medium',
-                stock.marketData.price > portfolioData.avgPrice
-                  ? 'text-success'
-                  : 'text-destructive',
+                stock.marketData.price > portfolioData.avgPrice ? 'text-success' : 'text-destructive'
               )}
             >
               {stock.marketData.price > portfolioData.avgPrice ? '+' : ''}
-              {(
-                ((stock.marketData.price - portfolioData.avgPrice) / portfolioData.avgPrice) *
-                100
-              ).toFixed(1)}
-              %
+              {(((stock.marketData.price - portfolioData.avgPrice) / portfolioData.avgPrice) * 100).toFixed(1)}%
             </span>
           </div>
         </div>
       )}
 
-      <div className={cn('mt-4 pt-4 border-t border-border/50', portfolioData && 'mt-3 pt-3')}>
+      <div className="mt-4 pt-3 border-t border-border/50">
         <span className="text-xs text-primary font-medium group-hover:underline">
-          View full analysis →
+          See why →
         </span>
       </div>
     </div>
   );
 };
+
+export default StockCard;

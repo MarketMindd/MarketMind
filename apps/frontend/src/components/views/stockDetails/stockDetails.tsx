@@ -1,50 +1,47 @@
-import {
-  ArrowDownRight,
-  ArrowLeft,
-  ArrowUpRight,
-  Brain,
-  Clock,
-  LineChart,
-  Target,
-} from 'lucide-react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { AdvancedRealTimeChart } from 'react-ts-tradingview-widgets';
-import { calculatePriceChange, StockRecommendation } from '@market-mind/common';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/elements/button';
-import RecommendationBadge from '@/components/elements/recommendationBadge';
-import { Size } from '@/enums/recommendationBadge';
+import { RecommendationBadge } from '@/components/elements/recommendationBadge';
+import { AdvancedRealTimeChart } from 'react-ts-tradingview-widgets';
 import { useClientQueries } from '@/hooks/useClientQueries';
 import { cn } from '@/utils/tailwindUtils';
+import {
+  ArrowLeft,
+  ArrowUpRight,
+  ArrowDownRight,
+  Clock,
+  Target,
+  TrendingUp,
+  Brain,
+  Zap,
+  LineChart,
+} from 'lucide-react';
+import { StockRecommendation } from '@market-mind/common';
 
 export const StockDetails = () => {
-  const { stockSymbol } = useParams();
+  const { stockSymbol } = useParams<{ stockSymbol: string }>();
   const navigate = useNavigate();
-  const { stocks } = useClientQueries();
 
   const {
-    data: stock,
-    isLoading,
-    error,
-  } = stocks.useGetStock(stockSymbol ?? '', {
-    enabled: !!stockSymbol,
-  });
+    stocks: { useGetStock },
+  } = useClientQueries();
+  const { data: stock, isLoading } = useGetStock(stockSymbol!);
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <span className="text-xl font-semibold text-foreground">Loading...</span>
+        <div className="text-center animate-pulse">
+          <h2 className="text-xl font-semibold text-foreground mb-2">Analyzing Stock Data...</h2>
+        </div>
       </div>
     );
   }
 
-  if (error || !stock) {
+  if (!stock) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-xl font-semibold text-foreground mb-2">Stock not found</h2>
-          <Link to="/dashboard">
-            <Button>Return to Dashboard</Button>
-          </Link>
+          <Button onClick={() => navigate('/dashboard')}>Return to Dashboard</Button>
         </div>
       </div>
     );
@@ -54,96 +51,126 @@ export const StockDetails = () => {
   const isAnalyzed = stock.aiRecommendation.status !== StockRecommendation.NOT_ANALYZED;
 
   return (
-    <div className="flex-1 flex flex-col bg-background">
-      <div className="pt-8 sm:pt-6 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-        <Link to="/dashboard">
-          <Button variant="ghost" className="mb-6 animate-fade-in">
-            <ArrowLeft size={18} />
-            Back to Dashboard
-          </Button>
-        </Link>
+    <div className="flex-1 flex flex-col bg-background w-full">
+      <main className="pt-8 sm:pt-6 pb-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto w-full">
+        {/* Back button */}
+        <Button
+          variant="ghost"
+          onClick={() => navigate('/dashboard')}
+          className="mb-6 animate-fade-in"
+        >
+          <ArrowLeft size={18} />
+          Back to Dashboard
+        </Button>
 
+        {/* Header — name + plain recommendation */}
         <div className="glass-card p-6 mb-6 animate-fade-in stagger-1">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
             <div>
-              <div className="flex flex-wrap items-center gap-3 mb-2">
-                <span className="font-mono text-2xl text-primary font-bold">{stock.symbol}</span>
-                <span className="text-sm text-muted-foreground px-3 py-1 bg-secondary rounded-full whitespace-nowrap">
-                  {stock.sector}
-                </span>
+              <h1 className="text-2xl font-bold text-foreground mb-1">{stock.name}</h1>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span className="font-mono">{stock.symbol}</span>
+                <span>·</span>
+                <span>{stock.sector}</span>
               </div>
-              <h1 className="text-xl font-semibold text-foreground">{stock.name}</h1>
             </div>
-            <RecommendationBadge
-              recommendation={stock.aiRecommendation.status}
-              confidence={stock.aiRecommendation.confidence}
-              size={Size.LG}
-              showConfidence
-            />
+            {isAnalyzed && (
+              <RecommendationBadge
+                recommendation={stock.aiRecommendation.status}
+                confidence={stock.aiRecommendation.confidence}
+                size="lg"
+                showConfidence
+              />
+            )}
           </div>
 
-          <div className="flex items-end gap-6">
+          <div className="flex items-end gap-6 flex-wrap">
             <div>
               <span className="text-4xl font-bold text-foreground">
                 ${stock.marketData.price.toFixed(2)}
               </span>
               <div
                 className={cn(
-                  'flex items-center gap-1 text-lg mt-1',
+                  'flex items-center gap-1 text-base mt-1',
                   isPositive ? 'text-success' : 'text-destructive',
                 )}
               >
-                {isPositive ? <ArrowUpRight size={20} /> : <ArrowDownRight size={20} />}
+                {isPositive ? <ArrowUpRight size={18} /> : <ArrowDownRight size={18} />}
                 <span>
-                  {isPositive ? '+' : ''}
-                  {calculatePriceChange(stock.marketData.price, stock.marketData.priceChange)} (
-                  {isPositive ? '+' : ''}
-                  {stock.marketData.priceChange.toFixed(2)}%)
+                  {isPositive ? 'up' : 'down'} {Math.abs(stock.marketData.priceChange).toFixed(2)}% today
+                  <span className="text-muted-foreground ml-2 text-sm">
+                    ({isPositive ? '+' : ''}
+                    ${Math.abs((stock.marketData.price * stock.marketData.priceChange) / 100).toFixed(2)})
+                  </span>
                 </span>
               </div>
             </div>
-
-            {isAnalyzed && (
-              <div className="ml-auto">
-                <span className="text-sm text-muted-foreground block mb-2">AI Confidence</span>
-                <div className="flex items-center gap-3">
-                  <div className="w-32 h-2 bg-secondary rounded-full overflow-hidden">
-                    <div
-                      className={cn(
-                        'h-full rounded-full transition-all duration-700',
-                        stock.aiRecommendation.confidence >= 80
-                          ? 'bg-success'
-                          : stock.aiRecommendation.confidence >= 60
-                            ? 'bg-warning'
-                            : 'bg-destructive',
-                      )}
-                      style={{ width: `${stock.aiRecommendation.confidence}%` }}
-                    />
-                  </div>
-                  <span className="text-lg font-mono font-semibold">
-                    {stock.aiRecommendation.confidence}%
-                  </span>
-                </div>
-                <div className="mt-2 text-xs text-muted-foreground max-w-[220px] text-right ml-auto">
-                  {stock.aiRecommendation.confidence >= 80 
-                    ? "The AI is highly confident this aligns with your profile."
-                    : stock.aiRecommendation.confidence >= 60
-                    ? "The AI is moderately confident about this recommendation."
-                    : "The AI has low confidence; consider researching further."}
-                </div>
-              </div>
-            )}
           </div>
         </div>
 
-        <div className="glass-card p-6 mb-6 animate-fade-in stagger-2">
-          <div className="flex items-center gap-3 mb-4">
+        {/* Plain-English explanation — the main thing */}
+        {stock.aiRecommendation.status !== StockRecommendation.NOT_ANALYZED && (
+          <div className="glass-card p-6 mb-6 animate-fade-in stagger-2 border-l-4 border-l-primary">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
+                <Brain className="w-5 h-5 text-primary" />
+              </div>
+              <h2 className="text-lg font-semibold text-foreground">Why the AI thinks this</h2>
+            </div>
+            {stock.aiRecommendation.aiSummary && (
+              <p className="text-foreground/90 leading-relaxed mb-3">
+                {stock.aiRecommendation.aiSummary}
+              </p>
+            )}
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              {stock.aiRecommendation.rationale}
+            </p>
+          </div>
+        )}
+
+        {/* Insights */}
+        {stock.aiRecommendation.status !== StockRecommendation.NOT_ANALYZED && (
+          <div className="grid md:grid-cols-2 gap-6 mb-6">
+            <div className="glass-card p-6 animate-fade-in stagger-3">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-lg bg-warning/20 flex items-center justify-center">
+                  <Clock className="w-5 h-5 text-warning" />
+                </div>
+                <h3 className="font-semibold text-foreground">In the next few months</h3>
+              </div>
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                {stock.aiRecommendation.shortTermOutlook || 'No short-term outlook available.'}
+              </p>
+            </div>
+
+            <div className="glass-card p-6 animate-fade-in stagger-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-lg bg-success/20 flex items-center justify-center">
+                  <Target className="w-5 h-5 text-success" />
+                </div>
+                <h3 className="font-semibold text-foreground">A year or two out</h3>
+              </div>
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                {stock.aiRecommendation.longTermOutlook || 'No long-term outlook available.'}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Price chart — moved below, optional context */}
+        <div className="glass-card p-6 mb-6 animate-fade-in stagger-5">
+          <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
               <LineChart className="w-5 h-5 text-primary" />
             </div>
-            <h2 className="text-lg font-semibold text-foreground">Price History (30 Days)</h2>
+            <div>
+              <h2 className="text-lg font-semibold text-foreground">Price over the last 30 days</h2>
+              <p className="text-xs text-muted-foreground">
+                Just for reference — short-term swings don't usually matter much.
+              </p>
+            </div>
           </div>
-          <div style={{ height: '500px', width: '100%' }}>
+          <div style={{ height: '400px', width: '100%' }}>
             <AdvancedRealTimeChart
               symbol={stock.symbol}
               range="1M"
@@ -154,59 +181,33 @@ export const StockDetails = () => {
           </div>
         </div>
 
-        <div className="glass-card p-6 mb-6 animate-fade-in stagger-3">
-          <div className="flex items-center justify-between gap-4 mb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
-                <Brain className="w-5 h-5 text-primary" />
-              </div>
-              <h2 className="text-lg font-semibold text-foreground">AI Analysis</h2>
+        {/* Momentum */}
+        <div className="glass-card p-6 animate-fade-in stagger-6">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
+              <Zap className="w-5 h-5 text-primary" />
             </div>
-            <Button
-              variant="glow"
-              className="flex items-center gap-2"
-              onClick={() => navigate(`/chat?symbol=${stock.symbol}`)}
-            >
-              <Brain size={16} />
-              Ask AI Assistant
-            </Button>
+            <h3 className="font-semibold text-foreground">What's happening right now</h3>
           </div>
-          <p className="text-muted-foreground leading-relaxed">
-            {stock.aiRecommendation.rationale}
-          </p>
+          <div className="flex items-center gap-4">
+            <TrendingUp
+              className={cn(
+                'w-8 h-8',
+                stock.aiRecommendation.status === StockRecommendation.INVEST
+                  ? 'text-success'
+                  : stock.aiRecommendation.status === StockRecommendation.HOLD
+                    ? 'text-warning'
+                    : 'text-destructive',
+              )}
+            />
+            <p className="text-foreground">
+              {isPositive
+                ? 'The stock price is showing positive momentum today.'
+                : 'The stock price is facing a minor setback today.'}
+            </p>
+          </div>
         </div>
-
-        {(stock.aiRecommendation.shortTermOutlook || stock.aiRecommendation.longTermOutlook) && (
-          <div className="grid md:grid-cols-2 gap-6 mb-6 animate-fade-in stagger-4">
-            {stock.aiRecommendation.shortTermOutlook && (
-              <div className="glass-card p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-lg bg-warning/20 flex items-center justify-center">
-                    <Clock className="w-5 h-5 text-warning" />
-                  </div>
-                  <h3 className="font-semibold text-foreground">Short-Term Outlook</h3>
-                </div>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  {stock.aiRecommendation.shortTermOutlook}
-                </p>
-              </div>
-            )}
-            {stock.aiRecommendation.longTermOutlook && (
-              <div className="glass-card p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-lg bg-success/20 flex items-center justify-center">
-                    <Target className="w-5 h-5 text-success" />
-                  </div>
-                  <h3 className="font-semibold text-foreground">Long-Term Outlook</h3>
-                </div>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  {stock.aiRecommendation.longTermOutlook}
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+      </main>
     </div>
   );
 };
