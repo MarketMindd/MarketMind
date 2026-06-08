@@ -12,7 +12,6 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { RecommendationStatus, StockRecommendation } from '@market-mind/common';
 import { Button } from '@/components/elements/button';
-import { PerformanceSummary } from '@/components/elements/performanceSummary';
 import { StockCard } from '@/components/elements/stockCard';
 import { useClientQueries } from '@/hooks/useClientQueries';
 import { cn } from '@/utils/tailwindUtils';
@@ -191,10 +190,7 @@ export const Dashboard = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-8">
-          <div className="lg:col-span-1">
-            <PerformanceSummary />
-          </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
           <div className="lg:col-span-3 grid grid-cols-3 gap-4">
             {summaryCards.map((card, i) => (
               <button
