@@ -12,6 +12,7 @@ import { AdvancedRealTimeChart } from 'react-ts-tradingview-widgets';
 import { calculatePriceChange, StockRecommendation } from '@market-mind/common';
 import { Button } from '@/components/elements/button';
 import RecommendationBadge from '@/components/elements/recommendationBadge';
+import { buildAskAiHref } from '@/consts/routes';
 import { Size } from '@/enums/recommendationBadge';
 import { useClientQueries } from '@/hooks/useClientQueries';
 import { cn } from '@/utils/tailwindUtils';
@@ -158,7 +159,14 @@ export const StockDetails = () => {
             <Button
               variant="glow"
               className="flex items-center gap-2"
-              onClick={() => navigate(`/chat?symbol=${stock.symbol}`)}
+              onClick={() =>
+                navigate(
+                  buildAskAiHref({
+                    symbol: stock.symbol,
+                    prompt: `Give me your analysis of ${stock.symbol}.`,
+                  }),
+                )
+              }
             >
               <Brain size={16} />
               Ask AI Assistant
