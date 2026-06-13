@@ -33,6 +33,7 @@ const getUserFirstName = () => {
 export const Chat = () => {
   const [searchParams] = useSearchParams();
   const symbolParam = searchParams.get('symbol');
+  const promptParam = searchParams.get('prompt');
   const navigate = useNavigate();
   const { sessionId } = useParams<{ sessionId?: string }>();
   const activeSessionId = sessionId || '';
@@ -120,12 +121,15 @@ export const Chat = () => {
     }
   }, [symbolParam, sessions, navigate]);
 
-  // Pre-fill the input when arriving via "Ask AI" button
+  // Pre-fill the composer when arriving via an "Ask AI" entry point
   useEffect(() => {
-    if (symbolParam && !activeSessionId) {
+    if (activeSessionId) return;
+    if (promptParam) {
+      setInput(promptParam);
+    } else if (symbolParam) {
       setInput(`Tell me about ${symbolParam.toUpperCase()}`);
     }
-  }, [symbolParam, activeSessionId]);
+  }, [promptParam, symbolParam, activeSessionId]);
 
   // Send the pending message once the session is created and URL has updated
   useEffect(() => {
