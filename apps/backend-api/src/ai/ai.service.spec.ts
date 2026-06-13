@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AiRecommendation, RiskTolerance, StockRecommendation } from '@market-mind/common';
 import type { FilteredSnapshot } from '../filter/filter.types';
 import { AiService } from './ai.service';
-import { GeminiClientService } from './gemini-client.service';
+import { LLM_CLIENT } from './llm-client.interface';
 import { PromptBuilderService } from './prompt-builder.service';
 import { ResponseParserService } from './response-parser.service';
 
@@ -32,12 +32,12 @@ const makeSnapshot = (
 describe('AiService', () => {
   let service: AiService;
   let mockPromptBuilder: { buildRecommendationPrompt: jest.Mock };
-  let mockGeminiClient: { generateContent: jest.Mock };
+  let mockLlmClient: { generateContent: jest.Mock };
   let mockResponseParser: { parse: jest.Mock };
 
   beforeEach(async () => {
     mockPromptBuilder = { buildRecommendationPrompt: jest.fn().mockReturnValue('prompt') };
-    mockGeminiClient = {
+    mockLlmClient = {
       generateContent: jest
         .fn()
         .mockResolvedValue('{"status":"Invest","confidence":0.8,"rationale":"Good"}'),
@@ -48,7 +48,7 @@ describe('AiService', () => {
       providers: [
         AiService,
         { provide: PromptBuilderService, useValue: mockPromptBuilder },
-        { provide: GeminiClientService, useValue: mockGeminiClient },
+        { provide: LLM_CLIENT, useValue: mockLlmClient },
         { provide: ResponseParserService, useValue: mockResponseParser },
       ],
     }).compile();
@@ -59,7 +59,7 @@ describe('AiService', () => {
   it('returns empty array when user list is empty', async () => {
     const result = await service.analyze(makeSnapshot([]));
     expect(result).toEqual([]);
-    expect(mockGeminiClient.generateContent).not.toHaveBeenCalled();
+    expect(mockLlmClient.generateContent).not.toHaveBeenCalled();
   });
 
   it('calls Gemini exactly once for multiple users sharing the same risk tolerance', async () => {
@@ -70,7 +70,7 @@ describe('AiService', () => {
       { userId: 'u3', riskTolerance: RiskTolerance.MEDIUM },
     ];
     await service.analyze(makeSnapshot(users));
-    expect(mockGeminiClient.generateContent).toHaveBeenCalledTimes(1);
+    expect(mockLlmClient.generateContent).toHaveBeenCalledTimes(1);
   });
 
   it('calls Gemini once per unique risk tolerance', async () => {
@@ -84,12 +84,12 @@ describe('AiService', () => {
       { userId: 'u3', riskTolerance: RiskTolerance.LOW },
     ];
     const result = await service.analyze(makeSnapshot(users));
-    expect(mockGeminiClient.generateContent).toHaveBeenCalledTimes(2);
+    expect(mockLlmClient.generateContent).toHaveBeenCalledTimes(2);
     expect(result).toHaveLength(2);
   });
 
   it('continues processing remaining groups when one risk group fails', async () => {
-    mockGeminiClient.generateContent
+    mockLlmClient.generateContent
       .mockRejectedValueOnce(new Error('API error'))
       .mockResolvedValueOnce('raw');
     mockResponseParser.parse.mockReturnValueOnce(makeRecommendation('AAPL', RiskTolerance.HIGH));
@@ -104,7 +104,7 @@ describe('AiService', () => {
   });
 
   it('returns empty array when all risk groups fail', async () => {
-    mockGeminiClient.generateContent.mockRejectedValue(new Error('API down'));
+    mockLlmClient.generateContent.mockRejectedValue(new Error('API down'));
 
     const users = [
       { userId: 'u1', riskTolerance: RiskTolerance.LOW },
