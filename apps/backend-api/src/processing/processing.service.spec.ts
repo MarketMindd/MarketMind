@@ -119,7 +119,7 @@ describe('ProcessingService', () => {
   });
 
   it('sends email when recommendation status changes', async () => {
-    const rec = makeRec({ status: 'Hold' });
+    const rec = makeRec({ status: StockRecommendation.HOLD });
     mockRepo.findOne.mockResolvedValue({ status: 'Invest' });
 
     await service.process([rec]);
