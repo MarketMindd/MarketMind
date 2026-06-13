@@ -1,6 +1,7 @@
 import { Loader2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import type { ExplainMode } from '@market-mind/common';
 import { useToast } from '@/hooks/useToast';
 import { useClientQueries } from '../../../hooks/useClientQueries';
 import { ChatEmptyState } from './chatEmptyState';
@@ -43,6 +44,14 @@ export const Chat = () => {
   const [input, setInput] = useState('');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [pendingMessage, setPendingMessage] = useState('');
+  const [explainMode, setExplainMode] = useState<ExplainMode>(
+    () => (localStorage.getItem('chatExplainMode') as ExplainMode) || 'easy',
+  );
+
+  const handleExplainModeChange = (mode: ExplainMode) => {
+    setExplainMode(mode);
+    localStorage.setItem('chatExplainMode', mode);
+  };
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -134,10 +143,10 @@ export const Chat = () => {
   // Send the pending message once the session is created and URL has updated
   useEffect(() => {
     if (pendingMessage && activeSessionId) {
-      sendMessage({ content: pendingMessage });
+      sendMessage({ content: pendingMessage, explainMode });
       setPendingMessage('');
     }
-  }, [activeSessionId, pendingMessage, sendMessage]);
+  }, [activeSessionId, pendingMessage, sendMessage, explainMode]);
 
   const handleSend = (text?: string) => {
     const textToSend = (typeof text === 'string' ? text.trim() : '') || input.trim();
@@ -147,7 +156,7 @@ export const Chat = () => {
       setPendingMessage(textToSend);
       createSession(symbolParam ? { symbol: symbolParam } : { title: 'New Chat' });
     } else {
-      sendMessage({ content: textToSend });
+      sendMessage({ content: textToSend, explainMode });
     }
     setInput('');
   };
@@ -192,6 +201,8 @@ export const Chat = () => {
               onKeyDown={handleKeyDown}
               onSend={handleSend}
               isPendingSend={isPendingSend}
+              explainMode={explainMode}
+              onExplainModeChange={handleExplainModeChange}
             />
           ) : (
             <ChatMessagesList
@@ -209,6 +220,8 @@ export const Chat = () => {
             onKeyDown={handleKeyDown}
             onSend={handleSend}
             isPendingSend={isPendingSend}
+            explainMode={explainMode}
+            onExplainModeChange={handleExplainModeChange}
           />
         )}
       </main>

@@ -1,4 +1,6 @@
 import { Send } from 'lucide-react';
+import type { ExplainMode } from '@market-mind/common';
+import { ExplainModeToggle } from '../../elements/explainModeToggle';
 import { Button } from '../../elements/button';
 import { Input } from '../../elements/input';
 
@@ -9,6 +11,8 @@ interface ChatEmptyStateProps {
   onKeyDown: (e: React.KeyboardEvent) => void;
   onSend: () => void;
   isPendingSend: boolean;
+  explainMode: ExplainMode;
+  onExplainModeChange: (mode: ExplainMode) => void;
 }
 
 export const ChatEmptyState = ({
@@ -18,6 +22,8 @@ export const ChatEmptyState = ({
   onKeyDown,
   onSend,
   isPendingSend,
+  explainMode,
+  onExplainModeChange,
 }: ChatEmptyStateProps) => {
   return (
     <div className="flex-1 flex flex-col items-center justify-center max-w-3xl mx-auto w-full px-6 py-8 space-y-8 animate-fade-in relative">
@@ -51,6 +57,9 @@ export const ChatEmptyState = ({
           >
             <Send size={18} />
           </Button>
+        </div>
+        <div className="flex justify-center">
+          <ExplainModeToggle mode={explainMode} onChange={onExplainModeChange} />
         </div>
       </div>
     </div>

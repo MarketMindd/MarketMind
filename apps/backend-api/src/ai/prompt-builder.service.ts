@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PortfolioItemWithStock, RiskTolerance, SectorInterest } from '@market-mind/common';
+import { ExplainMode, PortfolioItemWithStock, RiskTolerance, SectorInterest } from '@market-mind/common';
 import { FilteredSnapshot } from '../filter/filter.types';
 
 const RISK_GUIDANCE: Record<RiskTolerance, string> = {
@@ -9,6 +9,11 @@ const RISK_GUIDANCE: Record<RiskTolerance, string> = {
     'Balance risk and reward. Consider both upside potential and downside risk equally.',
   [RiskTolerance.HIGH]:
     'Accept higher volatility for greater return potential. Lean towards Invest on positive signals.',
+};
+
+const EXPLAIN_MODE_GUIDANCE: Record<ExplainMode, string> = {
+  easy: 'EXPLANATION STYLE — EASY MODE: The user is a beginner who wants to start investing and grow their money, and may know almost nothing about finance. Explain everything in plain, simple language, as if talking to a curious friend who is brand new to investing. Avoid jargon; whenever a financial term is unavoidable (e.g. "volatility", "P/E ratio", "diversification"), immediately explain it in one short, friendly sentence using an everyday analogy. Prefer short sentences, concrete examples, and what it practically means for their money. Never assume prior knowledge.',
+  pro: 'EXPLANATION STYLE — PROFESSIONAL MODE: The user is an experienced investor. Be concise, precise, and analytical. Use standard financial terminology freely (valuation multiples, volatility, risk-adjusted return, diversification) without defining the basics, and focus on the substantive analysis.',
 };
 
 @Injectable()
@@ -120,6 +125,7 @@ The JSON must have exactly these fields:
       confidence: number;
       summary?: string;
     }>,
+    explainMode: ExplainMode = 'easy',
   ): string {
     const portfolioText =
       portfolio.length === 0
@@ -182,6 +188,8 @@ ${newsSection}
       : 'Respond with a JSON object containing a single field "reply" (string, markdown supported).';
 
     return `You are "MarketMind AI", MarketMind's friendly, supportive AI financial assistant. Your goal is to explain market concepts, break down complex data, and discuss stock recommendations in simple terms for retail investors.
+
+${EXPLAIN_MODE_GUIDANCE[explainMode]}
 
 USER PROFILE:
 - Risk Profile: ${profile.riskTolerance}

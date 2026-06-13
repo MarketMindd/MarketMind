@@ -1,4 +1,6 @@
 import { Send } from 'lucide-react';
+import type { ExplainMode } from '@market-mind/common';
+import { ExplainModeToggle } from '../../elements/explainModeToggle';
 import { Button } from '../../elements/button';
 import { Input } from '../../elements/input';
 
@@ -8,6 +10,8 @@ interface ChatInputFooterProps {
   onKeyDown: (e: React.KeyboardEvent) => void;
   onSend: () => void;
   isPendingSend: boolean;
+  explainMode: ExplainMode;
+  onExplainModeChange: (mode: ExplainMode) => void;
 }
 
 export const ChatInputFooter = ({
@@ -16,10 +20,15 @@ export const ChatInputFooter = ({
   onKeyDown,
   onSend,
   isPendingSend,
+  explainMode,
+  onExplainModeChange,
 }: ChatInputFooterProps) => {
   return (
     <div className="p-4 border-t border-border/40 bg-background flex-shrink-0">
       <div className="max-w-3xl mx-auto w-full">
+        <div className="flex justify-end mb-2">
+          <ExplainModeToggle mode={explainMode} onChange={onExplainModeChange} />
+        </div>
         <div className="flex gap-3">
           <Input
             value={input}

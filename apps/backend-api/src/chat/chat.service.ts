@@ -168,6 +168,7 @@ export class ChatService {
       stockContext,
       shouldGenerateTitle,
       rankedRecommendations,
+      payload.explainMode,
     );
 
     const customJsonSchema = z.toJSONSchema(chatResponseSchema);

@@ -21,8 +21,11 @@ export interface CreateChatSessionPayload {
   symbol?: string;
 }
 
+export type ExplainMode = 'easy' | 'pro';
+
 export interface SendMessagePayload {
   content: string;
+  explainMode?: ExplainMode;
 }
 
 export const createChatSessionSchema = z.object({
@@ -32,4 +35,5 @@ export const createChatSessionSchema = z.object({
 
 export const sendMessageSchema = z.object({
   content: z.string().min(1).max(4000),
+  explainMode: z.enum(['easy', 'pro']).optional(),
 });
