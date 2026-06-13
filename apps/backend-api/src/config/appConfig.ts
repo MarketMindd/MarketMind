@@ -36,6 +36,16 @@ export const appConfig = {
   alphaVantageApiKey: process.env.ALPHA_VANTAGE_API_KEY ?? '',
   massiveApiKey: process.env.MASSIVE_API_KEY ?? '',
   geminiApiKey: process.env.GEMINI_API_KEY ?? '',
+  llm: {
+    provider: (process.env.LLM_PROVIDER as 'gemini' | 'gpt-oss') || 'gemini',
+    gptOss: {
+      baseUrl: process.env.LLM_BASE_URL ?? '',
+      username: process.env.LLM_USERNAME ?? '',
+      password: process.env.LLM_PASSWORD ?? '',
+      model: process.env.LLM_MODEL ?? 'gpt-oss-120b',
+      maxTokens: parseInt(process.env.LLM_MAX_TOKENS || '4096', 10),
+    },
+  },
   stock: {
     maxStocksCount:
       !!process.env.MAX_STOCKS_COUNT && !isNaN(+process.env.MAX_STOCKS_COUNT)
