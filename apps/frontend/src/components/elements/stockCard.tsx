@@ -1,5 +1,6 @@
 import { ArrowDownRight, ArrowUpRight, Briefcase } from 'lucide-react';
 import { calculatePriceChange, PortfolioItem, Stock, StockRecommendation } from '@market-mind/common';
+import { AskAiButton } from '@/components/elements/askAiButton';
 import RecommendationBadge from '@/components/elements/recommendationBadge';
 import { cn } from '@/utils/tailwindUtils';
 
@@ -15,6 +16,12 @@ export const StockCard = ({ stock, onClick, className, portfolioData }: StockCar
   const isAnalyzed = stock.aiRecommendation.status !== StockRecommendation.NOT_ANALYZED;
 
   const dollarChange = calculatePriceChange(stock.marketData.price, stock.marketData.priceChange);
+
+  const askPrompt = !isAnalyzed
+    ? `Tell me about ${stock.symbol}.`
+    : portfolioData
+      ? `How is my ${stock.symbol} holding doing, and should I hold, add to it, or exit?`
+      : `Why is ${stock.symbol} rated ${stock.aiRecommendation.status}? Would it fit my portfolio?`;
 
   return (
     <div
@@ -119,10 +126,16 @@ export const StockCard = ({ stock, onClick, className, portfolioData }: StockCar
         </div>
       )}
 
-      <div className={cn('mt-4 pt-4 border-t border-border/50', portfolioData && 'mt-3 pt-3')}>
+      <div
+        className={cn(
+          'mt-4 pt-4 border-t border-border/50 flex items-center justify-between gap-2',
+          portfolioData && 'mt-3 pt-3',
+        )}
+      >
         <span className="text-xs text-primary font-medium group-hover:underline">
           View full analysis →
         </span>
+        <AskAiButton symbol={stock.symbol} prompt={askPrompt} />
       </div>
     </div>
   );
