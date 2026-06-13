@@ -7,7 +7,7 @@ import {
   SectorInterest,
 } from '@market-mind/common';
 import { FilteredSnapshot } from '../filter/filter.types';
-import { LLM_CLIENT, LlmClient } from './llm-client.interface';
+import { LLM_CLIENT, type LlmClient } from './llm-client.interface';
 import { PromptBuilderService } from './prompt-builder.service';
 import { ResponseParserService } from './response-parser.service';
 
