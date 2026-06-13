@@ -66,6 +66,7 @@ describe('MassiveApiService', () => {
       expect(networkService.get).toHaveBeenCalledWith(
         'https://api.massive.com/v2/reference/news?ticker=AAPL&limit=5&apiKey=test-massive-key',
         expect.any(Function),
+        expect.objectContaining({ cacheTtlMs: expect.any(Number) }),
       );
 
       expect(result).toEqual([
