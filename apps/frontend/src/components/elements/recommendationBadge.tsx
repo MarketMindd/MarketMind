@@ -68,15 +68,15 @@ export const RecommendationBadge = ({
     },
   };
 
-  const recConfig = config[normalizedRec] || config[StockRecommendation.HOLD];
+  const recConfig = config[normalizedRec];
   const { icon: Icon, className, term, label, explain } = recConfig;
 
-  const sizeClasses = {
+  const sizeClasses: Record<typeof size, string> = {
     sm: 'text-xs px-2.5 py-1 gap-1.5',
     md: 'text-sm px-3 py-1.5 gap-1.5',
     lg: 'text-base px-4 py-2 gap-2',
   };
-  const iconSizes = { sm: 12, md: 14, lg: 16 };
+  const iconSizes: Record<typeof size, number> = { sm: 12, md: 14, lg: 16 };
 
   return (
     <div className="inline-flex items-center gap-2">
@@ -110,5 +110,3 @@ export const RecommendationBadge = ({
     </div>
   );
 };
-
-export default RecommendationBadge;
