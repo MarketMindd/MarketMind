@@ -12,8 +12,8 @@ const RISK_GUIDANCE: Record<RiskTolerance, string> = {
 };
 
 const EXPLAIN_MODE_GUIDANCE: Record<ExplainMode, string> = {
-  easy: 'EXPLANATION STYLE — EASY MODE: The user is a beginner who wants to start investing and grow their money, and may know almost nothing about finance. Explain everything in plain, simple language, as if talking to a curious friend who is brand new to investing. Avoid jargon; whenever a financial term is unavoidable (e.g. "volatility", "P/E ratio", "diversification"), immediately explain it in one short, friendly sentence using an everyday analogy. Prefer short sentences, concrete examples, and what it practically means for their money. Never assume prior knowledge.',
-  pro: 'EXPLANATION STYLE — PROFESSIONAL MODE: The user is an experienced investor. Be concise, precise, and analytical. Use standard financial terminology freely (valuation multiples, volatility, risk-adjusted return, diversification) without defining the basics, and focus on the substantive analysis.',
+  [ExplainMode.Easy]: 'EXPLANATION STYLE — EASY MODE: The user is a beginner who wants to start investing and grow their money, and may know almost nothing about finance. Explain everything in plain, simple language, as if talking to a curious friend who is brand new to investing. Avoid jargon; whenever a financial term is unavoidable (e.g. "volatility", "P/E ratio", "diversification"), immediately explain it in one short, friendly sentence using an everyday analogy. Prefer short sentences, concrete examples, and what it practically means for their money. Never assume prior knowledge.',
+  [ExplainMode.Pro]: 'EXPLANATION STYLE — PROFESSIONAL MODE: The user is an experienced investor. Be concise, precise, and analytical. Use standard financial terminology freely (valuation multiples, volatility, risk-adjusted return, diversification) without defining the basics, and focus on the substantive analysis.',
 };
 
 @Injectable()
@@ -125,7 +125,7 @@ The JSON must have exactly these fields:
       confidence: number;
       summary?: string;
     }>,
-    explainMode: ExplainMode = 'easy',
+    explainMode: ExplainMode = ExplainMode.Easy,
   ): string {
     const portfolioText =
       portfolio.length === 0

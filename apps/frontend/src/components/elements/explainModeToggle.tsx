@@ -1,5 +1,5 @@
 import { Baby, GraduationCap, LucideIcon } from 'lucide-react';
-import type { ExplainMode } from '@market-mind/common';
+import { ExplainMode } from '@market-mind/common';
 import { cn } from '../../utils/tailwindUtils';
 
 interface ExplainModeToggleProps {
@@ -9,8 +9,8 @@ interface ExplainModeToggleProps {
 }
 
 const OPTIONS: { value: ExplainMode; label: string; icon: LucideIcon }[] = [
-  { value: 'easy', label: 'Easy mode', icon: Baby },
-  { value: 'pro', label: 'Professional', icon: GraduationCap },
+  { value: ExplainMode.Easy, label: 'Easy mode', icon: Baby },
+  { value: ExplainMode.Pro, label: 'Professional', icon: GraduationCap },
 ];
 
 export const ExplainModeToggle = ({ mode, onChange, className }: ExplainModeToggleProps) => {
@@ -30,7 +30,7 @@ export const ExplainModeToggle = ({ mode, onChange, className }: ExplainModeTogg
             onClick={() => onChange(option.value)}
             aria-pressed={isActive}
             title={
-              option.value === 'easy'
+              option.value === ExplainMode.Easy
                 ? 'Beginner-friendly explanations, no jargon'
                 : 'Concise, technical explanations for experienced investors'
             }

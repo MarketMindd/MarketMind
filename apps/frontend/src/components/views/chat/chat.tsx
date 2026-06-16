@@ -1,13 +1,15 @@
 import { Loader2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import type { ExplainMode } from '@market-mind/common';
+import { ExplainMode } from '@market-mind/common';
 import { useToast } from '@/hooks/useToast';
 import { useClientQueries } from '../../../hooks/useClientQueries';
 import { ChatEmptyState } from './chatEmptyState';
 import { ChatInputFooter } from './chatInputFooter';
 import { ChatMessagesList } from './chatMessagesList';
 import { ChatSidebar } from './chatSidebar';
+
+const EXPLAIN_MODE_STORAGE_KEY = 'chatExplainMode';
 
 const getUserFirstName = () => {
   const token = localStorage.getItem('accessToken');
@@ -45,12 +47,12 @@ export const Chat = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [pendingMessage, setPendingMessage] = useState('');
   const [explainMode, setExplainMode] = useState<ExplainMode>(
-    () => (localStorage.getItem('chatExplainMode') as ExplainMode) || 'easy',
+    () => (localStorage.getItem(EXPLAIN_MODE_STORAGE_KEY) as ExplainMode) || ExplainMode.Easy,
   );
 
   const handleExplainModeChange = (mode: ExplainMode) => {
     setExplainMode(mode);
-    localStorage.setItem('chatExplainMode', mode);
+    localStorage.setItem(EXPLAIN_MODE_STORAGE_KEY, mode);
   };
 
   const messagesEndRef = useRef<HTMLDivElement>(null);

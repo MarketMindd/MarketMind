@@ -1,4 +1,4 @@
-import { RiskTolerance } from '@market-mind/common';
+import { ExplainMode, RiskTolerance } from '@market-mind/common';
 import { PromptBuilderService } from './prompt-builder.service';
 
 describe('PromptBuilderService.buildChatPrompt', () => {
@@ -24,7 +24,7 @@ describe('PromptBuilderService.buildChatPrompt', () => {
       undefined,
       false,
       undefined,
-      'easy',
+      ExplainMode.Easy,
     );
     expect(prompt).toContain('EASY MODE');
     expect(prompt).toContain('beginner');
@@ -39,7 +39,7 @@ describe('PromptBuilderService.buildChatPrompt', () => {
       undefined,
       false,
       undefined,
-      'pro',
+      ExplainMode.Pro,
     );
     expect(prompt).toContain('PROFESSIONAL MODE');
     expect(prompt).not.toContain('EASY MODE');

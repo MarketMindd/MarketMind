@@ -18,7 +18,7 @@ export const StockCard = ({ stock, onClick, className, portfolioData }: StockCar
   const dollarChange = calculatePriceChange(stock.marketData.price, stock.marketData.priceChange);
 
   const askPrompt = !isAnalyzed
-    ? `Tell me about ${stock.symbol}.`
+    ? undefined
     : portfolioData
       ? `How is my ${stock.symbol} holding doing, and should I hold, add to it, or exit?`
       : `Why is ${stock.symbol} rated ${stock.aiRecommendation.status}? Would it fit my portfolio?`;
