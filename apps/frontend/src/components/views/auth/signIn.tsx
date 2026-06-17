@@ -76,21 +76,6 @@ export const SignIn = () => {
             Make smarter investment decisions with clear, explainable AI insights tailored to your risk profile.
           </p>
         </div>
-
-        <div className="relative space-y-6">
-          <div className="glass-card p-4 max-w-sm animate-fade-in">
-            <div className="flex items-center gap-3 mb-2">
-              <span className="font-mono text-primary font-semibold">AAPL</span>
-              <span className="text-xs bg-success/20 text-success px-2 py-0.5 rounded-full">Invest</span>
-            </div>
-            <p className="text-sm text-muted-foreground">Strong services growth and AI integration potential...</p>
-          </div>
-          
-          <div className="glass-card p-4 max-w-xs ml-12 animate-fade-in stagger-1">
-            <div className="text-2xl font-semibold text-foreground">87%</div>
-            <div className="text-sm text-muted-foreground">Confidence Score</div>
-          </div>
-        </div>
       </div>
 
       {/* Right panel - Auth form */}
