@@ -91,4 +91,41 @@ describe('NetworkService', () => {
     expect(error.message).toBe('API error: Internal Server Error');
     expect(fetchMock).toHaveBeenCalledTimes(3);
   });
+
+  it('serves a cached response without a second fetch within the TTL', async () => {
+    const mockData = { test: 'value' };
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => mockData,
+    });
+
+    const url = 'http://example.com/news';
+    const mapper = (data: { test: string }) => ({ mapped: data.test });
+
+    const first = await service.get(url, mapper, { cacheTtlMs: 60_000 });
+    const second = await service.get(url, mapper, { cacheTtlMs: 60_000 });
+
+    expect(first).toEqual({ mapped: 'value' });
+    expect(second).toEqual({ mapped: 'value' });
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not retry a 429 and parks the host in cooldown', async () => {
+    const fetchMock = global.fetch as jest.Mock;
+    fetchMock.mockResolvedValue({
+      ok: false,
+      status: 429,
+      statusText: 'Too Many Requests',
+      headers: { get: () => null },
+    });
+
+    const url = 'http://ratelimited.test/news';
+    const mapper = (data: unknown) => data;
+
+    await service.get(url, mapper).catch((e) => e);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    await service.get(url, mapper).catch((e) => e);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
 });

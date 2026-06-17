@@ -3,6 +3,7 @@ import {
   ForbiddenException,
   HttpException,
   HttpStatus,
+  Inject,
   Injectable,
   InternalServerErrorException,
   Logger,
@@ -20,7 +21,7 @@ import {
   StockEntity,
   UserProfileEntity,
 } from '@market-mind/database';
-import { GeminiClientService } from '../ai/gemini-client.service';
+import { LLM_CLIENT, type LlmClient } from '../ai/llm-client.interface';
 import { PromptBuilderService } from '../ai/prompt-builder.service';
 import { NewsApiService } from '../news/news-api.service';
 import { PortfolioService } from '../portfolio/portfolio.service';
@@ -64,7 +65,7 @@ export class ChatService {
     private readonly recommendationRepo: Repository<RecommendationEntity>,
     private readonly portfolioService: PortfolioService,
     private readonly promptBuilder: PromptBuilderService,
-    private readonly geminiClient: GeminiClientService,
+    @Inject(LLM_CLIENT) private readonly llmClient: LlmClient,
     private readonly newsApiService: NewsApiService,
   ) {}
 
@@ -167,13 +168,14 @@ export class ChatService {
       stockContext,
       shouldGenerateTitle,
       rankedRecommendations,
+      payload.explainMode,
     );
 
     const customJsonSchema = z.toJSONSchema(chatResponseSchema);
 
     let rawResultText: string;
     try {
-      rawResultText = await this.geminiClient.generateContent(prompt, customJsonSchema);
+      rawResultText = await this.llmClient.generateContent(prompt, customJsonSchema);
     } catch (err) {
       this.logger.error(`Gemini AI generation failed: ${err}`);
       await this.messageRepo.remove(userMessage);

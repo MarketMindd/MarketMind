@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { appConfig } from '../config/appConfig';
 import { AlphaVantageFeedItem, AlphaVantageResponse, NewsArticle } from '../filter/filter.types';
 import { NetworkService } from '../network/network.service';
+import { NEWS_CACHE_TTL_MS } from './news.constants';
 import { NewsProviderService } from './news.interface';
 
 @Injectable()
@@ -22,8 +23,10 @@ export class AlphaVantageService implements NewsProviderService {
     const url = `https://www.alphavantage.co/query?${params.toString()}`;
 
     try {
-      return await this.networkService.get<AlphaVantageResponse, NewsArticle[]>(url, (res) =>
-        this.mapData(res.feed ?? []),
+      return await this.networkService.get<AlphaVantageResponse, NewsArticle[]>(
+        url,
+        (res) => this.mapData(res.feed ?? []),
+        { cacheTtlMs: NEWS_CACHE_TTL_MS },
       );
     } catch (error) {
       this.logger.warn(

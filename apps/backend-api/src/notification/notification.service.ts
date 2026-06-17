@@ -70,8 +70,9 @@ export class NotificationService {
     recipients: NotificationRecipient[],
   ): NotificationEmailPayload {
     const subject = `${payload.stockSymbol}: our latest suggestion`;
-    const dashboardUrl = `${appConfig.clientUrl}/dashboard`;
-    const recommendationUrl = `${appConfig.clientUrl}/stock/${encodeURIComponent(payload.stockSymbol)}`;
+    const baseUrl = appConfig.clientUrl.replace(/\/+$/, '');
+    const dashboardUrl = `${baseUrl}/dashboard`;
+    const recommendationUrl = `${baseUrl}/stock/${encodeURIComponent(payload.stockSymbol)}`;
     const greetingNames = recipients
       .map((recipient) => recipient.fullName?.trim() ?? '')
       .filter((fullName) => fullName.length > 0);

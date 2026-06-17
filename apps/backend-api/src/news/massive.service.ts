@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { appConfig } from '../config/appConfig';
 import { MassiveFeedItem, MassiveResponse, NewsArticle } from '../filter/filter.types';
 import { NetworkService } from '../network/network.service';
+import { NEWS_CACHE_TTL_MS } from './news.constants';
 import { NewsProviderService } from './news.interface';
 
 @Injectable()
@@ -20,8 +21,10 @@ export class MassiveApiService implements NewsProviderService {
     const url = `https://api.massive.com/v2/reference/news?${params.toString()}`;
 
     try {
-      return await this.networkService.get<MassiveResponse, NewsArticle[]>(url, (res) =>
-        this.mapData(res.results ?? [], symbol),
+      return await this.networkService.get<MassiveResponse, NewsArticle[]>(
+        url,
+        (res) => this.mapData(res.results ?? [], symbol),
+        { cacheTtlMs: NEWS_CACHE_TTL_MS },
       );
     } catch (error) {
       this.logger.warn(

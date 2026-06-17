@@ -1,4 +1,5 @@
 import { PortfolioItemWithStock } from '@market-mind/common';
+import { AskAiButton } from '@/components/elements/askAiButton';
 import { cn } from '@/utils/tailwindUtils';
 
 interface PortfolioStockRowProps {
@@ -33,6 +34,12 @@ export const PortfolioStockRow = ({ stock, currentPrice }: PortfolioStockRowProp
           ({gainLossPercent >= 0 ? '+' : ''}
           {gainLossPercent.toFixed(1)}%)
         </span>
+      </td>
+      <td className="text-right py-3 px-2">
+        <AskAiButton
+          symbol={stock.ticker}
+          prompt={`How is my ${stock.ticker} holding performing, and should I hold, add, or exit?`}
+        />
       </td>
     </tr>
   );

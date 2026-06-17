@@ -11,6 +11,7 @@ import {
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { RecommendationStatus, StockRecommendation } from '@market-mind/common';
+import { AskAiButton } from '@/components/elements/askAiButton';
 import { Button } from '@/components/elements/button';
 import { StockCard } from '@/components/elements/stockCard';
 import { useClientQueries } from '@/hooks/useClientQueries';
@@ -153,16 +154,23 @@ export const Dashboard = () => {
                         <Eye className="w-4 h-4 text-primary" />
                         <span className="text-sm font-medium text-foreground">Stocks to Watch</span>
                       </div>
-                      <div className="flex gap-2 flex-wrap">
+                      <div className="flex gap-2 flex-wrap items-center">
                         {marketSummary.suggestedStocks.map((ticker) => (
-                          <button
-                            key={ticker}
-                            onClick={() => navigate(`/stock/${ticker}`)}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors duration-200"
-                          >
-                            {ticker}
-                            <ChevronRight size={14} />
-                          </button>
+                          <div key={ticker} className="inline-flex items-center gap-1">
+                            <button
+                              onClick={() => navigate(`/stock/${ticker}`)}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors duration-200"
+                            >
+                              {ticker}
+                              <ChevronRight size={14} />
+                            </button>
+                            <AskAiButton
+                              symbol={ticker}
+                              prompt={`Tell me about ${ticker} and why it might be worth watching.`}
+                              label=""
+                              className="px-2"
+                            />
+                          </div>
                         ))}
                       </div>
                     </div>

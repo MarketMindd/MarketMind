@@ -60,6 +60,7 @@ describe('AlphaVantageService', () => {
       expect(networkService.get).toHaveBeenCalledWith(
         'https://www.alphavantage.co/query?function=NEWS_SENTIMENT&tickers=AAPL&limit=5&sort=LATEST&apikey=test-key',
         expect.any(Function),
+        expect.objectContaining({ cacheTtlMs: expect.any(Number) }),
       );
 
       expect(result).toEqual([

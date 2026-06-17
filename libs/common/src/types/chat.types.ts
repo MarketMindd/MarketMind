@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ExplainMode } from '../enums/explain-mode';
 
 export interface ChatSession {
   id: string;
@@ -23,6 +24,7 @@ export interface CreateChatSessionPayload {
 
 export interface SendMessagePayload {
   content: string;
+  explainMode?: ExplainMode;
 }
 
 export const createChatSessionSchema = z.object({
@@ -32,4 +34,5 @@ export const createChatSessionSchema = z.object({
 
 export const sendMessageSchema = z.object({
   content: z.string().min(1).max(4000),
+  explainMode: z.enum(ExplainMode).optional(),
 });

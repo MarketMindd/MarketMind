@@ -4,7 +4,6 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { AiRecommendation } from '@market-mind/common';
 import { RecommendationEntity } from '@market-mind/database';
 import { Repository } from 'typeorm';
-import { AppModule } from '../app/app.module';
 import { ProcessingService } from '../processing/processing.service';
 import { parseRecommendationSimulationArgs } from './recommendation-simulator.parser';
 
@@ -50,7 +49,11 @@ export const runRecommendationSimulation = async (
 ): Promise<RecommendationSimulationResult> => {
   const recommendation = parseRecommendationSimulationArgs(argv);
   const createApplicationContext =
-    deps.createApplicationContext ?? (() => NestFactory.createApplicationContext(AppModule));
+    deps.createApplicationContext ??
+    (async () => {
+      const { AppModule } = await import('../app/app.module');
+      return NestFactory.createApplicationContext(AppModule);
+    });
   const log = deps.log ?? console.log;
 
   log(`Submitting recommendation: ${JSON.stringify(recommendation)}`);

@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import {
   AiRecommendation,
   MarketSummaryResult,
@@ -7,7 +7,7 @@ import {
   SectorInterest,
 } from '@market-mind/common';
 import { FilteredSnapshot } from '../filter/filter.types';
-import { GeminiClientService } from './gemini-client.service';
+import { LLM_CLIENT, type LlmClient } from './llm-client.interface';
 import { PromptBuilderService } from './prompt-builder.service';
 import { ResponseParserService } from './response-parser.service';
 
@@ -19,7 +19,7 @@ export class AiService {
 
   constructor(
     private readonly promptBuilder: PromptBuilderService,
-    private readonly geminiClient: GeminiClientService,
+    @Inject(LLM_CLIENT) private readonly llmClient: LlmClient,
     private readonly responseParser: ResponseParserService,
   ) {}
 
@@ -36,7 +36,7 @@ export class AiService {
     for (const riskTolerance of uniqueRiskLevels) {
       try {
         const prompt = this.promptBuilder.buildRecommendationPrompt(filtered, riskTolerance);
-        const rawText = await this.geminiClient.generateContent(prompt);
+        const rawText = await this.llmClient.generateContent(prompt);
         const recommendation = this.responseParser.parse(rawText, symbol, riskTolerance);
         recommendations.push(recommendation);
         this.logger.log(
@@ -64,7 +64,7 @@ export class AiService {
       interests,
       availableStocks,
     );
-    const rawText = await this.geminiClient.generateContent(prompt, {
+    const rawText = await this.llmClient.generateContent(prompt, {
       type: 'object',
       properties: {
         summary: { type: 'string' },

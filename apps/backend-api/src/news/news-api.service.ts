@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { appConfig } from '../config/appConfig';
 import { NewsArticle } from '../filter/filter.types';
 import { NetworkService } from '../network/network.service';
+import { NEWS_CACHE_TTL_MS } from './news.constants';
 import { NewsProviderService } from './news.interface';
 
 interface NewsApiResponse {
@@ -28,8 +29,10 @@ export class NewsApiService implements NewsProviderService {
     const url = `https://newsapi.org/v2/everything?${params.toString()}`;
 
     try {
-      return await this.networkService.get<NewsApiResponse, NewsArticle[]>(url, (res) =>
-        this.mapData(res.articles ?? []),
+      return await this.networkService.get<NewsApiResponse, NewsArticle[]>(
+        url,
+        (res) => this.mapData(res.articles ?? []),
+        { cacheTtlMs: NEWS_CACHE_TTL_MS },
       );
     } catch (error) {
       this.logger.warn(

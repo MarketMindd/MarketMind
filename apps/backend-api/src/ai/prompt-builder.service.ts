@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PortfolioItemWithStock, RiskTolerance, SectorInterest } from '@market-mind/common';
+import { ExplainMode, PortfolioItemWithStock, RiskTolerance, SectorInterest } from '@market-mind/common';
 import { FilteredSnapshot } from '../filter/filter.types';
 
 const RISK_GUIDANCE: Record<RiskTolerance, string> = {
@@ -9,6 +9,11 @@ const RISK_GUIDANCE: Record<RiskTolerance, string> = {
     'Balance risk and reward. Consider both upside potential and downside risk equally.',
   [RiskTolerance.HIGH]:
     'Accept higher volatility for greater return potential. Lean towards Invest on positive signals.',
+};
+
+const EXPLAIN_MODE_GUIDANCE: Record<ExplainMode, string> = {
+  [ExplainMode.Easy]: 'EXPLANATION STYLE — EASY MODE: The user is a beginner who wants to start investing and grow their money, and may know almost nothing about finance. Explain everything in plain, simple language, as if talking to a curious friend who is brand new to investing. Avoid jargon; whenever a financial term is unavoidable (e.g. "volatility", "P/E ratio", "diversification"), immediately explain it in one short, friendly sentence using an everyday analogy. Prefer short sentences, concrete examples, and what it practically means for their money. Never assume prior knowledge.',
+  [ExplainMode.Pro]: 'EXPLANATION STYLE — PROFESSIONAL MODE: The user is an experienced investor. Be concise, precise, and analytical. Use standard financial terminology freely (valuation multiples, volatility, risk-adjusted return, diversification) without defining the basics, and focus on the substantive analysis.',
 };
 
 @Injectable()
@@ -120,6 +125,7 @@ The JSON must have exactly these fields:
       confidence: number;
       summary?: string;
     }>,
+    explainMode: ExplainMode = ExplainMode.Easy,
   ): string {
     const portfolioText =
       portfolio.length === 0
@@ -183,6 +189,8 @@ ${newsSection}
 
     return `You are "MarketMind AI", MarketMind's friendly, supportive AI financial assistant. Your goal is to explain market concepts, break down complex data, and discuss stock recommendations in simple terms for retail investors.
 
+${EXPLAIN_MODE_GUIDANCE[explainMode]}
+
 USER PROFILE:
 - Risk Profile: ${profile.riskTolerance}
 - Interested Sectors: ${profile.interests.join(', ') || 'None selected'}
@@ -212,8 +220,9 @@ CONVERSATION INSTRUCTIONS:
    - Do not invent stock prices, recommendations, or news that are not in the injected context.
 3. If the user asks for financial advice (e.g., "should I buy AAPL?"), explain the facts from the data, refer to the system's recommendation status (if present), but strictly note that you are an AI assistant and this is not certified financial advice.
 4. If the user asks questions completely unrelated to finance, investing, stocks, or their portfolio, politely redirect them back to financial topics.
-5. WEBSITE ASSISTANCE:
-   - If the user asks how to perform actions on the website (e.g., "where can I edit my holdings?", "how to change my risk tolerance?", "how to see Apple chart?"), use the WEBSITE STRUCTURE above to guide them precisely to the correct page or URL path.
+5. WEBSITE ASSISTANCE & LINKING:
+   - If the user asks how to perform actions on the website (e.g., "where can I edit my holdings?", "how to change my risk tolerance?", "how to see Apple chart?"), use the WEBSITE STRUCTURE above to guide them precisely to the correct page.
+   - Whenever you mention a stock or a page, render it as a clickable Markdown link using the EXACT URL paths above, so the user can navigate in one click. For a stock use [SYMBOL](/stock/SYMBOL), for example [AAPL](/stock/AAPL). For pages use links such as [your portfolio](/portfolio), [the dashboard](/dashboard), [the chat](/chat), or [risk tolerance](/onboarding/risk-tolerance). Do NOT invent paths that are not listed in the WEBSITE STRUCTURE above.
 6. You must format your reply using Markdown (headers, bold text, lists).${titleInstruction}
 
 CONVERSATION HISTORY:
