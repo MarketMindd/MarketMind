@@ -117,5 +117,3 @@ export const StockCard = ({ stock, onClick, className, portfolioData }: StockCar
     </div>
   );
 };
-
-export default StockCard;

@@ -4,7 +4,7 @@ import { PortfolioItemWithStock } from '@market-mind/common';
 import { Button } from '@/components/elements/button';
 import { useClientQueries } from '@/hooks/useClientQueries';
 import { cn } from '@/utils/tailwindUtils';
-import PortfolioInput from './portfolioInput';
+import { PortfolioInput } from './portfolioInput';
 import { PortfolioStockRow } from './portfolioStockRow';
 
 const EMPTY_PORTFOLIO: PortfolioItemWithStock[] = [];

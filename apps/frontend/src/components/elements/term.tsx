@@ -42,5 +42,3 @@ export const Term = ({ children, term, explanation, className, hideIcon }: TermP
     </Tooltip>
   );
 };
-
-export default Term;

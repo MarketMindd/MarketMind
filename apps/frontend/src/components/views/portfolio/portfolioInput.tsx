@@ -14,7 +14,7 @@ interface PortfolioInputProps {
 
 type EditablePortfolioField = keyof Pick<PortfolioItemWithStock, 'shares' | 'avgPrice'>;
 
-const PortfolioInput = ({ portfolio, onChange, compact = false }: PortfolioInputProps) => {
+export const PortfolioInput = ({ portfolio, onChange, compact = false }: PortfolioInputProps) => {
   const {
     stocks: { useGetAllStocks },
   } = useClientQueries();
@@ -223,5 +223,3 @@ const PortfolioInput = ({ portfolio, onChange, compact = false }: PortfolioInput
     </div>
   );
 };
-
-export default PortfolioInput;
