@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { RiskTolerance } from '@market-mind/common';
+import { RiskTolerance, StockRecommendation } from '@market-mind/common';
 import { UserProfileEntity } from '@market-mind/database';
 import * as nodemailer from 'nodemailer';
 import { appConfig } from '../config/appConfig';
@@ -16,8 +16,8 @@ const makePayload = (
 ): RecommendationNotificationPayload => ({
   stockSymbol: 'AAPL',
   riskTolerance: RiskTolerance.MEDIUM,
-  previousStatus: 'Invest',
-  newStatus: 'Hold',
+  previousStatus: StockRecommendation.INVEST,
+  newStatus: StockRecommendation.HOLD,
   rationale: 'Momentum weakened after earnings.',
   ...overrides,
 });
@@ -156,7 +156,7 @@ describe('NotificationService', () => {
   });
 
   it('uses invest-specific copy for invest recommendations', async () => {
-    await service.notifyRecommendationChange(makePayload({ newStatus: 'Invest' }));
+    await service.notifyRecommendationChange(makePayload({ newStatus: StockRecommendation.INVEST }));
 
     const body = sendMail.mock.calls[0][0] as { text: string };
 

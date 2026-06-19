@@ -4,6 +4,7 @@ export * from './entities/stock';
 export * from './entities/marketData';
 export * from './entities/portfolio';
 export * from './enums/command';
+export * from './enums/explain-mode';
 export * from './enums/risk-tolerance';
 export * from './enums/sector-interest';
 export * from './utils';

@@ -1,6 +1,7 @@
 export interface RetryOptions {
   delaysMs: readonly number[];
   onRetry?: (attemptNumber: number, delayMs: number, error: unknown) => void;
+  shouldRetry?: (error: unknown) => boolean;
 }
 
 const sleep = async (ms: number): Promise<void> => {
@@ -17,6 +18,10 @@ export const retry = async <T>(operation: () => Promise<T>, options: RetryOption
       lastError = error;
 
       if (attempt === options.delaysMs.length) {
+        break;
+      }
+
+      if (options.shouldRetry && !options.shouldRetry(error)) {
         break;
       }
 

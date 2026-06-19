@@ -1,8 +1,13 @@
-import { ArrowDown, ArrowUp, Briefcase } from 'lucide-react';
-import { PortfolioItem, Stock, StockRecommendation } from '@market-mind/common';
+import { AskAiButton } from '@/components/elements/askAiButton';
 import { RecommendationBadge } from '@/components/elements/recommendationBadge';
-import { Term } from '@/components/elements/term';
 import { cn } from '@/utils/tailwindUtils';
+import {
+  PortfolioItem,
+  Stock,
+  StockRecommendation
+} from '@market-mind/common';
+import { ArrowDown, ArrowUp, Briefcase } from 'lucide-react';
+import { Term } from './term';
 
 interface StockCardProps {
   stock: Stock;
@@ -17,7 +22,16 @@ export const StockCard = ({ stock, onClick, className, portfolioData }: StockCar
   const isAnalyzed = stock.aiRecommendation.status !== StockRecommendation.NOT_ANALYZED;
 
   // We use aiSummary if available, else rationale, else a generic fallback.
-  const shortExplanation = stock.aiRecommendation.aiSummary || stock.aiRecommendation.rationale || "The AI is still gathering data on this stock.";
+  const shortExplanation =
+    stock.aiRecommendation.aiSummary ||
+    stock.aiRecommendation.rationale ||
+    'The AI is still gathering data on this stock.';
+
+  const askPrompt = !isAnalyzed
+    ? undefined
+    : portfolioData
+      ? `How is my ${stock.symbol} holding doing, and should I hold, add to it, or exit?`
+      : `Why is ${stock.symbol} rated ${stock.aiRecommendation.status}? Would it fit my portfolio?`;
 
   return (
     <div
@@ -61,7 +75,7 @@ export const StockCard = ({ stock, onClick, className, portfolioData }: StockCar
             <div
               className={cn(
                 'flex items-center gap-1 text-sm mt-1',
-                isPositive ? 'text-success' : 'text-destructive'
+                isPositive ? 'text-success' : 'text-destructive',
               )}
             >
               {isPositive ? <ArrowUp size={14} /> : <ArrowDown size={14} />}
@@ -79,7 +93,12 @@ export const StockCard = ({ stock, onClick, className, portfolioData }: StockCar
             >
               <span className="block">AI is</span>
               <span className="text-foreground font-medium">
-                {stock.aiRecommendation.confidence >= 80 ? 'strongly' : stock.aiRecommendation.confidence >= 60 ? 'fairly' : 'somewhat'} sure
+                {stock.aiRecommendation.confidence >= 80
+                  ? 'strongly'
+                  : stock.aiRecommendation.confidence >= 60
+                    ? 'fairly'
+                    : 'somewhat'}{' '}
+                sure
               </span>
             </Term>
           )}
@@ -99,20 +118,30 @@ export const StockCard = ({ stock, onClick, className, portfolioData }: StockCar
             <span
               className={cn(
                 'font-medium',
-                stock.marketData.price > portfolioData.avgPrice ? 'text-success' : 'text-destructive'
+                stock.marketData.price > portfolioData.avgPrice
+                  ? 'text-success'
+                  : 'text-destructive',
               )}
             >
               {stock.marketData.price > portfolioData.avgPrice ? '+' : ''}
-              {(((stock.marketData.price - portfolioData.avgPrice) / portfolioData.avgPrice) * 100).toFixed(1)}%
+              {(
+                ((stock.marketData.price - portfolioData.avgPrice) / portfolioData.avgPrice) *
+                100
+              ).toFixed(1)}
+              %
             </span>
           </div>
         </div>
       )}
 
-      <div className="mt-4 pt-3 border-t border-border/50">
-        <span className="text-xs text-primary font-medium group-hover:underline">
-          See why →
-        </span>
+      <div
+        className={cn(
+          'mt-4 pt-4 border-t border-border/50 flex items-center justify-between gap-2',
+          portfolioData && 'mt-3 pt-3',
+        )}
+      >
+        <span className="text-xs text-primary font-medium group-hover:underline">See why →</span>
+        <AskAiButton symbol={stock.symbol} prompt={askPrompt} />
       </div>
     </div>
   );

@@ -1,21 +1,21 @@
-import { useParams, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/elements/button';
-import { RecommendationBadge } from '@/components/elements/recommendationBadge';
-import { AdvancedRealTimeChart } from 'react-ts-tradingview-widgets';
-import { useClientQueries } from '@/hooks/useClientQueries';
-import { cn } from '@/utils/tailwindUtils';
 import {
+  ArrowDownRight,
   ArrowLeft,
   ArrowUpRight,
-  ArrowDownRight,
-  Clock,
-  Target,
-  TrendingUp,
   Brain,
-  Zap,
+  Clock,
   LineChart,
+  Target,
+  Zap,
 } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { AdvancedRealTimeChart } from 'react-ts-tradingview-widgets';
 import { StockRecommendation } from '@market-mind/common';
+import { Button } from '@/components/elements/button';
+import { RecommendationBadge } from '@/components/elements/recommendationBadge';
+import { buildAskAiHref } from '@/consts/routes';
+import { useClientQueries } from '@/hooks/useClientQueries';
+import { cn } from '@/utils/tailwindUtils';
 
 export const StockDetails = () => {
   const { stockSymbol } = useParams<{ stockSymbol: string }>();
@@ -97,10 +97,14 @@ export const StockDetails = () => {
               >
                 {isPositive ? <ArrowUpRight size={18} /> : <ArrowDownRight size={18} />}
                 <span>
-                  {isPositive ? 'up' : 'down'} {Math.abs(stock.marketData.priceChange).toFixed(2)}% today
+                  {isPositive ? 'up' : 'down'} {Math.abs(stock.marketData.priceChange).toFixed(2)}%
+                  today
                   <span className="text-muted-foreground ml-2 text-sm">
-                    ({isPositive ? '+' : ''}
-                    ${Math.abs((stock.marketData.price * stock.marketData.priceChange) / 100).toFixed(2)})
+                    ({isPositive ? '+' : ''}$
+                    {Math.abs(
+                      (stock.marketData.price * stock.marketData.priceChange) / 100,
+                    ).toFixed(2)}
+                    )
                   </span>
                 </span>
               </div>
@@ -187,24 +191,21 @@ export const StockDetails = () => {
             <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
               <Zap className="w-5 h-5 text-primary" />
             </div>
-            <h3 className="font-semibold text-foreground">What's happening right now</h3>
-          </div>
-          <div className="flex items-center gap-4">
-            <TrendingUp
-              className={cn(
-                'w-8 h-8',
-                stock.aiRecommendation.status === StockRecommendation.INVEST
-                  ? 'text-success'
-                  : stock.aiRecommendation.status === StockRecommendation.HOLD
-                    ? 'text-warning'
-                    : 'text-destructive',
-              )}
-            />
-            <p className="text-foreground">
-              {isPositive
-                ? 'The stock price is showing positive momentum today.'
-                : 'The stock price is facing a minor setback today.'}
-            </p>
+            <Button
+              variant="glow"
+              className="flex items-center gap-2"
+              onClick={() =>
+                navigate(
+                  buildAskAiHref({
+                    symbol: stock.symbol,
+                    prompt: `Give me your analysis of ${stock.symbol}.`,
+                  }),
+                )
+              }
+            >
+              <Brain size={16} />
+              Ask AI Assistant
+            </Button>
           </div>
         </div>
       </main>

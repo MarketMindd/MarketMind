@@ -1,12 +1,15 @@
+import { useToast } from '@/hooks/useToast';
+import { ExplainMode } from '@market-mind/common';
 import { Loader2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { useToast } from '@/hooks/useToast';
 import { useClientQueries } from '../../../hooks/useClientQueries';
 import { ChatEmptyState } from './chatEmptyState';
 import { ChatInputFooter } from './chatInputFooter';
 import { ChatMessagesList } from './chatMessagesList';
 import { ChatSidebar } from './chatSidebar';
+
+const EXPLAIN_MODE_STORAGE_KEY = 'chatExplainMode';
 
 const getUserFirstName = () => {
   const token = localStorage.getItem('accessToken');
@@ -33,6 +36,7 @@ const getUserFirstName = () => {
 export const Chat = () => {
   const [searchParams] = useSearchParams();
   const symbolParam = searchParams.get('symbol');
+  const promptParam = searchParams.get('prompt');
   const navigate = useNavigate();
   const { sessionId } = useParams<{ sessionId?: string }>();
   const activeSessionId = sessionId || '';
@@ -42,6 +46,14 @@ export const Chat = () => {
   const [input, setInput] = useState('');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [pendingMessage, setPendingMessage] = useState('');
+  const [explainMode, setExplainMode] = useState<ExplainMode>(
+    () => (localStorage.getItem(EXPLAIN_MODE_STORAGE_KEY) as ExplainMode) || ExplainMode.Easy,
+  );
+
+  const handleExplainModeChange = (mode: ExplainMode) => {
+    setExplainMode(mode);
+    localStorage.setItem(EXPLAIN_MODE_STORAGE_KEY, mode);
+  };
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -120,20 +132,23 @@ export const Chat = () => {
     }
   }, [symbolParam, sessions, navigate]);
 
-  // Pre-fill the input when arriving via "Ask AI" button
+  // Pre-fill the composer when arriving via an "Ask AI" entry point
   useEffect(() => {
-    if (symbolParam && !activeSessionId) {
+    if (activeSessionId) return;
+    if (promptParam) {
+      setInput(promptParam);
+    } else if (symbolParam) {
       setInput(`Tell me about ${symbolParam.toUpperCase()}`);
     }
-  }, [symbolParam, activeSessionId]);
+  }, [promptParam, symbolParam, activeSessionId]);
 
   // Send the pending message once the session is created and URL has updated
   useEffect(() => {
     if (pendingMessage && activeSessionId) {
-      sendMessage({ content: pendingMessage });
+      sendMessage({ content: pendingMessage, explainMode });
       setPendingMessage('');
     }
-  }, [activeSessionId, pendingMessage, sendMessage]);
+  }, [activeSessionId, pendingMessage, sendMessage, explainMode]);
 
   const handleSend = (text?: string) => {
     const textToSend = (typeof text === 'string' ? text.trim() : '') || input.trim();
@@ -143,7 +158,7 @@ export const Chat = () => {
       setPendingMessage(textToSend);
       createSession(symbolParam ? { symbol: symbolParam } : { title: 'New Chat' });
     } else {
-      sendMessage({ content: textToSend });
+      sendMessage({ content: textToSend, explainMode });
     }
     setInput('');
   };
@@ -181,14 +196,16 @@ export const Chat = () => {
               <span className="text-sm">Retrieving message history...</span>
             </div>
           ) : !activeSessionId || messages.length === 0 ? (
-              <ChatEmptyState
-                userName={getUserFirstName()}
-                input={input}
-                onInputChange={setInput}
-                onKeyDown={handleKeyDown}
-                onSend={handleSend}
-                isPendingSend={isPendingSend}
-              />
+            <ChatEmptyState
+              firstName={getUserFirstName()}
+              input={input}
+              onInputChange={setInput}
+              onKeyDown={handleKeyDown}
+              onSend={handleSend}
+              isPendingSend={isPendingSend}
+              explainMode={explainMode}
+              onExplainModeChange={handleExplainModeChange}
+            />
           ) : (
             <ChatMessagesList
               messages={messages}
@@ -205,6 +222,8 @@ export const Chat = () => {
             onKeyDown={handleKeyDown}
             onSend={handleSend}
             isPendingSend={isPendingSend}
+            explainMode={explainMode}
+            onExplainModeChange={handleExplainModeChange}
           />
         )}
       </main>

@@ -185,6 +185,7 @@ export const Portfolio = () => {
                     <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">
                       Gain/Loss
                     </th>
+                    <th className="py-3 px-2" aria-label="Ask AI" />
                   </tr>
                 </thead>
                 <tbody>
