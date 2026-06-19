@@ -6,18 +6,19 @@ import type {
 } from '@tanstack/react-query';
 import type {
   AuthResponse,
+  ChatMessage,
+  ChatSession,
+  CreateChatSessionPayload,
+  GoogleSignInPayload,
   MarketSummaryResult,
+  OAuthResponse,
   PortfolioItemWithStock,
   SavePortfolioPayload,
+  SendMessagePayload,
   SignInPayload,
   SignUpPayload,
-  GoogleSignInPayload,
   Stock,
   UpdateProfilePayload,
-  ChatSession,
-  ChatMessage,
-  CreateChatSessionPayload,
-  SendMessagePayload,
 } from '@market-mind/common';
 
 export type iClientQueriesProvider = {
@@ -29,8 +30,8 @@ export type iClientQueriesProvider = {
       options?: UseMutationOptions<AuthResponse, Error, SignUpPayload>,
     ) => UseMutationResult<AuthResponse, Error, SignUpPayload>;
     useGoogleSignIn: (
-      options?: UseMutationOptions<AuthResponse, Error, GoogleSignInPayload>,
-    ) => UseMutationResult<AuthResponse, Error, GoogleSignInPayload>;
+      options?: UseMutationOptions<OAuthResponse, Error, GoogleSignInPayload>,
+    ) => UseMutationResult<OAuthResponse, Error, GoogleSignInPayload>;
     useSignOut: (
       options?: UseMutationOptions<void, Error, void>,
     ) => UseMutationResult<void, Error, void>;

@@ -5,6 +5,7 @@ import type {
   CreateChatSessionPayload,
   GoogleSignInPayload,
   MarketSummaryResult,
+  OAuthResponse,
   PortfolioItemWithStock,
   SavePortfolioPayload,
   SendMessagePayload,
@@ -18,7 +19,7 @@ export interface iDataProvider {
   auth: {
     signin: (payload: SignInPayload) => Promise<AuthResponse>;
     signup: (payload: SignUpPayload) => Promise<AuthResponse>;
-    googleSignin: (payload: GoogleSignInPayload) => Promise<AuthResponse>;
+    googleSignin: (payload: GoogleSignInPayload) => Promise<OAuthResponse>;
     signout: () => Promise<void>;
   };
   profile: {

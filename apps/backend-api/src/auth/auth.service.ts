@@ -11,6 +11,7 @@ import { OAuth2Client } from 'google-auth-library';
 import { Repository } from 'typeorm';
 import {
   AuthResponse,
+  OAuthResponse,
   RiskTolerance,
   SignInPayload,
   SignUpPayload,
@@ -108,7 +109,7 @@ export class AuthService {
     return response;
   }
 
-  async googleSignin(credential: string): Promise<AuthResponse> {
+  async googleSignin(credential: string): Promise<OAuthResponse> {
     const client = new OAuth2Client(appConfig.auth.googleClientId);
 
     try {
@@ -124,6 +125,7 @@ export class AuthService {
 
       const email = payload.email;
       let user = await this.usersRepo.findOne({ where: { email } });
+      let isNewUser = false;
 
       if (!user) {
         const randomPassword = await bcrypt.hash(
@@ -136,6 +138,7 @@ export class AuthService {
           password: randomPassword,
         });
         user = await this.usersRepo.save(newUser);
+        isNewUser = true;
       }
 
       const {
@@ -147,7 +150,8 @@ export class AuthService {
       } = user;
       const response = this.createAuthResponse(profile, user.id);
       await this.saveRefreshToken(user.id, response.refreshToken);
-      return response;
+
+      return { ...response, user: { ...response.user, isNewUser } };
     } catch {
       throw new UnauthorizedException('Google authentication failed');
     }

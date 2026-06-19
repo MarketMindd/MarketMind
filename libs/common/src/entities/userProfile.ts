@@ -45,3 +45,6 @@ export const authResponseSchema = z.object({
   user: userProfileSchema,
 });
 export type AuthResponse = z.infer<typeof authResponseSchema>;
+export type OAuthResponse = Omit<AuthResponse, 'user'> & {
+  user: UserProfile & { isNewUser: boolean };
+};

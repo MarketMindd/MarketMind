@@ -15,6 +15,7 @@ import type {
   CreateChatSessionPayload,
   GoogleSignInPayload,
   MarketSummaryResult,
+  OAuthResponse,
   PortfolioItemWithStock,
   SavePortfolioPayload,
   SendMessagePayload,
@@ -68,9 +69,9 @@ export const useClientQueries = (): iClientQueriesProvider => {
   };
 
   const useGoogleSignIn = (
-    options?: UseMutationOptions<AuthResponse, Error, GoogleSignInPayload>,
+    options?: UseMutationOptions<OAuthResponse, Error, GoogleSignInPayload>,
   ) => {
-    return useMutation<AuthResponse, Error, GoogleSignInPayload>({
+    return useMutation<OAuthResponse, Error, GoogleSignInPayload>({
       mutationFn: (payload) => ctx.dataProvider.auth.googleSignin(payload),
       ...options,
     });

@@ -5,7 +5,12 @@ import {
   signInPayloadSchema,
   signUpPayloadSchema,
 } from '@market-mind/common';
-import type { GoogleSignInPayload, SignInPayload, SignUpPayload } from '@market-mind/common';
+import type {
+  GoogleSignInPayload,
+  OAuthResponse,
+  SignInPayload,
+  SignUpPayload,
+} from '@market-mind/common';
 import { Public } from '../decorators/roles.decorator';
 import { ZodValidationPipe } from '../pipes/zodValidatorPipe';
 import { AuthService } from './auth.service';
@@ -32,7 +37,7 @@ export class AuthController {
   @Post('google')
   async googleSignin(
     @Body(new ZodValidationPipe(googleSignInPayloadSchema)) body: GoogleSignInPayload,
-  ): Promise<AuthResponse> {
+  ): Promise<OAuthResponse> {
     return this.authService.googleSignin(body.credential);
   }
 
