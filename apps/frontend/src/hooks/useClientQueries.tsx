@@ -13,6 +13,7 @@ import type {
   ChatMessage,
   ChatSession,
   CreateChatSessionPayload,
+  GoogleSignInPayload,
   MarketSummaryResult,
   PortfolioItemWithStock,
   SavePortfolioPayload,
@@ -62,6 +63,15 @@ export const useClientQueries = (): iClientQueriesProvider => {
   const useSignUp = (options?: UseMutationOptions<AuthResponse, Error, SignUpPayload>) => {
     return useMutation<AuthResponse, Error, SignUpPayload>({
       mutationFn: (payload) => ctx.dataProvider.auth.signup(payload),
+      ...options,
+    });
+  };
+
+  const useGoogleSignIn = (
+    options?: UseMutationOptions<AuthResponse, Error, GoogleSignInPayload>,
+  ) => {
+    return useMutation<AuthResponse, Error, GoogleSignInPayload>({
+      mutationFn: (payload) => ctx.dataProvider.auth.googleSignin(payload),
       ...options,
     });
   };
@@ -279,7 +289,7 @@ export const useClientQueries = (): iClientQueriesProvider => {
   };
 
   return {
-    auth: { useSignIn, useSignUp, useSignOut },
+    auth: { useSignIn, useSignUp, useGoogleSignIn, useSignOut },
     profile: { useUpdateProfile },
     stocks: { useGetStock, useGetStocks, useGetAllStocks },
     portfolio: { usePortfolio, useSavePortfolio, useAiMarketSummary },

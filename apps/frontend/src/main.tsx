@@ -1,3 +1,4 @@
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import { StrictMode } from 'react';
 import * as ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
@@ -10,13 +11,17 @@ const dataProvider = createFetchDataProvider();
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
 root.render(
-  <ClientQueriesProvider dataProvider={dataProvider}>
-    <Toaster />
-    <StrictMode>
-      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-        <App />
-      </BrowserRouter>
-    </StrictMode>
-  </ClientQueriesProvider>,
+  <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+    <ClientQueriesProvider dataProvider={dataProvider}>
+      <Toaster />
+      <StrictMode>
+        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <App />
+        </BrowserRouter>
+      </StrictMode>
+    </ClientQueriesProvider>
+  </GoogleOAuthProvider>,
 );

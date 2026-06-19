@@ -15,15 +15,24 @@ export const SignIn: React.FC = () => {
   };
 
   const {
-    auth: { useSignIn },
+    auth: { useSignIn, useGoogleSignIn },
   } = useClientQueries();
   const signIn = useSignIn({
-    onSuccess: () => {
-      navigate(APP_ROUTES.DASHBOARD);
-    },
+    onSuccess: () => navigate(APP_ROUTES.DASHBOARD),
     onError: (err: Error) => {
       toast({
         title: 'Sign in failed',
+        description: err.message,
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const googleSignIn = useGoogleSignIn({
+    onSuccess: () => navigate(APP_ROUTES.DASHBOARD),
+    onError: (err: Error) => {
+      toast({
+        title: 'Google Sign in failed',
         description: err.message,
         variant: 'destructive',
       });
@@ -36,6 +45,7 @@ export const SignIn: React.FC = () => {
       <AuthForm
         isSignIn
         onAuth={(payload) => signIn.mutate(payload)}
+        onGoogleAuth={(payload) => googleSignIn.mutate(payload)}
         onModeSwitch={handleModeSwitch}
       />
     </div>

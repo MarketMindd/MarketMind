@@ -11,6 +11,7 @@ import type {
   SavePortfolioPayload,
   SignInPayload,
   SignUpPayload,
+  GoogleSignInPayload,
   Stock,
   UpdateProfilePayload,
   ChatSession,
@@ -27,6 +28,9 @@ export type iClientQueriesProvider = {
     useSignUp: (
       options?: UseMutationOptions<AuthResponse, Error, SignUpPayload>,
     ) => UseMutationResult<AuthResponse, Error, SignUpPayload>;
+    useGoogleSignIn: (
+      options?: UseMutationOptions<AuthResponse, Error, GoogleSignInPayload>,
+    ) => UseMutationResult<AuthResponse, Error, GoogleSignInPayload>;
     useSignOut: (
       options?: UseMutationOptions<void, Error, void>,
     ) => UseMutationResult<void, Error, void>;

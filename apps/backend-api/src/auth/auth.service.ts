@@ -7,6 +7,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcryptjs';
+import { OAuth2Client } from 'google-auth-library';
 import { Repository } from 'typeorm';
 import {
   AuthResponse,
@@ -105,6 +106,51 @@ export class AuthService {
     const response = this.createAuthResponse(profile, user.id);
     await this.saveRefreshToken(user.id, response.refreshToken);
     return response;
+  }
+
+  async googleSignin(credential: string): Promise<AuthResponse> {
+    const client = new OAuth2Client(appConfig.auth.googleClientId);
+
+    try {
+      const ticket = await client.verifyIdToken({
+        idToken: credential,
+        audience: appConfig.auth.googleClientId,
+      });
+
+      const payload = ticket.getPayload();
+      if (!payload || !payload.email) {
+        throw new UnauthorizedException('Invalid Google token');
+      }
+
+      const email = payload.email;
+      let user = await this.usersRepo.findOne({ where: { email } });
+
+      if (!user) {
+        const randomPassword = await bcrypt.hash(
+          Math.random().toString(36).slice(-10) + Math.random().toString(36).slice(-10),
+          10,
+        );
+        const newUser = this.usersRepo.create({
+          email,
+          fullName: payload.name || email.split('@')[0],
+          password: randomPassword,
+        });
+        user = await this.usersRepo.save(newUser);
+      }
+
+      const {
+        password: _p,
+        refreshTokens: _r,
+        createdAt: _createdAt,
+        updatedAt: _updatedAt,
+        ...profile
+      } = user;
+      const response = this.createAuthResponse(profile, user.id);
+      await this.saveRefreshToken(user.id, response.refreshToken);
+      return response;
+    } catch {
+      throw new UnauthorizedException('Google authentication failed');
+    }
   }
 
   async logout(userId: string, refreshToken: string): Promise<void> {

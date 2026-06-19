@@ -24,9 +24,14 @@ export const signInPayloadSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 });
 
+export const googleSignInPayloadSchema = z.object({
+  credential: z.string(),
+});
+
 export type UserProfile = z.infer<typeof userProfileSchema>;
 export type SignUpPayload = z.infer<typeof signUpPayloadSchema>;
 export type SignInPayload = z.infer<typeof signInPayloadSchema>;
+export type GoogleSignInPayload = z.infer<typeof googleSignInPayloadSchema>;
 
 export const updateProfileSchema = z.object({
   riskTolerance: z.enum(RiskTolerance).optional(),
