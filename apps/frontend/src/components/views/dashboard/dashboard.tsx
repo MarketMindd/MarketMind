@@ -62,13 +62,15 @@ const highlightText = (text: string, riskTolerance: string, interests: string[])
   );
 };
 
+const ALL_FILTERS = 'All';
+
 export const Dashboard = () => {
   const navigate = useNavigate();
   const {
     portfolio: { usePortfolio, useAiMarketSummary },
     stocks: { useGetAllStocks },
   } = useClientQueries();
-  const [filter, setFilter] = useState<'All' | RecommendationStatus>('All');
+  const [filter, setFilter] = useState<typeof ALL_FILTERS | RecommendationStatus>(ALL_FILTERS);
 
   const { data: portfolio = [] } = usePortfolio();
   const { data: marketSummary, isLoading: isSummaryLoading } = useAiMarketSummary();
@@ -79,7 +81,7 @@ export const Dashboard = () => {
   const recommendedStocks = stocks.filter((stock) => !portfolioTickers.includes(stock.symbol));
 
   const filteredRecommendedStocks = recommendedStocks.filter((stock) =>
-    filter === 'All' ? true : stock.aiRecommendation.status === filter,
+    filter === ALL_FILTERS ? true : stock.aiRecommendation.status === filter,
   );
 
   const investCount = stocks.filter(
@@ -166,26 +168,30 @@ export const Dashboard = () => {
                       : 'No summary available.'}
                   </p>
                   {marketSummary?.suggestedStocks && marketSummary.suggestedStocks.length > 0 && (
-                    <div className="mt-4 pt-3 border-t border-border/50 flex flex-wrap items-center gap-x-4 gap-y-2">
+                    <div className="mt-4 pt-3 border-t border-border/50 flex flex-col flex-wrap gap-x-4 gap-y-2">
                       <div className="flex items-center gap-2">
-                        <Eye className="w-4 h-4 text-primary" />
+                        <Eye size={18} className="text-primary" />
                         <span className="text-sm font-medium text-foreground">Stocks to Watch</span>
                       </div>
                       <div className="flex gap-2 flex-wrap items-center">
                         {marketSummary.suggestedStocks.map((ticker) => (
-                          <div key={ticker} className="inline-flex items-center gap-1">
+                          <div
+                            key={ticker}
+                            className="inline-flex items-stretch rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors duration-200 border border-primary/10 overflow-hidden group"
+                          >
                             <button
                               onClick={() => navigate(`/stock/${ticker}`)}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors duration-200"
+                              className="inline-flex items-center gap-1 px-2 py-1 text-primary text-xs text-center font-medium hover:bg-primary/30 transition-colors duration-200"
                             >
                               {ticker}
                               <ChevronRight size={14} />
                             </button>
+                            <div className="w-px bg-primary/20 group-hover:bg-primary/30 transition-colors duration-200" />
                             <AskAiButton
                               symbol={ticker}
                               prompt={`Tell me about ${ticker} and why it might be worth watching.`}
                               label=""
-                              className="px-2"
+                              className="px-2 rounded-none hover:bg-primary/30 m-0 h-auto"
                             />
                           </div>
                         ))}
@@ -206,7 +212,7 @@ export const Dashboard = () => {
                 onClick={() =>
                   setFilter(
                     filter === (card.label as typeof filter)
-                      ? 'All'
+                      ? ALL_FILTERS
                       : (card.label as typeof filter),
                   )
                 }
@@ -244,12 +250,12 @@ export const Dashboard = () => {
             Tap any card to see why — in plain English, with no jargon.
           </p>
 
-          <div className="flex items-center gap-2 mb-6 flex-wrap">
+          <div className="flex items-center gap-4 mb-6 flex-wrap">
             <Filter size={18} className="text-muted-foreground" />
             <div className="flex gap-2 flex-wrap">
               {(
                 [
-                  'All',
+                  ALL_FILTERS,
                   StockRecommendation.INVEST,
                   StockRecommendation.HOLD,
                   StockRecommendation.EXIT,
@@ -261,7 +267,7 @@ export const Dashboard = () => {
                   size="sm"
                   onClick={() => setFilter(f as typeof filter)}
                 >
-                  {f === 'All' ? 'Show all' : recommendationDisplayLabel[f]}
+                  {f === ALL_FILTERS ? ALL_FILTERS : recommendationDisplayLabel[f]}
                 </Button>
               ))}
             </div>

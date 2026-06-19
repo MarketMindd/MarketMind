@@ -89,7 +89,7 @@ export const StockCard = ({ stock, onClick, className, portfolioData }: StockCar
               term={`AI confidence: ${stock.aiRecommendation.confidence}%`}
               explanation="How sure the AI is about this recommendation, based on its analysis."
               hideIcon
-              className="text-xs text-muted-foreground text-right no-underline gap-2"
+              className="text-xs text-muted-foreground text-right no-underline gap-1.5"
             >
               <span className="block">AI is</span>
               <span className="text-foreground font-medium">
