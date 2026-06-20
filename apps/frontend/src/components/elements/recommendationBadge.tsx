@@ -1,12 +1,13 @@
 import { Eye, ThumbsDown, ThumbsUp } from 'lucide-react';
 import { StockRecommendation } from '@market-mind/common';
+import { Size } from '@/enums/recommendationBadge';
 import { cn } from '@/utils/tailwindUtils';
 import { Term } from './term';
 
 interface RecommendationBadgeProps {
   recommendation: StockRecommendation;
   confidence?: number;
-  size?: 'sm' | 'md' | 'lg';
+  size?: Size;
   showConfidence?: boolean;
 }
 
@@ -27,7 +28,7 @@ const getConfidenceLabel = (confidence: number) => {
 export const RecommendationBadge = ({
   recommendation,
   confidence,
-  size = 'md',
+  size = Size.MD,
   showConfidence = false,
 }: RecommendationBadgeProps) => {
   const normalizedRec = recommendation || StockRecommendation.NOT_ANALYZED;

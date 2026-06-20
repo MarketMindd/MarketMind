@@ -1,17 +1,14 @@
-import {
-  ArrowDownRight,
-  ArrowLeft,
-  ArrowUpRight,
-} from 'lucide-react';
+import { ArrowDownRight, ArrowLeft, ArrowUpRight } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { StockRecommendation } from '@market-mind/common';
 import { Button } from '@/components/elements/button';
 import { RecommendationBadge } from '@/components/elements/recommendationBadge';
+import { Size } from '@/enums/recommendationBadge';
+import { useClientQueries } from '@/hooks/useClientQueries';
+import { cn } from '@/utils/tailwindUtils';
 import { AiExplanation } from './aiExplanation';
 import { StockInsights } from './stockInsights';
 import { StockPriceChart } from './stockPriceChart';
-import { useClientQueries } from '@/hooks/useClientQueries';
-import { cn } from '@/utils/tailwindUtils';
 
 export const StockDetails = () => {
   const { stockSymbol } = useParams<{ stockSymbol: string }>();
@@ -74,7 +71,7 @@ export const StockDetails = () => {
               <RecommendationBadge
                 recommendation={stock.aiRecommendation.status}
                 confidence={stock.aiRecommendation.confidence}
-                size="lg"
+                size={Size.LG}
                 showConfidence
               />
             )}

@@ -1,12 +1,9 @@
+import { ArrowDown, ArrowUp, Briefcase } from 'lucide-react';
+import { PortfolioItem, Stock, StockRecommendation } from '@market-mind/common';
 import { AskAiButton } from '@/components/elements/askAiButton';
 import { RecommendationBadge } from '@/components/elements/recommendationBadge';
+import { Size } from '@/enums/recommendationBadge';
 import { cn } from '@/utils/tailwindUtils';
-import {
-  PortfolioItem,
-  Stock,
-  StockRecommendation
-} from '@market-mind/common';
-import { ArrowDown, ArrowUp, Briefcase } from 'lucide-react';
 import { Term } from './term';
 
 interface StockCardProps {
@@ -57,7 +54,7 @@ export const StockCard = ({ stock, onClick, className, portfolioData }: StockCar
             <span className="truncate">{stock.sector}</span>
           </div>
         </div>
-        <RecommendationBadge recommendation={stock.aiRecommendation.status} size="sm" />
+        <RecommendationBadge recommendation={stock.aiRecommendation.status} size={Size.MD} />
       </div>
 
       {/* Plain summary */}
