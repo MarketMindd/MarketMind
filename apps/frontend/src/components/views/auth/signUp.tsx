@@ -5,7 +5,7 @@ import { APP_ROUTES } from '@/consts/routes';
 import { useClientQueries } from '@/hooks/useClientQueries';
 import { useToast } from '@/hooks/useToast';
 import { parsePortfolioFile } from '@/utils/fileParsingUtils';
-import { PortfolioItem, Stock } from '@market-mind/common';
+import { PortfolioItem } from '@market-mind/common';
 import {
   ArrowRight,
   Lock,
@@ -31,10 +31,10 @@ export const SignUp: React.FC = () => {
   const {
     auth: { useSignUp },
     portfolio: { useSavePortfolio },
-    stocks: { useGetAllStocks },
+    stocks: { useGetBasicStocks },
   } = useClientQueries();
 
-  const { data: availableStocks = [] } = useGetAllStocks();
+  const { data: basicStocks = [] } = useGetBasicStocks();
 
   const { mutate: savePortfolio } = useSavePortfolio({
     onSuccess: () => {
@@ -82,7 +82,7 @@ export const SignUp: React.FC = () => {
     }
 
     try {
-      const validSymbols = availableStocks.map((s: Stock) => s.symbol);
+      const validSymbols = basicStocks.map((s) => s.symbol);
       const parsedStocks = await parsePortfolioFile(file, validSymbols);
 
       if (parsedStocks.length === 0) {

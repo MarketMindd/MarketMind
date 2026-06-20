@@ -48,6 +48,9 @@ export type iClientQueriesProvider = {
     useGetAllStocks: (
       options?: Omit<UseQueryOptions<Stock[], Error>, 'queryKey' | 'queryFn'>,
     ) => UseQueryResult<Stock[], Error>;
+    useGetBasicStocks: (
+      options?: Omit<UseQueryOptions<Stock[], Error>, 'queryKey' | 'queryFn'>,
+    ) => UseQueryResult<Stock[], Error>;
   };
   portfolio: {
     usePortfolio: (

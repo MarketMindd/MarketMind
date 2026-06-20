@@ -165,6 +165,18 @@ export const createFetchDataProvider = (): iDataProvider => {
     }
   };
 
+  const getBasicStocks = async () => {
+    try {
+      const res = await apiClient.get('/stocks/basic');
+      return res.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.message || 'Request failed');
+      }
+      throw error;
+    }
+  };
+
   const signout = async () => {
     try {
       const userId = localStorage.getItem(USER_ID_KEY);
@@ -206,6 +218,7 @@ export const createFetchDataProvider = (): iDataProvider => {
     stocks: {
       getStocks,
       getAllStocks,
+      getBasicStocks,
     },
     portfolio: {
       getPortfolio: async () => {

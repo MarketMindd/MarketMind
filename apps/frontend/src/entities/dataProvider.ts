@@ -25,6 +25,7 @@ export interface iDataProvider {
   stocks: {
     getStocks: (symbols: string[]) => Promise<Stock[]>;
     getAllStocks: () => Promise<Stock[]>;
+    getBasicStocks: () => Promise<Stock[]>;
   };
   portfolio: {
     getPortfolio: () => Promise<PortfolioItemWithStock[]>;

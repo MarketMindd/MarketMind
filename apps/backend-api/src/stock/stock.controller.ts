@@ -1,11 +1,18 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { getSymbolsQuerySchema, Stock } from '@market-mind/common';
 import { ZodValidationPipe } from '../pipes/zodValidatorPipe';
+import { Public } from '../decorators/roles.decorator';
 import { StockService } from './stock.service';
 
 @Controller('stocks')
 export class StockController {
   constructor(private readonly stockService: StockService) {}
+
+  @Public()
+  @Get('basic')
+  async getBasicStocks(): Promise<Stock[]> {
+    return this.stockService.getBasicStocks();
+  }
 
   @Get()
   async getStocks(

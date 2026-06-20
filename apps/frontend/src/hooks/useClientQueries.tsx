@@ -126,6 +126,20 @@ export const useClientQueries = (): iClientQueriesProvider => {
     });
   };
 
+  const useGetBasicStocks = (
+    options?: Omit<UseQueryOptions<Stock[], Error>, 'queryKey' | 'queryFn'>,
+  ) => {
+    return useQuery<Stock[], Error>({
+      queryKey: ['basicStocks'],
+      queryFn: async () => {
+        if (!ctx.dataProvider) return [];
+        return ctx.dataProvider.stocks.getBasicStocks();
+      },
+      enabled: !!ctx.dataProvider,
+      ...options,
+    });
+  };
+
   const usePortfolio = (
     options?: Omit<UseQueryOptions<PortfolioItemWithStock[], Error>, 'queryKey' | 'queryFn'>,
   ) => {
@@ -281,7 +295,7 @@ export const useClientQueries = (): iClientQueriesProvider => {
   return {
     auth: { useSignIn, useSignUp, useSignOut },
     profile: { useUpdateProfile },
-    stocks: { useGetStock, useGetStocks, useGetAllStocks },
+    stocks: { useGetStock, useGetStocks, useGetAllStocks, useGetBasicStocks },
     portfolio: { usePortfolio, useSavePortfolio, useAiMarketSummary },
     chat: {
       useGetChatSessions,

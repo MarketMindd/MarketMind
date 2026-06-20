@@ -16,14 +16,14 @@ type EditablePortfolioField = keyof Pick<PortfolioItemWithStock, 'shares' | 'avg
 
 export const PortfolioInput = ({ portfolio, onChange, compact = false }: PortfolioInputProps) => {
   const {
-    stocks: { useGetAllStocks },
+    stocks: { useGetBasicStocks },
   } = useClientQueries();
   const [searchTerm, setSearchTerm] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const { data: availableStocks = [] } = useGetAllStocks();
+  const { data: availableStocks = [] } = useGetBasicStocks();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
