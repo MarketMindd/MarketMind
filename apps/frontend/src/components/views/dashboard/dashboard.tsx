@@ -1,71 +1,12 @@
-import {
-  Activity,
-  Briefcase,
-  ChevronRight,
-  Eye,
-  Filter,
-  Sparkles,
-  TrendingDown,
-  TrendingUp,
-} from 'lucide-react';
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
 import { RecommendationStatus, StockRecommendation } from '@market-mind/common';
-import { AskAiButton } from '@/components/elements/askAiButton';
-import { Button } from '@/components/elements/button';
-import { StockCard } from '@/components/elements/stockCard';
+import { DailyBrief } from './dailyBrief';
+import { RecommendationSummary, ALL_FILTERS } from './recommendationSummary';
+import { RecommendedStocksList } from './recommendedStocksList';
+import { PortfolioSection } from './portfolioSection';
 import { useClientQueries } from '@/hooks/useClientQueries';
-import { cn } from '@/utils/tailwindUtils';
-
-const highlightText = (text: string, riskTolerance: string, interests: string[]) => {
-  if (!text) return text;
-
-  const escapeRegExp = (string: string) => {
-    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  };
-
-  const terms = [riskTolerance, ...interests].filter(Boolean);
-  if (terms.length === 0) return text;
-
-  const searchTerms: string[] = [];
-  for (const term of terms) {
-    searchTerms.push(escapeRegExp(term));
-    const splitTerm = term.replace(/([A-Z])/g, ' $1').trim();
-    if (splitTerm !== term) {
-      searchTerms.push(escapeRegExp(splitTerm));
-    }
-  }
-
-  const pattern = new RegExp(`\\b(${searchTerms.join('|')})\\b`, 'gi');
-  const parts = text.split(pattern);
-
-  if (parts.length === 1) return text;
-
-  return (
-    <>
-      {parts.map((part, i) => {
-        const lowercasePart = part.toLowerCase();
-        const matchesAnyTerm = searchTerms.some(
-          (st) => lowercasePart === st.toLowerCase().replace(/\\/g, ''),
-        );
-
-        if (matchesAnyTerm) {
-          return (
-            <span key={i} className="text-primary font-semibold">
-              {part}
-            </span>
-          );
-        }
-        return part;
-      })}
-    </>
-  );
-};
-
-const ALL_FILTERS = 'All';
 
 export const Dashboard = () => {
-  const navigate = useNavigate();
   const {
     portfolio: { usePortfolio, useAiMarketSummary },
     stocks: { useGetAllStocks },
@@ -94,38 +35,7 @@ export const Dashboard = () => {
     (s) => s.aiRecommendation.status === StockRecommendation.EXIT,
   ).length;
 
-  const recommendationDisplayLabel = {
-    [StockRecommendation.INVEST]: 'Good to buy',
-    [StockRecommendation.HOLD]: 'Keep watching',
-    [StockRecommendation.EXIT]: 'Better to sell',
-  };
 
-  const summaryCards = [
-    {
-      label: StockRecommendation.INVEST,
-      displayLabel: recommendationDisplayLabel[StockRecommendation.INVEST],
-      count: investCount,
-      icon: TrendingUp,
-      color: 'text-success',
-      bg: 'bg-success/10',
-    },
-    {
-      label: StockRecommendation.HOLD,
-      displayLabel: recommendationDisplayLabel[StockRecommendation.HOLD],
-      count: holdCount,
-      icon: Activity,
-      color: 'text-warning',
-      bg: 'bg-warning/10',
-    },
-    {
-      label: StockRecommendation.EXIT,
-      displayLabel: recommendationDisplayLabel[StockRecommendation.EXIT],
-      count: exitCount,
-      icon: TrendingDown,
-      color: 'text-destructive',
-      bg: 'bg-destructive/10',
-    },
-  ];
 
   const today = new Date().toLocaleDateString(undefined, {
     weekday: 'long',
@@ -143,210 +53,27 @@ export const Dashboard = () => {
           </h1>
         </div>
 
-        <div className="glass-card p-6 mb-6 animate-fade-in stagger-1 border-l-4 border-l-primary">
-          <div className="flex items-start gap-4">
-            <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
-              <Sparkles className="w-5 h-5 text-primary" />
-            </div>
-            <div className="flex-1 w-full">
-              <h2 className="font-semibold text-foreground mb-3">Your daily brief</h2>
-              {isSummaryLoading ? (
-                <div className="animate-pulse space-y-2 mt-2">
-                  <div className="h-4 bg-muted rounded w-3/4"></div>
-                  <div className="h-4 bg-muted rounded w-full"></div>
-                  <div className="h-4 bg-muted rounded w-5/6"></div>
-                </div>
-              ) : (
-                <div className="space-y-3 text-foreground/90 leading-relaxed">
-                  <p className="whitespace-pre-wrap">
-                    {marketSummary
-                      ? highlightText(
-                          marketSummary.summary,
-                          marketSummary.riskTolerance,
-                          marketSummary.interests,
-                        )
-                      : 'No summary available.'}
-                  </p>
-                  {marketSummary?.suggestedStocks && marketSummary.suggestedStocks.length > 0 && (
-                    <div className="mt-4 pt-3 border-t border-border/50 flex flex-col flex-wrap gap-x-4 gap-y-2">
-                      <div className="flex items-center gap-2">
-                        <Eye size={18} className="text-primary" />
-                        <span className="text-sm font-medium text-foreground">Stocks to Watch</span>
-                      </div>
-                      <div className="flex gap-2 flex-wrap items-center">
-                        {marketSummary.suggestedStocks.map((ticker) => (
-                          <div
-                            key={ticker}
-                            className="inline-flex items-stretch rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors duration-200 border border-primary/10 overflow-hidden group"
-                          >
-                            <button
-                              onClick={() => navigate(`/stock/${ticker}`)}
-                              className="inline-flex items-center gap-1 px-2 py-1 text-primary text-xs text-center font-medium hover:bg-primary/30 transition-colors duration-200"
-                            >
-                              {ticker}
-                              <ChevronRight size={14} />
-                            </button>
-                            <div className="w-px bg-primary/20 group-hover:bg-primary/30 transition-colors duration-200" />
-                            <AskAiButton
-                              symbol={ticker}
-                              prompt={`Tell me about ${ticker} and why it might be worth watching.`}
-                              label=""
-                              className="px-2 rounded-none hover:bg-primary/30 m-0 h-auto"
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+        <DailyBrief marketSummary={marketSummary} isLoading={isSummaryLoading} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
-          <div className="lg:col-span-3 grid grid-cols-3 gap-4">
-            {summaryCards.map((card, i) => (
-              <button
-                key={card.label}
-                onClick={() =>
-                  setFilter(
-                    filter === (card.label as typeof filter)
-                      ? ALL_FILTERS
-                      : (card.label as typeof filter),
-                  )
-                }
-                className={cn(
-                  'glass-card p-4 text-left hover-lift animate-fade-in transition-all duration-200',
-                  filter === card.label && 'ring-2 ring-primary',
-                )}
-                style={{ animationDelay: `${0.1 + i * 0.1}s` }}
-              >
-                <div
-                  className={cn(
-                    'w-9 h-9 rounded-lg mb-3 flex items-center justify-center',
-                    card.bg,
-                  )}
-                >
-                  <card.icon className={cn('w-5 h-5', card.color)} />
-                </div>
-                <div className={cn('text-2xl font-bold', card.color)}>{card.count}</div>
-                <div className="text-xs text-muted-foreground mt-0.5">{card.displayLabel}</div>
-              </button>
-            ))}
-          </div>
-        </div>
+        <RecommendationSummary
+          investCount={investCount}
+          holdCount={holdCount}
+          exitCount={exitCount}
+          currentFilter={filter}
+          onFilterChange={setFilter}
+        />
 
-        <div className="animate-fade-in stagger-3">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-3">
-              <Sparkles className="w-5 h-5 text-primary" />
-              <h2 className="text-xl font-semibold text-foreground">
-                {portfolioStocks.length > 0 ? 'Picks for you' : 'Stocks the AI likes for you'}
-              </h2>
-            </div>
-          </div>
-          <p className="text-sm text-muted-foreground mb-5">
-            Tap any card to see why — in plain English, with no jargon.
-          </p>
+        <RecommendedStocksList
+          filteredRecommendedStocks={filteredRecommendedStocks}
+          filter={filter}
+          setFilter={setFilter}
+          portfolioStocksCount={portfolioStocks.length}
+        />
 
-          <div className="flex items-center gap-4 mb-6 flex-wrap">
-            <Filter size={18} className="text-muted-foreground" />
-            <div className="flex gap-2 flex-wrap">
-              {(
-                [
-                  ALL_FILTERS,
-                  StockRecommendation.INVEST,
-                  StockRecommendation.HOLD,
-                  StockRecommendation.EXIT,
-                ] as const
-              ).map((f) => (
-                <Button
-                  key={f}
-                  variant={filter === f ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setFilter(f as typeof filter)}
-                >
-                  {f === ALL_FILTERS ? ALL_FILTERS : recommendationDisplayLabel[f]}
-                </Button>
-              ))}
-            </div>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredRecommendedStocks.map((stock, i) => (
-              <div
-                key={stock.symbol}
-                className="animate-fade-in"
-                style={{ animationDelay: `${0.2 + i * 0.1}s` }}
-              >
-                <StockCard stock={stock} onClick={() => navigate(`/stock/${stock.symbol}`)} />
-              </div>
-            ))}
-          </div>
-
-          {filteredRecommendedStocks.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">
-                No stocks here right now — try another filter.
-              </p>
-            </div>
-          )}
-        </div>
-
-        {portfolio.length === 0 ? (
-          <div className="glass-card p-6 mt-8 text-center animate-fade-in">
-            <Briefcase className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-foreground mb-2">
-              Do you already own some stocks?
-            </h3>
-            <p className="text-muted-foreground text-sm mb-4 max-w-md mx-auto">
-              Tell us what you own and we'll keep an eye on it for you — plus tailor recommendations
-              around it.
-            </p>
-            <Button variant="outline" onClick={() => navigate('/portfolio')}>
-              <Briefcase size={18} />
-              Add what I own
-            </Button>
-          </div>
-        ) : (
-          portfolioStocks.length > 0 && (
-            <div className="mt-8 animate-fade-in stagger-2">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <Briefcase className="w-5 h-5 text-primary" />
-                  <h2 className="text-xl font-semibold text-foreground">What you own</h2>
-                  <span className="text-sm text-muted-foreground">({portfolioStocks.length})</span>
-                </div>
-                <Link
-                  to="/portfolio"
-                  className="flex items-center gap-1 text-sm text-primary hover:underline"
-                >
-                  Edit
-                  <ChevronRight size={16} />
-                </Link>
-              </div>
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {portfolioStocks.map((stock, i) => {
-                  const portfolioData = portfolio.find((p) => p.ticker === stock.symbol);
-                  return (
-                    <div
-                      key={stock.symbol}
-                      className="animate-fade-in"
-                      style={{ animationDelay: `${0.2 + i * 0.1}s` }}
-                    >
-                      <StockCard
-                        stock={stock}
-                        onClick={() => navigate(`/stock/${stock.symbol}`)}
-                        portfolioData={portfolioData}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )
-        )}
+        <PortfolioSection
+          portfolio={portfolio}
+          portfolioStocks={portfolioStocks}
+        />
       </main>
     </div>
   );

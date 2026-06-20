@@ -16,7 +16,7 @@ export async function parsePortfolioFile(
   const workbook = XLSX.read(arrayBuffer, { type: 'array' });
   const firstSheetName = workbook.SheetNames[0];
   const worksheet = workbook.Sheets[firstSheetName];
-  const jsonData = XLSX.utils.sheet_to_json<Record<string, any>>(worksheet);
+  const jsonData = XLSX.utils.sheet_to_json<Record<string, unknown>>(worksheet);
 
   const parsedStocks: PortfolioItem[] = [];
   const validTickersSet = new Set(validSymbols);

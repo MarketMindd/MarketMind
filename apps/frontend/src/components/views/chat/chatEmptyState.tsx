@@ -4,11 +4,7 @@ import { Button } from '../../elements/button';
 import { ExplainModeToggle } from '../../elements/explainModeToggle';
 import { Input } from '../../elements/input';
 
-const suggestedQuestions = [
-  "What does 'market cap' mean?",
-  "Is it a good time to buy Apple stock?",
-  "How do I build a balanced portfolio?"
-];
+
 
 interface ChatEmptyStateProps {
   firstName: string;

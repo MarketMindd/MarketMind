@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import {
   AuthResponse,
@@ -118,8 +117,11 @@ export const createFetchDataProvider = (): iDataProvider => {
       localStorage.setItem(REFRESH_TOKEN_KEY, res.data.refreshToken);
       localStorage.setItem(USER_ID_KEY, res.data.user.id);
       return res.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Request failed');
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.message || 'Request failed');
+      }
+      throw error;
     }
   };
 
@@ -130,8 +132,11 @@ export const createFetchDataProvider = (): iDataProvider => {
       localStorage.setItem(REFRESH_TOKEN_KEY, res.data.refreshToken);
       localStorage.setItem(USER_ID_KEY, res.data.user.id);
       return res.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Request failed');
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.message || 'Request failed');
+      }
+      throw error;
     }
   };
 
@@ -140,8 +145,11 @@ export const createFetchDataProvider = (): iDataProvider => {
       if (symbols.length === 0) return [];
       const res = await apiClient.get(`/stocks?symbols=${symbols.join(',')}`);
       return res.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Request failed');
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.message || 'Request failed');
+      }
+      throw error;
     }
   };
 
@@ -149,8 +157,11 @@ export const createFetchDataProvider = (): iDataProvider => {
     try {
       const res = await apiClient.get('/stocks');
       return res.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Request failed');
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.message || 'Request failed');
+      }
+      throw error;
     }
   };
 
@@ -162,7 +173,7 @@ export const createFetchDataProvider = (): iDataProvider => {
       if (userId && refreshToken) {
         await apiClient.post('/auth/logout', { userId, refreshToken });
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Logout failed:', error);
     } finally {
       localStorage.removeItem(ACCESS_TOKEN_KEY);
@@ -175,8 +186,11 @@ export const createFetchDataProvider = (): iDataProvider => {
     try {
       const res = await apiClient.patch<{ success: boolean }>('/profile', payload);
       return res.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Request failed');
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.message || 'Request failed');
+      }
+      throw error;
     }
   };
 
@@ -231,11 +245,14 @@ export const createFetchDataProvider = (): iDataProvider => {
             payload,
           );
           return res.data;
-        } catch (error: any) {
-          if (error.response?.status === 429) {
-            throw new Error('MarketMind AI is currently busy. Please wait a moment and try again.');
+        } catch (error) {
+          if (axios.isAxiosError(error)) {
+            if (error.response?.status === 429) {
+              throw new Error('MarketMind AI is currently busy. Please wait a moment and try again.');
+            }
+            throw new Error(error.response?.data?.message || 'Failed to send message');
           }
-          throw new Error(error.response?.data?.message || 'Failed to send message');
+          throw error;
         }
       },
     },
