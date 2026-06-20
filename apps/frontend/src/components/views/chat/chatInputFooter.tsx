@@ -34,7 +34,7 @@ export const ChatInputFooter = ({
             value={input}
             onChange={(e) => onInputChange(e.target.value)}
             onKeyDown={onKeyDown}
-            placeholder="Ask about stocks, market trends, or your portfolio..."
+            placeholder="Continue here - Ask in plain English"
             className="flex-1"
             disabled={isPendingSend}
           />

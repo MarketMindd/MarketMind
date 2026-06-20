@@ -8,15 +8,15 @@ import { useClientQueries } from '@/hooks/useClientQueries';
 import { useToast } from '@/hooks/useToast';
 import { cn } from '@/utils/tailwindUtils';
 
-const sectors: { id: SectorInterest; name: string; icon: string }[] = [
-  { id: SectorInterest.TECHNOLOGY, name: 'Technology', icon: '💻' },
-  { id: SectorInterest.HEALTHCARE, name: 'Healthcare', icon: '🏥' },
-  { id: SectorInterest.FINANCE, name: 'Finance', icon: '🏦' },
-  { id: SectorInterest.ENERGY, name: 'Energy', icon: '⚡' },
-  { id: SectorInterest.CONSUMER, name: 'Consumer', icon: '🛒' },
-  { id: SectorInterest.INDUSTRIAL, name: 'Industrial', icon: '🏭' },
-  { id: SectorInterest.REAL_ESTATE, name: 'Real Estate', icon: '🏠' },
-  { id: SectorInterest.MATERIALS, name: 'Materials', icon: '🔧' },
+const sectors: { id: SectorInterest; name: string; icon: string; description: string; examples: string }[] = [
+  { id: SectorInterest.TECHNOLOGY, name: 'Technology', icon: '💻', description: 'Companies that design, develop, and manufacture technology products.', examples: 'Apple, Microsoft, Nvidia' },
+  { id: SectorInterest.HEALTHCARE, name: 'Healthcare', icon: '🏥', description: 'Medical services, equipment, and pharmaceuticals.', examples: 'Johnson & Johnson, Pfizer, UnitedHealth' },
+  { id: SectorInterest.FINANCE, name: 'Finance', icon: '🏦', description: 'Banks, investment funds, and insurance companies.', examples: 'JPMorgan Chase, Visa, Goldman Sachs' },
+  { id: SectorInterest.ENERGY, name: 'Energy', icon: '⚡', description: 'Exploration and production of oil, gas, and renewable energy.', examples: 'ExxonMobil, Chevron, NextEra Energy' },
+  { id: SectorInterest.CONSUMER, name: 'Consumer', icon: '🛒', description: 'Retailers, food, and beverage companies.', examples: 'Amazon, Walmart, Coca-Cola' },
+  { id: SectorInterest.INDUSTRIAL, name: 'Industrial', icon: '🏭', description: 'Manufacturing, machinery, and defense.', examples: 'Boeing, Caterpillar, Honeywell' },
+  { id: SectorInterest.REAL_ESTATE, name: 'Real Estate', icon: '🏠', description: 'Property management, development, and REITs.', examples: 'American Tower, Prologis, Simon Property' },
+  { id: SectorInterest.MATERIALS, name: 'Materials', icon: '🔧', description: 'Chemicals, construction materials, and mining.', examples: 'Linde, Sherwin-Williams, Newmont' },
 ];
 
 export const Interests: React.FC = () => {
@@ -116,17 +116,27 @@ export const Interests: React.FC = () => {
                 key={sector.id}
                 onClick={() => toggleSector(sector.id)}
                 className={cn(
-                  'p-4 rounded-xl border-2 text-center transition-all duration-200 hover-lift',
+                  'group relative p-4 rounded-xl border-2 text-center transition-all duration-300 overflow-hidden min-h-[120px] flex flex-col items-center justify-center',
                   selectedSectors.includes(sector.id)
                     ? 'border-primary bg-primary/10'
                     : 'border-border bg-secondary/30 hover:border-muted-foreground/30',
                 )}
               >
-                <span className="text-2xl block mb-2">{sector.icon}</span>
-                <span className="text-sm font-medium text-foreground">{sector.name}</span>
-                {selectedSectors.includes(sector.id) && (
-                  <Check className="mx-auto mt-2 text-primary" size={18} />
-                )}
+                <div className="flex flex-col items-center justify-center transition-all duration-300 group-hover:opacity-0 group-hover:scale-95 absolute inset-0">
+                  <span className="text-3xl block mb-2">{sector.icon}</span>
+                  <span className="text-sm font-medium text-foreground">{sector.name}</span>
+                  {selectedSectors.includes(sector.id) && (
+                    <Check className="absolute top-3 right-3 text-primary" size={18} />
+                  )}
+                </div>
+                <div className="flex flex-col items-center justify-center text-center opacity-0 scale-95 transition-all duration-300 group-hover:opacity-100 group-hover:scale-100 absolute inset-0 p-3 bg-secondary/95 backdrop-blur-sm">
+                  <span className="text-xs font-semibold text-foreground mb-1">{sector.name}</span>
+                  <span className="text-[10px] text-muted-foreground mb-2 leading-tight">{sector.description}</span>
+                  <span className="text-[10px] text-primary/80 font-medium leading-tight">e.g., {sector.examples}</span>
+                  {selectedSectors.includes(sector.id) && (
+                    <Check className="absolute top-2 right-2 text-primary" size={14} />
+                  )}
+                </div>
               </button>
             ))}
           </div>

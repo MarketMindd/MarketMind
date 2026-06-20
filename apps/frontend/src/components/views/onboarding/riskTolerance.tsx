@@ -10,19 +10,19 @@ const riskLevels = [
   {
     id: RiskToleranceEnum.LOW,
     name: 'Conservative',
-    description: 'Lower risk, steady growth focus',
+    description: 'I prioritize keeping my money safe over high returns. I would be stressed if my portfolio dropped.',
     icon: '🛡️',
   },
   {
     id: RiskToleranceEnum.MEDIUM,
     name: 'Moderate',
-    description: 'Balanced risk and reward',
+    description: 'I want a balance. I can accept some ups and downs for a chance at better returns.',
     icon: '⚖️',
   },
   {
     id: RiskToleranceEnum.HIGH,
     name: 'Aggressive',
-    description: 'Higher risk, higher potential returns',
+    description: "I'm comfortable with large swings in my portfolio value for the chance of higher long-term growth.",
     icon: '🚀',
   },
 ];
@@ -79,10 +79,10 @@ export const RiskTolerance: React.FC = () => {
         <div className="glass-card p-8 animate-fade-in">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-semibold text-foreground mb-2">
-              What's your risk tolerance?
+              How do you feel about risk?
             </h2>
             <p className="text-muted-foreground">
-              This helps us tailor recommendations to your comfort level
+              Choose the statement that best describes you
             </p>
           </div>
 

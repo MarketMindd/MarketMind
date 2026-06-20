@@ -103,6 +103,7 @@
     "bcryptjs": "^3.0.3",
     "cron": "^4.3.3",
     "google-auth-library": "^10.7.0",
+    "nodemailer": "^7.0.13",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.1.13",
@@ -115,6 +116,7 @@
   "devDependencies": {
     "@nestjs/testing": "^11.0.0",
     "@types/jest": "^30.0.0",
+    "@types/nodemailer": "^7.0.11",
     "@types/passport-jwt": "^4.0.1",
     "jest": "^30.3.0",
     "ts-jest": "^29.4.9",
