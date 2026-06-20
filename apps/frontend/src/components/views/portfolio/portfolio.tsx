@@ -4,7 +4,7 @@ import { PortfolioItemWithStock } from '@market-mind/common';
 import { Button } from '@/components/elements/button';
 import { useClientQueries } from '@/hooks/useClientQueries';
 import { cn } from '@/utils/tailwindUtils';
-import PortfolioInput from './portfolioInput';
+import { PortfolioInput } from './portfolioInput';
 import { PortfolioStockRow } from './portfolioStockRow';
 
 const EMPTY_PORTFOLIO: PortfolioItemWithStock[] = [];
@@ -53,7 +53,7 @@ export const Portfolio = () => {
 
   return (
     <div className="flex-1 flex flex-col bg-background">
-      <div className="pt-8 sm:pt-6 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+      <div className="pt-28 sm:pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-foreground mb-2 flex items-center gap-3">

@@ -1,8 +1,8 @@
+import { useToast } from '@/hooks/useToast';
+import { ExplainMode } from '@market-mind/common';
 import { Loader2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { ExplainMode } from '@market-mind/common';
-import { useToast } from '@/hooks/useToast';
 import { useClientQueries } from '../../../hooks/useClientQueries';
 import { ChatEmptyState } from './chatEmptyState';
 import { ChatInputFooter } from './chatInputFooter';
@@ -176,7 +176,7 @@ export const Chat = () => {
   };
 
   return (
-    <div className="flex-1 flex overflow-hidden bg-background relative">
+    <div className="flex-1 flex overflow-hidden bg-background relative pt-16">
       <ChatSidebar
         isSidebarCollapsed={isSidebarCollapsed}
         onToggle={() => setIsSidebarCollapsed((c) => !c)}

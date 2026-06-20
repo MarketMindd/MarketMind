@@ -14,16 +14,16 @@ interface PortfolioInputProps {
 
 type EditablePortfolioField = keyof Pick<PortfolioItemWithStock, 'shares' | 'avgPrice'>;
 
-const PortfolioInput = ({ portfolio, onChange, compact = false }: PortfolioInputProps) => {
+export const PortfolioInput = ({ portfolio, onChange, compact = false }: PortfolioInputProps) => {
   const {
-    stocks: { useGetAllStocks },
+    stocks: { useGetBasicStocks },
   } = useClientQueries();
   const [searchTerm, setSearchTerm] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const { data: availableStocks = [] } = useGetAllStocks();
+  const { data: availableStocks = [] } = useGetBasicStocks();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -58,7 +58,15 @@ const PortfolioInput = ({ portfolio, onChange, compact = false }: PortfolioInput
         }
       : undefined;
 
-    onChange([...portfolio, { ticker, shares: 0, avgPrice: 0, stock: stockObj }]);
+    onChange([
+      ...portfolio,
+      {
+        ticker,
+        shares: 0,
+        avgPrice: stockDetails?.marketData?.price ?? 0,
+        stock: stockObj,
+      },
+    ]);
     setSearchTerm('');
     setShowDropdown(false);
     setHighlightedIndex(0);
@@ -215,5 +223,3 @@ const PortfolioInput = ({ portfolio, onChange, compact = false }: PortfolioInput
     </div>
   );
 };
-
-export default PortfolioInput;
