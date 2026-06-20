@@ -21,6 +21,10 @@ import type {
   UpdateProfilePayload,
 } from '@market-mind/common';
 
+export type GoogleAuthParams = {
+  errorTitle: string;
+};
+
 export type iClientQueriesProvider = {
   auth: {
     useSignIn: (
@@ -30,6 +34,7 @@ export type iClientQueriesProvider = {
       options?: UseMutationOptions<AuthResponse, Error, SignUpPayload>,
     ) => UseMutationResult<AuthResponse, Error, SignUpPayload>;
     useGoogleSignIn: (
+      params: GoogleAuthParams,
       options?: UseMutationOptions<OAuthResponse, Error, GoogleSignInPayload>,
     ) => UseMutationResult<OAuthResponse, Error, GoogleSignInPayload>;
     useSignOut: (

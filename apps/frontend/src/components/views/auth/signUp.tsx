@@ -1,6 +1,5 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { OAuthResponse } from '@market-mind/common';
 import { APP_ROUTES } from '@/consts/routes';
 import { useClientQueries } from '@/hooks/useClientQueries';
 import { useToast } from '@/hooks/useToast';
@@ -29,16 +28,7 @@ export const SignUp: React.FC = () => {
       }),
   });
 
-  const googleSignIn = useGoogleSignIn({
-    onSuccess: ({ user: { isNewUser } }: OAuthResponse) =>
-      isNewUser ? navigate(APP_ROUTES.RISK_TOLERANCE) : navigate(APP_ROUTES.DASHBOARD),
-    onError: (err: Error) =>
-      toast({
-        title: 'Google Sign up failed',
-        description: err.message,
-        variant: 'destructive',
-      }),
-  });
+  const googleSignIn = useGoogleSignIn({ errorTitle: 'Google Sign up failed' });
 
   return (
     <div className="min-h-screen flex">
