@@ -24,9 +24,18 @@ export const signInPayloadSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 });
 
+export const googleTokensSchema = z.object({
+  id_token: z.string(),
+});
+
+export const googleSignInPayloadSchema = z.object({
+  authCode: z.string(),
+});
+
 export type UserProfile = z.infer<typeof userProfileSchema>;
 export type SignUpPayload = z.infer<typeof signUpPayloadSchema>;
 export type SignInPayload = z.infer<typeof signInPayloadSchema>;
+export type GoogleSignInPayload = z.infer<typeof googleSignInPayloadSchema>;
 
 export const updateProfileSchema = z.object({
   riskTolerance: z.enum(RiskTolerance).optional(),
@@ -51,3 +60,6 @@ export const authResponseSchema = z.object({
   user: userProfileSchema,
 });
 export type AuthResponse = z.infer<typeof authResponseSchema>;
+export type OAuthResponse = Omit<AuthResponse, 'user'> & {
+  user: UserProfile & { isNewUser: boolean };
+};

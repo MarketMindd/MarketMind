@@ -1,6 +1,16 @@
 import { Body, Controller, Post } from '@nestjs/common';
-import { AuthResponse, signInPayloadSchema, signUpPayloadSchema } from '@market-mind/common';
-import type { SignInPayload, SignUpPayload } from '@market-mind/common';
+import {
+  AuthResponse,
+  googleSignInPayloadSchema,
+  signInPayloadSchema,
+  signUpPayloadSchema,
+} from '@market-mind/common';
+import type {
+  GoogleSignInPayload,
+  OAuthResponse,
+  SignInPayload,
+  SignUpPayload,
+} from '@market-mind/common';
 import { Public } from '../decorators/roles.decorator';
 import { ZodValidationPipe } from '../pipes/zodValidatorPipe';
 import { AuthService } from './auth.service';
@@ -22,6 +32,13 @@ export class AuthController {
     @Body(new ZodValidationPipe(signInPayloadSchema)) body: SignInPayload,
   ): Promise<AuthResponse> {
     return this.authService.signin(body.email, body.password);
+  }
+
+  @Post('google')
+  async googleSignin(
+    @Body(new ZodValidationPipe(googleSignInPayloadSchema)) body: GoogleSignInPayload,
+  ): Promise<OAuthResponse> {
+    return this.authService.googleSignin(body.authCode);
   }
 
   @Post('refresh')

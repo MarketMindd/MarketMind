@@ -7,9 +7,12 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcryptjs';
+import { OAuth2Client } from 'google-auth-library';
 import { Repository } from 'typeorm';
 import {
   AuthResponse,
+  googleTokensSchema,
+  OAuthResponse,
   RiskTolerance,
   SignInPayload,
   SignUpPayload,
@@ -17,6 +20,7 @@ import {
 } from '@market-mind/common';
 import { UserProfileEntity } from '@market-mind/database';
 import { appConfig } from '../config/appConfig';
+import { oAuth2Client } from '../config/OAuth2Client';
 
 @Injectable()
 export class AuthService {
@@ -105,6 +109,62 @@ export class AuthService {
     const response = this.createAuthResponse(profile, user.id);
     await this.saveRefreshToken(user.id, response.refreshToken);
     return response;
+  }
+
+  async googleSignin(authCode: string): Promise<OAuthResponse> {
+    try {
+      const { tokens } = await oAuth2Client.getToken(authCode);
+
+      const { data: parsedTokens, error } = googleTokensSchema.safeParse(tokens);
+
+      if (error) {
+        throw new UnauthorizedException('Invalid google tokens');
+      }
+
+      const ticket = await oAuth2Client.verifyIdToken({
+        idToken: parsedTokens.id_token,
+        audience: appConfig.auth.googleClientId,
+      });
+
+      const payload = ticket.getPayload();
+      if (!payload || !payload.email) {
+        throw new UnauthorizedException('Invalid google id token');
+      }
+
+      const { email, name } = payload;
+      let user = await this.usersRepo.findOne({ where: { email } });
+      let isNewUser = false;
+
+      if (!user) {
+        const randomPassword = await bcrypt.hash(
+          Math.random().toString(36).slice(-10) + Math.random().toString(36).slice(-10),
+          10,
+        );
+        const newUser = this.usersRepo.create({
+          email,
+          fullName: name || email.split('@')[0],
+          password: randomPassword,
+        });
+        user = await this.usersRepo.save(newUser);
+        isNewUser = true;
+      }
+
+      const {
+        password: _p,
+        refreshTokens: _r,
+        createdAt: _createdAt,
+        updatedAt: _updatedAt,
+        ...profile
+      } = user;
+      const response = this.createAuthResponse(profile, user.id);
+      await this.saveRefreshToken(user.id, response.refreshToken);
+
+      return { ...response, user: { ...response.user, isNewUser } };
+    } catch (error) {
+      console.error('Google sign-in error:', error);
+
+      throw new UnauthorizedException('Google authentication failed');
+    }
   }
 
   async logout(userId: string, refreshToken: string): Promise<void> {

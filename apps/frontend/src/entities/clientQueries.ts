@@ -7,18 +7,24 @@ import type {
 import type {
   AuthResponse,
   GetProfileResponse,
+  ChatMessage,
+  ChatSession,
+  CreateChatSessionPayload,
+  GoogleSignInPayload,
   MarketSummaryResult,
+  OAuthResponse,
   PortfolioItemWithStock,
   SavePortfolioPayload,
+  SendMessagePayload,
   SignInPayload,
   SignUpPayload,
   Stock,
   UpdateProfilePayload,
-  ChatSession,
-  ChatMessage,
-  CreateChatSessionPayload,
-  SendMessagePayload,
 } from '@market-mind/common';
+
+export type GoogleAuthParams = {
+  errorTitle: string;
+};
 
 export type iClientQueriesProvider = {
   auth: {
@@ -28,6 +34,10 @@ export type iClientQueriesProvider = {
     useSignUp: (
       options?: UseMutationOptions<AuthResponse, Error, SignUpPayload>,
     ) => UseMutationResult<AuthResponse, Error, SignUpPayload>;
+    useGoogleSignIn: (
+      params: GoogleAuthParams,
+      options?: UseMutationOptions<OAuthResponse, Error, GoogleSignInPayload>,
+    ) => UseMutationResult<OAuthResponse, Error, GoogleSignInPayload>;
     useSignOut: (
       options?: UseMutationOptions<void, Error, void>,
     ) => UseMutationResult<void, Error, void>;
