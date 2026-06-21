@@ -8,12 +8,15 @@ import {
   UseQueryOptions,
 } from '@tanstack/react-query';
 import React, { createContext, useContext, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type {
   AuthResponse,
   ChatMessage,
   ChatSession,
   CreateChatSessionPayload,
+  GoogleSignInPayload,
   MarketSummaryResult,
+  OAuthResponse,
   PortfolioItemWithStock,
   SavePortfolioPayload,
   SendMessagePayload,
@@ -22,8 +25,10 @@ import type {
   Stock,
   UpdateProfilePayload,
 } from '@market-mind/common';
-import type { iClientQueriesProvider } from '@/entities/clientQueries';
+import { APP_ROUTES } from '@/consts/routes';
+import type { GoogleAuthParams, iClientQueriesProvider } from '@/entities/clientQueries';
 import type { iDataProvider } from '@/entities/dataProvider';
+import { toast } from './useToast';
 
 type ClientQueriesContext = {
   dataProvider: iDataProvider;
@@ -62,6 +67,27 @@ export const useClientQueries = (): iClientQueriesProvider => {
   const useSignUp = (options?: UseMutationOptions<AuthResponse, Error, SignUpPayload>) => {
     return useMutation<AuthResponse, Error, SignUpPayload>({
       mutationFn: (payload) => ctx.dataProvider.auth.signup(payload),
+      ...options,
+    });
+  };
+
+  const useGoogleSignIn = (
+    params: GoogleAuthParams,
+    options?: UseMutationOptions<OAuthResponse, Error, GoogleSignInPayload>,
+  ) => {
+    const navigate = useNavigate();
+
+    return useMutation<OAuthResponse, Error, GoogleSignInPayload>({
+      mutationFn: (payload) => ctx.dataProvider.auth.googleSignin(payload),
+      onSuccess: ({ user: { isNewUser } }: OAuthResponse) =>
+        isNewUser ? navigate(APP_ROUTES.RISK_TOLERANCE) : navigate(APP_ROUTES.DASHBOARD),
+      onError: (err: Error) => {
+        toast({
+          title: params?.errorTitle,
+          description: err.message,
+          variant: 'destructive',
+        });
+      },
       ...options,
     });
   };
@@ -293,7 +319,7 @@ export const useClientQueries = (): iClientQueriesProvider => {
   };
 
   return {
-    auth: { useSignIn, useSignUp, useSignOut },
+    auth: { useSignIn, useSignUp, useGoogleSignIn, useSignOut },
     profile: { useUpdateProfile },
     stocks: { useGetStock, useGetStocks, useGetAllStocks, useGetBasicStocks },
     portfolio: { usePortfolio, useSavePortfolio, useAiMarketSummary },

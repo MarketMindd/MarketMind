@@ -1,24 +1,32 @@
+import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
 import { ArrowRight, Lock, Mail, User } from 'lucide-react';
 import { useState } from 'react';
-import { SignInPayload, SignUpPayload } from '@market-mind/common';
+import { GoogleSignInPayload, SignInPayload, SignUpPayload } from '@market-mind/common';
 import { Button } from '@/components/elements/button';
 import { Input } from '@/components/elements/input';
 
 interface AuthFormSignInProps {
   isSignIn: true;
   onAuth: (payload: SignInPayload) => void;
+  onGoogleAuth?: (payload: GoogleSignInPayload) => void;
   onModeSwitch: () => void;
 }
 
 interface AuthFormSignUpProps {
   isSignIn: false;
   onAuth: (payload: SignUpPayload) => void;
+  onGoogleAuth?: (payload: GoogleSignInPayload) => void;
   onModeSwitch: () => void;
 }
 
 type AuthFormProps = AuthFormSignInProps | AuthFormSignUpProps;
 
-export const AuthForm: React.FC<AuthFormProps> = ({ isSignIn, onAuth, onModeSwitch }) => {
+export const AuthForm: React.FC<AuthFormProps> = ({
+  isSignIn,
+  onAuth,
+  onGoogleAuth,
+  onModeSwitch,
+}) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
@@ -29,6 +37,12 @@ export const AuthForm: React.FC<AuthFormProps> = ({ isSignIn, onAuth, onModeSwit
       onAuth({ email, password });
     } else {
       onAuth({ email, password, fullName });
+    }
+  };
+
+  const handleGoogleSuccess = ({ credential }: CredentialResponse) => {
+    if (credential && onGoogleAuth) {
+      onGoogleAuth({ credential });
     }
   };
 
@@ -95,6 +109,14 @@ export const AuthForm: React.FC<AuthFormProps> = ({ isSignIn, onAuth, onModeSwit
             <div className="relative flex justify-center text-xs">
               <span className="px-2 bg-background text-muted-foreground">or continue with</span>
             </div>
+          </div>
+
+          <div className="flex justify-center">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => console.error('Google Sign In failed')}
+              useOneTap
+            />
           </div>
         </form>
 

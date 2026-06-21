@@ -1,14 +1,14 @@
+import { ArrowRight, Lock, Mail } from 'lucide-react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import logo from '@/assets/logo.png';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { APP_ROUTES } from '@/consts/routes';
 import { useClientQueries } from '@/hooks/useClientQueries';
 import { useToast } from '@/hooks/useToast';
-import { ArrowRight, Lock, Mail } from 'lucide-react';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { AuthBranding } from './authBranding';
-import { SocialAuthButtons } from './socialAuthButtons';
+import { GoogleAuthButton } from './socialAuthButtons';
 
 export const SignIn = () => {
   const navigate = useNavigate();
@@ -17,13 +17,11 @@ export const SignIn = () => {
   const { toast } = useToast();
 
   const {
-    auth: { useSignIn },
+    auth: { useSignIn, useGoogleSignIn },
   } = useClientQueries();
 
   const signIn = useSignIn({
-    onSuccess: () => {
-      navigate(APP_ROUTES.DASHBOARD);
-    },
+    onSuccess: () => navigate(APP_ROUTES.DASHBOARD),
     onError: (err: Error) => {
       toast({
         title: 'Sign in failed',
@@ -33,23 +31,10 @@ export const SignIn = () => {
     },
   });
 
+  const googleSignIn = useGoogleSignIn({ errorTitle: 'Google Sign in failed' });
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     signIn.mutate({ email, password });
-  };
-
-  const handleGoogleAuth = () => {
-    toast({
-      title: 'Google Sign In',
-      description: 'Google authentication would be triggered here. This is a demo.',
-    });
-  };
-
-  const handleAppleAuth = () => {
-    toast({
-      title: 'Apple Sign In',
-      description: 'Apple authentication would be triggered here. This is a demo.',
-    });
   };
 
   return (
@@ -69,12 +54,8 @@ export const SignIn = () => {
           </div>
 
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-semibold text-foreground mb-2">
-              Welcome back
-            </h2>
-            <p className="text-muted-foreground">
-              Enter your credentials to access your portfolio
-            </p>
+            <h2 className="text-2xl font-semibold text-foreground mb-2">Welcome back</h2>
+            <p className="text-muted-foreground">Enter your credentials to access your portfolio</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -106,7 +87,13 @@ export const SignIn = () => {
               </button>
             </div>
 
-            <Button type="submit" variant="glow" size="lg" className="w-full" disabled={signIn.isPending}>
+            <Button
+              type="submit"
+              variant="glow"
+              size="lg"
+              className="w-full"
+              disabled={signIn.isPending}
+            >
               {signIn.isPending ? 'Processing...' : 'Sign In'}
               <ArrowRight size={18} />
             </Button>
@@ -121,17 +108,13 @@ export const SignIn = () => {
               </div>
             </div>
 
-            {/* Social Login Buttons */}
-            <SocialAuthButtons
-              onGoogleAuth={handleGoogleAuth}
-              onAppleAuth={handleAppleAuth}
+            <GoogleAuthButton
+              onAuth={(payload) => googleSignIn.mutate(payload)}
             />
           </form>
 
           <div className="mt-6 text-center">
-            <span className="text-muted-foreground">
-              Don't have an account?
-            </span>
+            <span className="text-muted-foreground">Don't have an account?</span>
             <button
               type="button"
               onClick={() => navigate(APP_ROUTES.SIGN_UP)}
@@ -142,8 +125,8 @@ export const SignIn = () => {
           </div>
 
           <p className="mt-8 text-xs text-center text-muted-foreground">
-            By continuing, you agree to our Terms of Service and Privacy Policy.
-            This is a demo application — no real data is stored.
+            By continuing, you agree to our Terms of Service and Privacy Policy. This is a demo
+            application — no real data is stored.
           </p>
         </div>
       </div>

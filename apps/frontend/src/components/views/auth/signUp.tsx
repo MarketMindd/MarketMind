@@ -1,3 +1,7 @@
+import { ArrowRight, Lock, Mail, User } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { PortfolioItem } from '@market-mind/common';
 import logo from '@/assets/logo.png';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -5,18 +9,9 @@ import { APP_ROUTES } from '@/consts/routes';
 import { useClientQueries } from '@/hooks/useClientQueries';
 import { useToast } from '@/hooks/useToast';
 import { parsePortfolioFile } from '@/utils/fileParsingUtils';
-import { PortfolioItem } from '@market-mind/common';
-import {
-  ArrowRight,
-  Lock,
-  Mail,
-  User,
-} from 'lucide-react';
-import { useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { AuthBranding } from './authBranding';
 import { PortfolioUpload } from './portfolioUpload';
-import { SocialAuthButtons } from './socialAuthButtons';
+import { GoogleAuthButton } from './socialAuthButtons';
 
 export const SignUp: React.FC = () => {
   const navigate = useNavigate();
@@ -29,7 +24,7 @@ export const SignUp: React.FC = () => {
   const { toast } = useToast();
 
   const {
-    auth: { useSignUp },
+    auth: { useSignUp, useGoogleSignIn },
     portfolio: { useSavePortfolio },
     stocks: { useGetBasicStocks },
   } = useClientQueries();
@@ -60,6 +55,7 @@ export const SignUp: React.FC = () => {
     },
   });
 
+  const googleSignIn = useGoogleSignIn({ errorTitle: 'Google Sign up failed' });
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     signUp.mutate({ email, password, fullName: name });
@@ -116,20 +112,6 @@ export const SignUp: React.FC = () => {
         fileInputRef.current.value = '';
       }
     }
-  };
-
-  const handleGoogleAuth = () => {
-    toast({
-      title: 'Google Sign Up',
-      description: 'Google authentication would be triggered here. This is a demo.',
-    });
-  };
-
-  const handleAppleAuth = () => {
-    toast({
-      title: 'Apple Sign Up',
-      description: 'Apple authentication would be triggered here. This is a demo.',
-    });
   };
 
   return (
@@ -214,10 +196,7 @@ export const SignUp: React.FC = () => {
               </div>
             </div>
 
-            <SocialAuthButtons
-              onGoogleAuth={handleGoogleAuth}
-              onAppleAuth={handleAppleAuth}
-            />
+            <GoogleAuthButton onAuth={(payload) => googleSignIn.mutate(payload)} />
           </form>
 
           <div className="mt-6 text-center">

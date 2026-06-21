@@ -1,22 +1,25 @@
 import type {
   AuthResponse,
+  ChatMessage,
+  ChatSession,
+  CreateChatSessionPayload,
+  GoogleSignInPayload,
   MarketSummaryResult,
+  OAuthResponse,
   PortfolioItemWithStock,
   SavePortfolioPayload,
+  SendMessagePayload,
   SignInPayload,
   SignUpPayload,
   Stock,
   UpdateProfilePayload,
-  ChatSession,
-  ChatMessage,
-  CreateChatSessionPayload,
-  SendMessagePayload,
 } from '@market-mind/common';
 
 export interface iDataProvider {
   auth: {
     signin: (payload: SignInPayload) => Promise<AuthResponse>;
     signup: (payload: SignUpPayload) => Promise<AuthResponse>;
+    googleSignin: (payload: GoogleSignInPayload) => Promise<OAuthResponse>;
     signout: () => Promise<void>;
   };
   profile: {

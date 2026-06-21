@@ -10,6 +10,7 @@ import {
   SendMessagePayload,
   SignInPayload,
   SignUpPayload,
+  GoogleSignInPayload,
   UpdateProfilePayload,
 } from '@market-mind/common';
 import { appConfig } from '@/config/appConfig';
@@ -140,6 +141,18 @@ export const createFetchDataProvider = (): iDataProvider => {
     }
   };
 
+  const googleSignin = async (payload: GoogleSignInPayload) => {
+    try {
+      const res = await apiClient.post<AuthResponse>('/auth/google', payload);
+      localStorage.setItem(ACCESS_TOKEN_KEY, res.data.accessToken);
+      localStorage.setItem(REFRESH_TOKEN_KEY, res.data.refreshToken);
+      localStorage.setItem(USER_ID_KEY, res.data.user.id);
+      return res.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || 'Request failed');
+    }
+  };
+
   const getStocks = async (symbols: string[]) => {
     try {
       if (symbols.length === 0) return [];
@@ -210,6 +223,7 @@ export const createFetchDataProvider = (): iDataProvider => {
     auth: {
       signin,
       signup,
+      googleSignin,
       signout,
     },
     profile: {
