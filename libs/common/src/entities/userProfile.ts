@@ -40,8 +40,19 @@ export type GoogleSignInPayload = z.infer<typeof googleSignInPayloadSchema>;
 export const updateProfileSchema = z.object({
   riskTolerance: z.enum(RiskTolerance).optional(),
   interests: z.array(z.enum(SectorInterest)).optional(),
+  fullName: z.string().min(2).max(100).optional(),
+  emailNotifications: z.boolean().optional(),
 });
 export type UpdateProfilePayload = z.infer<typeof updateProfileSchema>;
+
+export const getProfileResponseSchema = z.object({
+  fullName: z.string(),
+  email: z.string().email(),
+  riskTolerance: z.nativeEnum(RiskTolerance),
+  interests: z.array(z.nativeEnum(SectorInterest)),
+  emailNotifications: z.boolean(),
+});
+export type GetProfileResponse = z.infer<typeof getProfileResponseSchema>;
 
 export const authResponseSchema = z.object({
   accessToken: z.string(),

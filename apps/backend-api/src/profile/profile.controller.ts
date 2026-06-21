@@ -1,13 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Body, Controller, Patch, Request } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Request } from '@nestjs/common';
 import { updateProfileSchema } from '@market-mind/common';
-import type { UpdateProfilePayload } from '@market-mind/common';
+import type { GetProfileResponse, UpdateProfilePayload } from '@market-mind/common';
 import { ZodValidationPipe } from '../pipes/zodValidatorPipe';
 import { ProfileService } from './profile.service';
 
 @Controller('profile')
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
+
+  @Get()
+  async getProfile(@Request() req: any): Promise<GetProfileResponse> {
+    return this.profileService.getProfile(req.user.id);
+  }
 
   @Patch()
   async updateProfile(

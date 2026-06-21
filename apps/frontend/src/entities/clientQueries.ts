@@ -6,6 +6,7 @@ import type {
 } from '@tanstack/react-query';
 import type {
   AuthResponse,
+  GetProfileResponse,
   ChatMessage,
   ChatSession,
   CreateChatSessionPayload,
@@ -42,6 +43,9 @@ export type iClientQueriesProvider = {
     ) => UseMutationResult<void, Error, void>;
   };
   profile: {
+    useGetProfile: (
+      options?: Omit<UseQueryOptions<GetProfileResponse, Error>, 'queryKey' | 'queryFn'>,
+    ) => UseQueryResult<GetProfileResponse, Error>;
     useUpdateProfile: (
       options?: UseMutationOptions<{ success: boolean }, Error, UpdateProfilePayload>,
     ) => UseMutationResult<{ success: boolean }, Error, UpdateProfilePayload>;

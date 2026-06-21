@@ -61,6 +61,7 @@ export class NotificationService {
       .select(['user.email AS email', 'user.fullName AS fullName'])
       .where('portfolio.stockSymbol = :stockSymbol', { stockSymbol })
       .andWhere('user.riskTolerance = :riskTolerance', { riskTolerance })
+      .andWhere('user.emailNotifications = :emailNotifications', { emailNotifications: true })
       .distinct(true)
       .getRawMany<NotificationRecipient>();
   }

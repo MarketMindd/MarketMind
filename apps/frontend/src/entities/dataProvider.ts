@@ -1,5 +1,6 @@
 import type {
   AuthResponse,
+  GetProfileResponse,
   ChatMessage,
   ChatSession,
   CreateChatSessionPayload,
@@ -23,6 +24,7 @@ export interface iDataProvider {
     signout: () => Promise<void>;
   };
   profile: {
+    getProfile: () => Promise<GetProfileResponse>;
     updateProfile: (payload: UpdateProfilePayload) => Promise<{ success: boolean }>;
   };
   stocks: {

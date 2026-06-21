@@ -56,7 +56,8 @@ describe('NotificationService', () => {
       { email: 'bob@example.com', fullName: 'Bob' },
     ]);
     const distinct = jest.fn().mockReturnValue({ getRawMany });
-    const andWhere = jest.fn().mockReturnValue({ distinct });
+    const andWhere: jest.Mock = jest.fn();
+    andWhere.mockReturnValue({ andWhere, distinct });
     const where = jest.fn().mockReturnValue({ andWhere });
     const select = jest.fn().mockReturnValue({ where });
     const innerJoin = jest.fn().mockReturnValue({ select });
@@ -124,7 +125,8 @@ describe('NotificationService', () => {
   it('does not call SMTP when there are no recipients', async () => {
     const getRawMany = jest.fn().mockResolvedValue([]);
     const distinct = jest.fn().mockReturnValue({ getRawMany });
-    const andWhere = jest.fn().mockReturnValue({ distinct });
+    const andWhere: jest.Mock = jest.fn();
+    andWhere.mockReturnValue({ andWhere, distinct });
     const where = jest.fn().mockReturnValue({ andWhere });
     const select = jest.fn().mockReturnValue({ where });
     const innerJoin = jest.fn().mockReturnValue({ select });
@@ -142,7 +144,8 @@ describe('NotificationService', () => {
       { email: 'bob@example.com', fullName: '   ' },
     ]);
     const distinct = jest.fn().mockReturnValue({ getRawMany });
-    const andWhere = jest.fn().mockReturnValue({ distinct });
+    const andWhere: jest.Mock = jest.fn();
+    andWhere.mockReturnValue({ andWhere, distinct });
     const where = jest.fn().mockReturnValue({ andWhere });
     const select = jest.fn().mockReturnValue({ where });
     const innerJoin = jest.fn().mockReturnValue({ select });

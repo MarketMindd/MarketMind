@@ -36,6 +36,9 @@ export class UserProfileEntity {
   })
   interests!: SectorInterest[];
 
+  @Column({ type: 'boolean', default: true })
+  emailNotifications!: boolean;
+
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt!: Date;
 

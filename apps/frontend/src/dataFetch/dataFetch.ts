@@ -4,6 +4,7 @@ import {
   ChatMessage,
   ChatSession,
   CreateChatSessionPayload,
+  GetProfileResponse,
   MarketSummaryResult,
   PortfolioItem,
   SavePortfolioPayload,
@@ -207,6 +208,18 @@ export const createFetchDataProvider = (): iDataProvider => {
     }
   };
 
+  const getProfile = async (): Promise<GetProfileResponse> => {
+    try {
+      const res = await apiClient.get<GetProfileResponse>('/profile');
+      return res.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.message || 'Request failed');
+      }
+      throw error;
+    }
+  };
+
   const updateProfile = async (payload: UpdateProfilePayload) => {
     try {
       const res = await apiClient.patch<{ success: boolean }>('/profile', payload);
@@ -227,6 +240,7 @@ export const createFetchDataProvider = (): iDataProvider => {
       signout,
     },
     profile: {
+      getProfile,
       updateProfile,
     },
     stocks: {
