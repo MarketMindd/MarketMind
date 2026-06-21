@@ -24,8 +24,12 @@ export const signInPayloadSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 });
 
+export const googleTokensSchema = z.object({
+  id_token: z.string(),
+});
+
 export const googleSignInPayloadSchema = z.object({
-  credential: z.string(),
+  authCode: z.string(),
 });
 
 export type UserProfile = z.infer<typeof userProfileSchema>;

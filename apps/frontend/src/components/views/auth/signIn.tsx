@@ -8,7 +8,7 @@ import { APP_ROUTES } from '@/consts/routes';
 import { useClientQueries } from '@/hooks/useClientQueries';
 import { useToast } from '@/hooks/useToast';
 import { AuthBranding } from './authBranding';
-import { SocialAuthButtons } from './socialAuthButtons';
+import { GoogleAuthButton } from './socialAuthButtons';
 
 export const SignIn = () => {
   const navigate = useNavigate();
@@ -108,12 +108,8 @@ export const SignIn = () => {
               </div>
             </div>
 
-            {/* Social Login Buttons */}
-            <SocialAuthButtons
-              onGoogleAuth={(payload) => googleSignIn.mutate(payload)}
-              onAppleAuth={() => {
-                console.log('sd');
-              }}
+            <GoogleAuthButton
+              onAuth={(payload) => googleSignIn.mutate(payload)}
             />
           </form>
 

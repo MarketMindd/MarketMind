@@ -32,6 +32,7 @@ export const appConfig = {
   auth: {
     maxActiveSessions: parseInt(process.env.MAX_ACTIVE_SESSIONS || '5', 10),
     googleClientId: process.env.GOOGLE_CLIENT_ID ?? '',
+    googleClientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
   },
   newsApiKey: process.env.NEWSAPI_KEY ?? '',
   alphaVantageApiKey: process.env.ALPHA_VANTAGE_API_KEY ?? '',

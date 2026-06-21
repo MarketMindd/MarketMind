@@ -11,6 +11,7 @@ import { OAuth2Client } from 'google-auth-library';
 import { Repository } from 'typeorm';
 import {
   AuthResponse,
+  googleTokensSchema,
   OAuthResponse,
   RiskTolerance,
   SignInPayload,
@@ -19,6 +20,7 @@ import {
 } from '@market-mind/common';
 import { UserProfileEntity } from '@market-mind/database';
 import { appConfig } from '../config/appConfig';
+import { oAuth2Client } from '../config/OAuth2Client';
 
 @Injectable()
 export class AuthService {
@@ -109,21 +111,27 @@ export class AuthService {
     return response;
   }
 
-  async googleSignin(credential: string): Promise<OAuthResponse> {
-    const client = new OAuth2Client(appConfig.auth.googleClientId);
-
+  async googleSignin(authCode: string): Promise<OAuthResponse> {
     try {
-      const ticket = await client.verifyIdToken({
-        idToken: credential,
+      const { tokens } = await oAuth2Client.getToken(authCode);
+
+      const { data: parsedTokens, error } = googleTokensSchema.safeParse(tokens);
+
+      if (error) {
+        throw new UnauthorizedException('Invalid google tokens');
+      }
+
+      const ticket = await oAuth2Client.verifyIdToken({
+        idToken: parsedTokens.id_token,
         audience: appConfig.auth.googleClientId,
       });
 
       const payload = ticket.getPayload();
       if (!payload || !payload.email) {
-        throw new UnauthorizedException('Invalid Google token');
+        throw new UnauthorizedException('Invalid google id token');
       }
 
-      const email = payload.email;
+      const { email, name } = payload;
       let user = await this.usersRepo.findOne({ where: { email } });
       let isNewUser = false;
 
@@ -134,7 +142,7 @@ export class AuthService {
         );
         const newUser = this.usersRepo.create({
           email,
-          fullName: payload.name || email.split('@')[0],
+          fullName: name || email.split('@')[0],
           password: randomPassword,
         });
         user = await this.usersRepo.save(newUser);
@@ -152,7 +160,9 @@ export class AuthService {
       await this.saveRefreshToken(user.id, response.refreshToken);
 
       return { ...response, user: { ...response.user, isNewUser } };
-    } catch {
+    } catch (error) {
+      console.error('Google sign-in error:', error);
+
       throw new UnauthorizedException('Google authentication failed');
     }
   }

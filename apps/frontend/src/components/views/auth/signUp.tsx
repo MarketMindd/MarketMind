@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/useToast';
 import { parsePortfolioFile } from '@/utils/fileParsingUtils';
 import { AuthBranding } from './authBranding';
 import { PortfolioUpload } from './portfolioUpload';
-import { SocialAuthButtons } from './socialAuthButtons';
+import { GoogleAuthButton } from './socialAuthButtons';
 
 export const SignUp: React.FC = () => {
   const navigate = useNavigate();
@@ -196,12 +196,7 @@ export const SignUp: React.FC = () => {
               </div>
             </div>
 
-            <SocialAuthButtons
-              onGoogleAuth={(payload) => googleSignIn.mutate(payload)}
-              onAppleAuth={() => {
-                console.log('sd');
-              }}
-            />
+            <GoogleAuthButton onAuth={(payload) => googleSignIn.mutate(payload)} />
           </form>
 
           <div className="mt-6 text-center">

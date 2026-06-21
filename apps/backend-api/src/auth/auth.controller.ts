@@ -38,7 +38,7 @@ export class AuthController {
   async googleSignin(
     @Body(new ZodValidationPipe(googleSignInPayloadSchema)) body: GoogleSignInPayload,
   ): Promise<OAuthResponse> {
-    return this.authService.googleSignin(body.credential);
+    return this.authService.googleSignin(body.authCode);
   }
 
   @Post('refresh')
