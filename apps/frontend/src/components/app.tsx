@@ -13,6 +13,7 @@ import { Portfolio } from './views/portfolio/portfolio';
 import { StockDetails } from './views/stockDetails/stockDetails';
 import { Chat } from './views/chat/chat';
 import { Landing } from './views/landing/landing';
+import { Profile } from './views/profile/profile';
 import { TooltipProvider } from '@/components/ui/tooltip';
 
 const MainLayout = () => {
@@ -78,6 +79,14 @@ export const App = () => {
             element={
               <ProtectedRoute>
                 <Chat />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path={APP_ROUTES.PROFILE}
+            element={
+              <ProtectedRoute>
+                <Profile />
               </ProtectedRoute>
             }
           />

@@ -5,7 +5,7 @@
   "scripts": {
     "start:frontend": "nx serve frontend --no-tui",
     "build:frontend": "nx build frontend --no-tui",
-    "start:api": "nx serve backend-api --no-tui",
+    "start:api": "nx serve backend-api --no-tui --skip-nx-cache",
     "build:api": "nx build backend-api --no-tui",
     "simulate:recommendation": "node -r tsconfig-paths/register -r @swc-node/register ./apps/backend-api/src/recommendation-simulator/main.ts",
     "db:migrate": "npm run db:migrate -w @market-mind/database",

@@ -13,6 +13,7 @@ import type {
   ChatMessage,
   ChatSession,
   CreateChatSessionPayload,
+  GetProfileResponse,
   MarketSummaryResult,
   PortfolioItemWithStock,
   SavePortfolioPayload,
@@ -72,6 +73,15 @@ export const useClientQueries = (): iClientQueriesProvider => {
       ...options,
     });
   };
+
+  const useGetProfile = (
+    options?: Omit<UseQueryOptions<GetProfileResponse, Error>, 'queryKey' | 'queryFn'>,
+  ) =>
+    useQuery<GetProfileResponse, Error>({
+      queryKey: ['profile'],
+      queryFn: () => ctx.dataProvider.profile.getProfile(),
+      ...options,
+    });
 
   const useUpdateProfile = (
     options?: UseMutationOptions<{ success: boolean }, Error, UpdateProfilePayload>,
@@ -294,7 +304,7 @@ export const useClientQueries = (): iClientQueriesProvider => {
 
   return {
     auth: { useSignIn, useSignUp, useSignOut },
-    profile: { useUpdateProfile },
+    profile: { useGetProfile, useUpdateProfile },
     stocks: { useGetStock, useGetStocks, useGetAllStocks, useGetBasicStocks },
     portfolio: { usePortfolio, useSavePortfolio, useAiMarketSummary },
     chat: {

@@ -25,6 +25,10 @@
           "configName": "tsconfig.lib.json",
           "buildDepsName": "build-deps",
           "watchDepsName": "watch-deps"
+        },
+        "sync": {
+          "enabled": false,
+          "disableProjectSyncWarnings": true
         }
       }
     },

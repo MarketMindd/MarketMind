@@ -1,5 +1,6 @@
 import type {
   AuthResponse,
+  GetProfileResponse,
   MarketSummaryResult,
   PortfolioItemWithStock,
   SavePortfolioPayload,
@@ -20,6 +21,7 @@ export interface iDataProvider {
     signout: () => Promise<void>;
   };
   profile: {
+    getProfile: () => Promise<GetProfileResponse>;
     updateProfile: (payload: UpdateProfilePayload) => Promise<{ success: boolean }>;
   };
   stocks: {

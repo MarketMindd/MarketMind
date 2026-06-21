@@ -6,6 +6,7 @@ import type {
 } from '@tanstack/react-query';
 import type {
   AuthResponse,
+  GetProfileResponse,
   MarketSummaryResult,
   PortfolioItemWithStock,
   SavePortfolioPayload,
@@ -32,6 +33,9 @@ export type iClientQueriesProvider = {
     ) => UseMutationResult<void, Error, void>;
   };
   profile: {
+    useGetProfile: (
+      options?: Omit<UseQueryOptions<GetProfileResponse, Error>, 'queryKey' | 'queryFn'>,
+    ) => UseQueryResult<GetProfileResponse, Error>;
     useUpdateProfile: (
       options?: UseMutationOptions<{ success: boolean }, Error, UpdateProfilePayload>,
     ) => UseMutationResult<{ success: boolean }, Error, UpdateProfilePayload>;

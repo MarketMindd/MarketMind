@@ -1,4 +1,4 @@
-import { ArrowRight, Briefcase, LayoutDashboard, LogOut, MessageSquare, type LucideIcon } from 'lucide-react';
+import { ArrowRight, Briefcase, LayoutDashboard, LogOut, MessageSquare, User, type LucideIcon } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import logo from '../../assets/logo.png';
 import { APP_ROUTES } from '../../consts/routes';
@@ -26,6 +26,7 @@ export const Navigation = () => {
     { path: APP_ROUTES.DASHBOARD, label: 'Dashboard', icon: LayoutDashboard },
     { path: APP_ROUTES.PORTFOLIO, label: 'Portfolio', icon: Briefcase },
     { path: APP_ROUTES.CHAT, label: 'AI Chat', icon: MessageSquare },
+    { path: APP_ROUTES.PROFILE, label: 'Profile', icon: User },
   ];
 
   return (

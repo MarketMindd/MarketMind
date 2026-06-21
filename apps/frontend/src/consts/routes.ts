@@ -3,6 +3,7 @@ export const APP_ROUTES = {
   DASHBOARD: '/dashboard',
   PORTFOLIO: '/portfolio',
   CHAT: '/chat',
+  PROFILE: '/profile',
   SIGN_IN: '/signin',
   SIGN_UP: '/signup',
   STOCK_DETAILS: '/stock/:stockSymbol',
