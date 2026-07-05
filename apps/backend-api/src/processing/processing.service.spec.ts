@@ -1,7 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { AiRecommendation, RiskTolerance, StockRecommendation } from '@market-mind/common';
-import { RecommendationEntity } from '@market-mind/database';
+import {
+  MarketDataEntity,
+  RecommendationEntity,
+  RecommendationHistoryEntity,
+} from '@market-mind/database';
 import { NotificationService } from '../notification/notification.service';
 import { ProcessingService } from './processing.service';
 
@@ -24,17 +28,34 @@ describe('ProcessingService', () => {
     findOne: jest.fn(),
     upsert: jest.fn().mockResolvedValue(undefined),
   };
+  const mockHistoryRepo = {
+    findOne: jest.fn(),
+    save: jest.fn().mockResolvedValue(undefined),
+    create: jest.fn().mockImplementation((dto) => dto),
+  };
+  const mockMarketDataRepo = {
+    findOne: jest.fn(),
+  };
   const mockNotificationService = {
     notifyRecommendationChange: jest.fn().mockResolvedValue(undefined),
   };
 
   beforeEach(async () => {
     jest.clearAllMocks();
+    mockRepo.findOne.mockResolvedValue(null);
+    mockRepo.upsert.mockResolvedValue(undefined);
+    mockHistoryRepo.findOne.mockResolvedValue(null);
+    mockHistoryRepo.save.mockResolvedValue(undefined);
+    mockHistoryRepo.create.mockImplementation((dto) => dto);
+    mockMarketDataRepo.findOne.mockResolvedValue(null);
+    mockNotificationService.notifyRecommendationChange.mockResolvedValue(undefined);
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ProcessingService,
         { provide: getRepositoryToken(RecommendationEntity), useValue: mockRepo },
+        { provide: getRepositoryToken(RecommendationHistoryEntity), useValue: mockHistoryRepo },
+        { provide: getRepositoryToken(MarketDataEntity), useValue: mockMarketDataRepo },
         { provide: NotificationService, useValue: mockNotificationService },
       ],
     }).compile();
@@ -46,6 +67,7 @@ describe('ProcessingService', () => {
     await service.process([]);
     expect(mockRepo.findOne).not.toHaveBeenCalled();
     expect(mockRepo.upsert).not.toHaveBeenCalled();
+    expect(mockHistoryRepo.findOne).not.toHaveBeenCalled();
   });
 
   it('calls upsert once with correct field mapping for a single recommendation', async () => {
@@ -153,5 +175,93 @@ describe('ProcessingService', () => {
 
     expect(mockRepo.upsert).toHaveBeenCalledTimes(1);
     expect(mockNotificationService.notifyRecommendationChange).toHaveBeenCalledTimes(1);
+  });
+
+  it('inserts history row when no previous history exists', async () => {
+    const rec = makeRec();
+    mockRepo.findOne.mockResolvedValue(null);
+    mockHistoryRepo.findOne.mockResolvedValue(null);
+    mockMarketDataRepo.findOne.mockResolvedValue({ price: '165.20' });
+
+    await service.process([rec]);
+
+    expect(mockHistoryRepo.save).toHaveBeenCalledTimes(1);
+    expect(mockHistoryRepo.save).toHaveBeenCalledWith(
+      expect.objectContaining({
+        stockSymbol: 'AAPL',
+        riskTolerance: RiskTolerance.MEDIUM,
+        status: 'Invest',
+        confidenceScore: 0.85,
+        entryPrice: 165.2,
+      }),
+    );
+  });
+
+  it('inserts history row when status changes', async () => {
+    mockHistoryRepo.findOne.mockResolvedValue({
+      status: 'Invest',
+      createdAt: new Date(),
+    });
+
+    await service.process([makeRec({ status: StockRecommendation.HOLD })]);
+
+    expect(mockHistoryRepo.save).toHaveBeenCalledTimes(1);
+  });
+
+  it('skips history insert when status is unchanged', async () => {
+    mockHistoryRepo.findOne.mockResolvedValue({
+      status: 'Invest',
+      createdAt: new Date(),
+    });
+
+    await service.process([makeRec({ status: StockRecommendation.INVEST })]);
+
+    expect(mockHistoryRepo.save).not.toHaveBeenCalled();
+    expect(mockMarketDataRepo.findOne).not.toHaveBeenCalled();
+  });
+
+  it('snapshots entryPrice from latest market_data', async () => {
+    mockHistoryRepo.findOne.mockResolvedValue(null);
+    mockMarketDataRepo.findOne.mockResolvedValue({
+      price: '178.52',
+      time: new Date(),
+    });
+
+    await service.process([makeRec()]);
+
+    expect(mockMarketDataRepo.findOne).toHaveBeenCalledWith({
+      where: { stockSymbol: 'AAPL' },
+      order: { time: 'DESC' },
+    });
+    expect(mockHistoryRepo.save).toHaveBeenCalledWith(
+      expect.objectContaining({
+        entryPrice: 178.52,
+      }),
+    );
+  });
+
+  it('uses entryPrice = 0 and logs warning when no market_data row exists', async () => {
+    mockHistoryRepo.findOne.mockResolvedValue(null);
+    mockMarketDataRepo.findOne.mockResolvedValue(null);
+
+    await service.process([makeRec()]);
+
+    expect(mockHistoryRepo.save).toHaveBeenCalledWith(
+      expect.objectContaining({
+        entryPrice: 0,
+      }),
+    );
+  });
+
+  it('history insert failure does not abort processing of remaining recommendations', async () => {
+    mockHistoryRepo.findOne.mockResolvedValue(null);
+    mockHistoryRepo.save.mockRejectedValueOnce(new Error('history unavailable'));
+
+    await expect(
+      service.process([makeRec({ symbol: 'FAIL' }), makeRec({ symbol: 'AAPL' })]),
+    ).resolves.not.toThrow();
+
+    expect(mockRepo.upsert).toHaveBeenCalledTimes(2);
+    expect(mockHistoryRepo.save).toHaveBeenCalledTimes(2);
   });
 });
