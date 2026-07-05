@@ -1,9 +1,10 @@
-import { Award, CheckCircle, Target, TrendingUp, XCircle, Loader2 } from 'lucide-react';
-import { StockRecommendation } from '@market-mind/common';
 import { Size } from '@/enums/recommendationBadge';
-import { cn } from '@/utils/tailwindUtils';
-import { RecommendationBadge } from '../../elements/recommendationBadge';
 import { useClientQueries } from '@/hooks/useClientQueries';
+import { formatDate } from '@/utils/dateUtils';
+import { cn } from '@/utils/tailwindUtils';
+import { StockRecommendation } from '@market-mind/common';
+import { Award, CheckCircle, Loader2, Target, TrendingUp, XCircle } from 'lucide-react';
+import { RecommendationBadge } from '../../elements/recommendationBadge';
 
 export const Performance = () => {
   const {
@@ -87,7 +88,7 @@ export const Performance = () => {
               <span className="text-muted-foreground">Total Calls</span>
             </div>
             <div className="text-4xl font-bold text-foreground">{totalCalls}</div>
-            <div className="text-sm text-muted-foreground mt-1">Since {since}</div>
+            <div className="text-sm text-muted-foreground mt-1">Since {formatDate(since)}</div>
           </div>
         </div>
 
