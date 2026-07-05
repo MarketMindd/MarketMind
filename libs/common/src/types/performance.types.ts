@@ -12,13 +12,15 @@ export interface PerformanceRecommendation {
   entryPrice: number;
   currentPrice: number;
   returnPct: number;
-  outcome: 'Success' | 'Miss';
+  outcome: 'Success' | 'Miss' | 'N/A';
 }
 
 export interface PerformanceStats {
   successRate: number;
   avgReturn: number;
   totalCalls: number;
+  successCount: number;
+  directionalCount: number;
   since: string;
 }
 
@@ -37,7 +39,7 @@ export const performanceRecommendationSchema = z.object({
   entryPrice: z.number(),
   currentPrice: z.number(),
   returnPct: z.number(),
-  outcome: z.enum(['Success', 'Miss']),
+  outcome: z.enum(['Success', 'Miss', 'N/A']),
 });
 
 export const performanceResponseSchema = z.object({
@@ -45,6 +47,8 @@ export const performanceResponseSchema = z.object({
     successRate: z.number().min(0).max(100),
     avgReturn: z.number(),
     totalCalls: z.number().int().nonnegative(),
+    successCount: z.number().int().nonnegative(),
+    directionalCount: z.number().int().nonnegative(),
     since: z.string(),
   }),
   recommendations: z.array(performanceRecommendationSchema),

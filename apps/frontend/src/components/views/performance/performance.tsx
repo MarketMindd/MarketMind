@@ -29,15 +29,10 @@ export const Performance = () => {
     );
   }
 
-  const { successRate, avgReturn, totalCalls, since } = performanceData.stats;
-  const successCount = Math.round((successRate / 100) * totalCalls);
+  const { successRate, avgReturn, totalCalls, successCount, directionalCount, since } = performanceData.stats;
   const recommendations = performanceData.recommendations;
 
-  const totalReturn = recommendations.reduce((acc, r) => {
-    return acc + (r.outcome === 'Success' ? r.returnPct : -Math.abs(r.returnPct));
-  }, 0);
-
-  const avgReturnDisplay = totalCalls > 0 ? (totalReturn / totalCalls).toFixed(1) : avgReturn.toFixed(1);
+  const avgReturnDisplay = avgReturn.toFixed(1);
 
   return (
     <div className="min-h-screen bg-background">
@@ -57,9 +52,9 @@ export const Performance = () => {
               </div>
               <span className="text-muted-foreground">Success Rate</span>
             </div>
-            <div className="text-4xl font-bold text-success">{successRate}%</div>
+            <div className="text-4xl font-bold text-success">{successRate.toFixed(1)}%</div>
             <div className="text-sm text-muted-foreground mt-1">
-              {successCount} of {totalCalls} recommendations
+              {successCount} of {directionalCount} directional calls
             </div>
           </div>
 
@@ -73,10 +68,10 @@ export const Performance = () => {
             <div
               className={cn(
                 'text-4xl font-bold',
-                totalReturn > 0 ? 'text-success' : 'text-destructive',
+                avgReturn > 0 ? 'text-success' : 'text-destructive',
               )}
             >
-              {totalReturn > 0 ? '+' : ''}
+              {avgReturn > 0 ? '+' : ''}
               {avgReturnDisplay}%
             </div>
             <div className="text-sm text-muted-foreground mt-1">Per recommendation</div>
@@ -156,11 +151,13 @@ export const Performance = () => {
                           <CheckCircle size={18} />
                           <span className="text-sm font-medium">Success</span>
                         </div>
-                      ) : (
+                      ) : rec.outcome === 'Miss' ? (
                         <div className="flex items-center gap-2 text-destructive">
                           <XCircle size={18} />
                           <span className="text-sm font-medium">Miss</span>
                         </div>
+                      ) : (
+                        <span className="text-sm text-muted-foreground">—</span>
                       )}
                     </td>
                   </tr>

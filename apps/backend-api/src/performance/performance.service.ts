@@ -94,21 +94,21 @@ export class PerformanceService {
     });
   }
 
-  private computeOutcome(status: string, returnPct: number): 'Success' | 'Miss' {
+  private computeOutcome(status: string, returnPct: number): 'Success' | 'Miss' | 'N/A' {
     if (status === 'Invest') return returnPct > 0 ? 'Success' : 'Miss';
     if (status === 'Exit') return returnPct < 0 ? 'Success' : 'Miss';
-    return 'Success';
+    return 'N/A';
   }
 
   private computeStats(rows: PerformanceRecommendation[]): PerformanceStats {
     const directionalRows = rows.filter((r) => r.status !== StockRecommendation.HOLD);
     const successCount = directionalRows.filter((r) => r.outcome === 'Success').length;
-    const successRate =
-      directionalRows.length > 0 ? (successCount / directionalRows.length) * 100 : 0;
+    const directionalCount = directionalRows.length;
+    const successRate = directionalCount > 0 ? (successCount / directionalCount) * 100 : 0;
     const avgReturn =
       rows.length > 0 ? rows.reduce((sum, r) => sum + r.returnPct, 0) / rows.length : 0;
     const since = rows.length > 0 ? rows[rows.length - 1].date : new Date().toISOString();
 
-    return { successRate, avgReturn, totalCalls: rows.length, since };
+    return { successRate, avgReturn, totalCalls: rows.length, successCount, directionalCount, since };
   }
 }
