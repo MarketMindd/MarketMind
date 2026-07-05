@@ -1,15 +1,38 @@
-import { Award, CheckCircle, Target, TrendingUp, XCircle } from 'lucide-react';
+import { Award, CheckCircle, Target, TrendingUp, XCircle, Loader2 } from 'lucide-react';
 import { StockRecommendation } from '@market-mind/common';
 import { Size } from '@/enums/recommendationBadge';
 import { cn } from '@/utils/tailwindUtils';
 import { RecommendationBadge } from '../../elements/recommendationBadge';
-import { mockPastRecommendations, mockPerformanceStats } from './performanceMockData';
+import { useClientQueries } from '@/hooks/useClientQueries';
 
 export const Performance = () => {
-  const { successRate, avgReturn, totalCalls, since } = mockPerformanceStats;
-  const successCount = Math.round((successRate / 100) * totalCalls);
+  const {
+    performance: { useGetPerformance },
+  } = useClientQueries();
 
-  const totalReturn = mockPastRecommendations.reduce((acc, r) => {
+  const { data: performanceData, isLoading } = useGetPerformance();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+      </div>
+    );
+  }
+
+  if (!performanceData) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">
+        Failed to load performance data.
+      </div>
+    );
+  }
+
+  const { successRate, avgReturn, totalCalls, since } = performanceData.stats;
+  const successCount = Math.round((successRate / 100) * totalCalls);
+  const recommendations = performanceData.recommendations;
+
+  const totalReturn = recommendations.reduce((acc, r) => {
     return acc + (r.outcome === 'Success' ? r.returnPct : -Math.abs(r.returnPct));
   }, 0);
 
@@ -88,7 +111,7 @@ export const Performance = () => {
                 </tr>
               </thead>
               <tbody>
-                {mockPastRecommendations.map((rec, i) => (
+                {recommendations.map((rec, i) => (
                   <tr
                     key={rec.id}
                     className="border-b border-border/30 hover:bg-secondary/30 transition-colors animate-fade-in"

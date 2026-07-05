@@ -13,6 +13,8 @@ import {
   SignUpPayload,
   GoogleSignInPayload,
   UpdateProfilePayload,
+  PerformanceResponse,
+  OAuthResponse,
 } from '@market-mind/common';
 import { appConfig } from '@/config/appConfig';
 import { iDataProvider } from '@/entities/dataProvider';
@@ -144,7 +146,7 @@ export const createFetchDataProvider = (): iDataProvider => {
 
   const googleSignin = async (payload: GoogleSignInPayload) => {
     try {
-      const res = await apiClient.post<AuthResponse>('/auth/google', payload);
+      const res = await apiClient.post<OAuthResponse>('/auth/google', payload);
       localStorage.setItem(ACCESS_TOKEN_KEY, res.data.accessToken);
       localStorage.setItem(REFRESH_TOKEN_KEY, res.data.refreshToken);
       localStorage.setItem(USER_ID_KEY, res.data.user.id);
@@ -295,6 +297,12 @@ export const createFetchDataProvider = (): iDataProvider => {
           }
           throw error;
         }
+      },
+    },
+    performance: {
+      getPerformance: async () => {
+        const res = await apiClient.get<PerformanceResponse>('/performance');
+        return res.data;
       },
     },
   };

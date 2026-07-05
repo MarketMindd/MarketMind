@@ -25,6 +25,7 @@ import type {
   SignUpPayload,
   Stock,
   UpdateProfilePayload,
+  PerformanceResponse,
 } from '@market-mind/common';
 import { APP_ROUTES } from '@/consts/routes';
 import type { GoogleAuthParams, iClientQueriesProvider } from '@/entities/clientQueries';
@@ -328,6 +329,16 @@ export const useClientQueries = (): iClientQueriesProvider => {
     });
   };
 
+  const useGetPerformance = (
+    options?: Omit<UseQueryOptions<PerformanceResponse, Error>, 'queryKey' | 'queryFn'>,
+  ) => {
+    return useQuery<PerformanceResponse, Error>({
+      queryKey: ['performance'],
+      queryFn: () => ctx.dataProvider.performance.getPerformance(),
+      ...options,
+    });
+  };
+
   return {
     auth: { useSignIn, useSignUp, useGoogleSignIn, useSignOut },
     profile: { useGetProfile, useUpdateProfile },
@@ -339,6 +350,9 @@ export const useClientQueries = (): iClientQueriesProvider => {
       useDeleteChatSession,
       useGetChatMessages,
       useSendChatMessage,
+    },
+    performance: {
+      useGetPerformance,
     },
   };
 };

@@ -6,12 +6,12 @@ import { RecommendedStocksList } from './recommendedStocksList';
 import { PortfolioSection } from './portfolioSection';
 import { useClientQueries } from '@/hooks/useClientQueries';
 import { PerformanceSummary } from './performanceSummary';
-import { mockPerformanceStats } from '../performance/performanceMockData';
 
 export const Dashboard = () => {
   const {
     portfolio: { usePortfolio, useAiMarketSummary },
     stocks: { useGetAllStocks },
+    performance: { useGetPerformance },
   } = useClientQueries();
   const [filter, setFilter] = useState<typeof ALL_FILTERS | RecommendationStatus>(ALL_FILTERS);
 
@@ -45,8 +45,7 @@ export const Dashboard = () => {
     day: 'numeric',
   });
 
-  const { successRate, totalCalls } = mockPerformanceStats;
-  const successCount = Math.round((successRate / 100) * totalCalls);
+  const { data: performanceData, isLoading: isPerformanceLoading } = useGetPerformance();
 
   return (
     <div className="min-h-screen bg-background">
@@ -62,11 +61,17 @@ export const Dashboard = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-8">
           <div className="lg:col-span-1">
-            <PerformanceSummary
-              successCount={successCount}
-              totalCount={totalCalls}
-              successRate={successRate}
-            />
+            {isPerformanceLoading ? (
+               <div className="glass-card p-5 h-full flex items-center justify-center">
+                 <span className="text-muted-foreground text-sm animate-pulse">Loading...</span>
+               </div>
+            ) : performanceData ? (
+              <PerformanceSummary
+                successCount={Math.round((performanceData.stats.successRate / 100) * performanceData.stats.totalCalls)}
+                totalCount={performanceData.stats.totalCalls}
+                successRate={performanceData.stats.successRate}
+              />
+            ) : null}
           </div>
           <div className="lg:col-span-3">
             <RecommendationSummary
