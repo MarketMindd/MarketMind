@@ -79,9 +79,9 @@ export class PerformanceService {
   ): PerformanceRecommendation[] {
     return rows.flatMap((r) => {
       const currentPrice = currentPrices.get(r.stockSymbol);
-      if (currentPrice === undefined) return [];
-
       const entryPrice = Number(r.entryPrice);
+      if (currentPrice === undefined || entryPrice === 0) return [];
+
       const returnPct = ((currentPrice - entryPrice) / entryPrice) * 100;
 
       return [

@@ -94,7 +94,8 @@ export class ProcessingService {
       });
 
       if (!marketData) {
-        this.logger.warn(`No market data found for ${rec.symbol}; using entryPrice=0`);
+        this.logger.warn(`No market data found for ${rec.symbol}; skipping history insert`);
+        return;
       }
 
       const historyRow = this.historyRepo.create({
@@ -102,7 +103,7 @@ export class ProcessingService {
         riskTolerance: rec.riskTolerance,
         status: rec.status,
         confidenceScore: rec.confidence,
-        entryPrice: marketData ? Number(marketData.price) : 0,
+        entryPrice: Number(marketData.price),
       });
 
       await this.historyRepo.save(historyRow);

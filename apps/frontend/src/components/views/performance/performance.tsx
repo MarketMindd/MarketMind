@@ -37,6 +37,8 @@ export const Performance = () => {
     return acc + (r.outcome === 'Success' ? r.returnPct : -Math.abs(r.returnPct));
   }, 0);
 
+  const avgReturnDisplay = totalCalls > 0 ? (totalReturn / totalCalls).toFixed(1) : avgReturn.toFixed(1);
+
   return (
     <div className="min-h-screen bg-background">
       <main className="pt-28 sm:pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
@@ -75,7 +77,7 @@ export const Performance = () => {
               )}
             >
               {totalReturn > 0 ? '+' : ''}
-              {(totalReturn / totalCalls).toFixed(1)}%
+              {avgReturnDisplay}%
             </div>
             <div className="text-sm text-muted-foreground mt-1">Per recommendation</div>
           </div>
