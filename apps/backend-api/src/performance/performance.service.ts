@@ -1,16 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import type {
+import { In, Repository } from 'typeorm';
+import {
   PerformanceRecommendation,
   PerformanceResponse,
   PerformanceStats,
+  StockRecommendation,
 } from '@market-mind/common';
-import {
-  MarketDataEntity,
-  RecommendationHistoryEntity,
-  StockEntity,
-} from '@market-mind/database';
-import { In, Repository } from 'typeorm';
+import { MarketDataEntity, RecommendationHistoryEntity, StockEntity } from '@market-mind/database';
 
 @Injectable()
 export class PerformanceService {
@@ -32,11 +29,7 @@ export class PerformanceService {
       this.resolveCompanyNames(symbols),
       this.resolveCurrentPrices(symbols),
     ]);
-    const recommendations = this.buildRecommendationRows(
-      historyRows,
-      companyNames,
-      currentPrices,
-    );
+    const recommendations = this.buildRecommendationRows(historyRows, companyNames, currentPrices);
     const stats = this.computeStats(recommendations);
 
     return { stats, recommendations };
@@ -89,7 +82,7 @@ export class PerformanceService {
           id: r.id,
           stockSymbol: r.stockSymbol,
           companyName: companyNames.get(r.stockSymbol) ?? r.stockSymbol,
-          status: r.status as 'Invest' | 'Hold' | 'Exit',
+          status: r.status as StockRecommendation,
           riskTolerance: r.riskTolerance,
           date: r.createdAt.toISOString(),
           entryPrice,
@@ -108,7 +101,7 @@ export class PerformanceService {
   }
 
   private computeStats(rows: PerformanceRecommendation[]): PerformanceStats {
-    const directionalRows = rows.filter((r) => r.status !== 'Hold');
+    const directionalRows = rows.filter((r) => r.status !== StockRecommendation.HOLD);
     const successCount = directionalRows.filter((r) => r.outcome === 'Success').length;
     const successRate =
       directionalRows.length > 0 ? (successCount / directionalRows.length) * 100 : 0;
