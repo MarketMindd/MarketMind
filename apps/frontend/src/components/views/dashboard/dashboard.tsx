@@ -5,6 +5,8 @@ import { RecommendationSummary, ALL_FILTERS } from './recommendationSummary';
 import { RecommendedStocksList } from './recommendedStocksList';
 import { PortfolioSection } from './portfolioSection';
 import { useClientQueries } from '@/hooks/useClientQueries';
+import { PerformanceSummary } from './performanceSummary';
+import { mockPerformanceStats } from '../performance/performanceMockData';
 
 export const Dashboard = () => {
   const {
@@ -43,6 +45,9 @@ export const Dashboard = () => {
     day: 'numeric',
   });
 
+  const { successRate, totalCalls } = mockPerformanceStats;
+  const successCount = Math.round((successRate / 100) * totalCalls);
+
   return (
     <div className="min-h-screen bg-background">
       <main className="pt-28 sm:pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
@@ -55,13 +60,24 @@ export const Dashboard = () => {
 
         <DailyBrief marketSummary={marketSummary} isLoading={isSummaryLoading} />
 
-        <RecommendationSummary
-          investCount={investCount}
-          holdCount={holdCount}
-          exitCount={exitCount}
-          currentFilter={filter}
-          onFilterChange={setFilter}
-        />
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-8">
+          <div className="lg:col-span-1">
+            <PerformanceSummary
+              successCount={successCount}
+              totalCount={totalCalls}
+              successRate={successRate}
+            />
+          </div>
+          <div className="lg:col-span-3">
+            <RecommendationSummary
+              investCount={investCount}
+              holdCount={holdCount}
+              exitCount={exitCount}
+              currentFilter={filter}
+              onFilterChange={setFilter}
+            />
+          </div>
+        </div>
 
         <RecommendedStocksList
           filteredRecommendedStocks={filteredRecommendedStocks}

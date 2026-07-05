@@ -9,6 +9,7 @@ export const APP_ROUTES = {
   STOCK_DETAILS: '/stock/:stockSymbol',
   RISK_TOLERANCE: '/onboarding/risk-tolerance',
   INTERESTS: '/onboarding/interests',
+  PERFORMANCE: '/performance',
 } as const;
 
 export const buildAskAiHref = ({ symbol, prompt }: { symbol?: string; prompt?: string }) => {

@@ -1,11 +1,12 @@
 import { z } from 'zod';
+import { StockRecommendation } from '../enums/command';
 import { RiskTolerance } from '../enums/risk-tolerance';
 
 export interface PerformanceRecommendation {
   id: string;
   stockSymbol: string;
   companyName: string;
-  status: 'Invest' | 'Hold' | 'Exit';
+  status: StockRecommendation;
   riskTolerance: RiskTolerance;
   date: string;
   entryPrice: number;
@@ -30,7 +31,7 @@ export const performanceRecommendationSchema = z.object({
   id: z.string().uuid(),
   stockSymbol: z.string().max(20),
   companyName: z.string(),
-  status: z.enum(['Invest', 'Hold', 'Exit']),
+  status: z.enum(StockRecommendation),
   riskTolerance: z.nativeEnum(RiskTolerance),
   date: z.string(),
   entryPrice: z.number(),
