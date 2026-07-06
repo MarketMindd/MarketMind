@@ -67,7 +67,7 @@ export const Dashboard = () => {
                </div>
             ) : performanceData ? (
               <PerformanceSummary
-                successCount={Math.round((performanceData.stats.successRate / 100) * performanceData.stats.totalCalls)}
+                successCount={performanceData.stats.successCount}
                 totalCount={performanceData.stats.totalCalls}
                 successRate={performanceData.stats.successRate}
               />

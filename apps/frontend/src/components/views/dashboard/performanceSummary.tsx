@@ -39,12 +39,12 @@ export const PerformanceSummary = ({ successCount, totalCount, successRate }: Pe
         <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
           That's a{' '}
           <Term
-            term={`Success rate: ${successRate}%`}
+            term={`Success rate: ${Number(successRate.toFixed(1))}%`}
             explanation="The share of past AI recommendations that ended up making money."
             hideIcon
             className="text-success font-medium no-underline"
           >
-            {successRate}% hit rate
+            {Number(successRate.toFixed(1))}% hit rate
           </Term>
         </p>
       </div>
