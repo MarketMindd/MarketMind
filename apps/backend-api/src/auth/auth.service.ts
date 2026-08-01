@@ -7,7 +7,6 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcryptjs';
-import { OAuth2Client } from 'google-auth-library';
 import { Repository } from 'typeorm';
 import {
   AuthResponse,

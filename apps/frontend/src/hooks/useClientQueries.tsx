@@ -329,10 +329,8 @@ export const useClientQueries = (): iClientQueriesProvider => {
   };
 
   return {
-    auth: { useSignIn, useSignUp, useSignOut },
     profile: { useGetProfile, useUpdateProfile },
     auth: { useSignIn, useSignUp, useGoogleSignIn, useSignOut },
-    profile: { useUpdateProfile },
     stocks: { useGetStock, useGetStocks, useGetAllStocks, useGetBasicStocks },
     portfolio: { usePortfolio, useSavePortfolio, useAiMarketSummary },
     chat: {

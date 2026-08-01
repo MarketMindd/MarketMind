@@ -144,7 +144,7 @@ JWT_EXPIRES_IN=3600s, JWT_REFRESH_EXPIRES_IN=604800s
 # External APIs
 GEMINI_API_KEY, NEWSAPI_KEY, ALPHA_VANTAGE_API_KEY, MASSIVE_API_KEY
 
-# LLM provider (gemini | gpt-oss). gpt-oss = Colman GPT-OSS-120B, VPN-only.
+# LLM provider (gemini | qwen). qwen = Colman Qwen3.6-27B, VPN-only.
 LLM_PROVIDER, LLM_BASE_URL, LLM_USERNAME, LLM_PASSWORD, LLM_MODEL, LLM_MAX_TOKENS
 
 # Frontend (Vite)

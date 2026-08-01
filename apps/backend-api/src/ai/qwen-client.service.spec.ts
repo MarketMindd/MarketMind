@@ -1,22 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { GptOssClientService } from './gpt-oss-client.service';
+import { QwenClientService } from './qwen-client.service';
 
 jest.mock('../config/appConfig', () => ({
   appConfig: {
     llm: {
-      gptOss: {
+      qwen: {
         baseUrl: 'http://llm.test',
         username: 'student1',
         password: 'pass123',
-        model: 'gpt-oss-120b',
+        model: 'qwen3.6:27b',
         maxTokens: 4096,
       },
     },
   },
 }));
 
-describe('GptOssClientService', () => {
-  const service = new GptOssClientService();
+describe('QwenClientService', () => {
+  const service = new QwenClientService();
   const originalFetch = global.fetch;
 
   afterEach(() => {
@@ -40,8 +40,9 @@ describe('GptOssClientService', () => {
       `Basic ${Buffer.from('student1:pass123').toString('base64')}`,
     );
     const body = JSON.parse(init.body);
-    expect(body.model).toBe('gpt-oss-120b');
+    expect(body.model).toBe('qwen3.6:27b');
     expect(body.max_tokens).toBe(4096);
+    expect(body.reasoning_effort).toBe('none');
     expect(body.messages[1]).toEqual({ role: 'user', content: 'say hi' });
   });
 

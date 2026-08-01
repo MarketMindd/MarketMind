@@ -3,20 +3,20 @@ import { retry } from '@market-mind/common';
 import { appConfig } from '../config/appConfig';
 import { LlmClient } from './llm-client.interface';
 
-const GPT_OSS_RETRY_DELAYS_MS = [1000, 2000] as const;
+const QWEN_RETRY_DELAYS_MS = [1000, 2000] as const;
 
 const JSON_SYSTEM_PROMPT =
   'You are a JSON API. Respond with a single valid JSON object only, with no markdown fences or commentary.';
 
 @Injectable()
-export class GptOssClientService implements LlmClient {
-  private readonly logger = new Logger(GptOssClientService.name);
+export class QwenClientService implements LlmClient {
+  private readonly logger = new Logger(QwenClientService.name);
 
   async generateContent(prompt: string): Promise<string> {
-    const { baseUrl, username, password, model, maxTokens } = appConfig.llm.gptOss;
+    const { baseUrl, username, password, model, maxTokens } = appConfig.llm.qwen;
     if (!baseUrl || !username || !password) {
       throw new Error(
-        'GPT-OSS LLM service is not configured (LLM_BASE_URL/LLM_USERNAME/LLM_PASSWORD)',
+        'Qwen LLM service is not configured (LLM_BASE_URL/LLM_USERNAME/LLM_PASSWORD)',
       );
     }
 
@@ -37,6 +37,7 @@ export class GptOssClientService implements LlmClient {
             temperature: 0.2,
             max_tokens: maxTokens,
             response_format: { type: 'json_object' },
+            reasoning_effort: 'none',
           }),
         });
 
@@ -57,7 +58,7 @@ export class GptOssClientService implements LlmClient {
         return content;
       },
       {
-        delaysMs: GPT_OSS_RETRY_DELAYS_MS,
+        delaysMs: QWEN_RETRY_DELAYS_MS,
         onRetry: (attempt, delayMs, error) => {
           this.logger.warn(
             `LLM call failed (attempt ${attempt}); retrying in ${delayMs}ms: ${error instanceof Error ? error.message : String(error)}`,

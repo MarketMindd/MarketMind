@@ -1,4 +1,8 @@
+import { LlmProvider } from '@market-mind/common';
 import { parseBoolean } from '@market-mind/database';
+
+const parseLlmProvider = (value?: string): LlmProvider =>
+  Object.values(LlmProvider).find((provider) => provider === value) ?? LlmProvider.Qwen;
 
 const getJwtSecret = (defaultSecret: string) => {
   const secret = process.env.JWT_SECRET;
@@ -39,12 +43,12 @@ export const appConfig = {
   massiveApiKey: process.env.MASSIVE_API_KEY ?? '',
   geminiApiKey: process.env.GEMINI_API_KEY ?? '',
   llm: {
-    provider: (process.env.LLM_PROVIDER as 'gemini' | 'gpt-oss') || 'gemini',
-    gptOss: {
+    provider: parseLlmProvider(process.env.LLM_PROVIDER),
+    qwen: {
       baseUrl: process.env.LLM_BASE_URL ?? '',
       username: process.env.LLM_USERNAME ?? '',
       password: process.env.LLM_PASSWORD ?? '',
-      model: process.env.LLM_MODEL ?? 'gpt-oss-120b',
+      model: process.env.LLM_MODEL ?? 'qwen3.6:27b',
       maxTokens: parseInt(process.env.LLM_MAX_TOKENS || '4096', 10),
     },
   },
