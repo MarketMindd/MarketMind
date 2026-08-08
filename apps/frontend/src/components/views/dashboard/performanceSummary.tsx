@@ -5,11 +5,15 @@ import { APP_ROUTES } from '@/consts/routes';
 
 interface PerformanceSummaryProps {
   successCount: number;
-  totalCount: number;
+  directionalCount: number;
   successRate: number;
 }
 
-export const PerformanceSummary = ({ successCount, totalCount, successRate }: PerformanceSummaryProps) => {
+export const PerformanceSummary = ({
+  successCount,
+  directionalCount,
+  successRate,
+}: PerformanceSummaryProps) => {
   return (
     <div className="glass-card p-5 h-full flex flex-col">
       <div className="flex items-center justify-between mb-4">
@@ -32,7 +36,8 @@ export const PerformanceSummary = ({ successCount, totalCount, successRate }: Pe
         <div className="flex items-center justify-center gap-2 mb-2">
           <CheckCircle2 className="w-5 h-5 text-success" />
           <span className="text-3xl font-bold text-foreground">
-            {successCount}<span className="text-muted-foreground text-xl"> / {totalCount}</span>
+            {successCount}
+            <span className="text-muted-foreground text-xl"> / {directionalCount}</span>
           </span>
         </div>
         <p className="text-sm text-foreground mb-1">picks worked out</p>

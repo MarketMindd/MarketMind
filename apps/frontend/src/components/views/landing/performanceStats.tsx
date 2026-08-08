@@ -1,7 +1,9 @@
 import { CheckCircle, Target, TrendingUp, Users, XCircle } from 'lucide-react';
 import { StockRecommendation } from '@market-mind/common';
 import { useClientQueries } from '@/hooks/useClientQueries';
+import { formatDate } from '@/utils/dateUtils';
 import { cn } from '@/utils/tailwindUtils';
+import { Term } from '@/components/elements/term';
 
 export const PerformanceStats = () => {
   const {
@@ -20,7 +22,7 @@ export const PerformanceStats = () => {
   }
 
   const { stats, recommendations } = performanceData;
-  const { successCount, totalCalls: totalCount, successRate } = stats;
+  const { successCount, totalCalls: totalCount, directionalCount, successRate } = stats;
   const avgReturn = stats.avgReturn.toFixed(1);
 
   return (
@@ -44,7 +46,7 @@ export const PerformanceStats = () => {
             </div>
             <div className="text-muted-foreground">Success Rate</div>
             <div className="text-sm text-muted-foreground mt-1">
-              {successCount} of {totalCount} calls
+              {successCount} of {directionalCount} graded calls
             </div>
           </div>
 
@@ -70,7 +72,7 @@ export const PerformanceStats = () => {
             </div>
             <div className="text-5xl font-bold text-foreground mb-2">{totalCount}</div>
             <div className="text-muted-foreground">Total Recommendations</div>
-            <div className="text-sm text-muted-foreground mt-1">Since {stats.since}</div>
+            <div className="text-sm text-muted-foreground mt-1">Since {formatDate(stats.since)}</div>
           </div>
         </div>
 
@@ -127,7 +129,14 @@ export const PerformanceStats = () => {
                       ) : rec.outcome === 'Miss' ? (
                         <XCircle size={18} className="text-destructive" />
                       ) : (
-                        <span className="text-muted-foreground">-</span>
+                        <Term
+                          term="Pending"
+                          explanation="No price movement yet since this call was made (markets may be closed), so it can't be graded as a win or a loss yet."
+                          hideIcon
+                          className="text-muted-foreground no-underline"
+                        >
+                          Pending
+                        </Term>
                       )}
                     </td>
                   </tr>

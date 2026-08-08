@@ -4,6 +4,7 @@ import { formatDate } from '@/utils/dateUtils';
 import { cn } from '@/utils/tailwindUtils';
 import { StockRecommendation } from '@market-mind/common';
 import { Award, CheckCircle, Loader2, Target, TrendingUp, XCircle } from 'lucide-react';
+import { Term } from '../../elements/term';
 import { RecommendationBadge } from '../../elements/recommendationBadge';
 
 export const Performance = () => {
@@ -54,7 +55,7 @@ export const Performance = () => {
             </div>
             <div className="text-4xl font-bold text-success">{successRate.toFixed(1)}%</div>
             <div className="text-sm text-muted-foreground mt-1">
-              {successCount} of {directionalCount} directional calls
+              {successCount} of {directionalCount} graded calls
             </div>
           </div>
 
@@ -157,7 +158,14 @@ export const Performance = () => {
                           <span className="text-sm font-medium">Miss</span>
                         </div>
                       ) : (
-                        <span className="text-sm text-muted-foreground">—</span>
+                        <Term
+                          term="Pending"
+                          explanation="No price movement yet since this call was made (markets may be closed), so it can't be graded as a win or a loss yet."
+                          hideIcon
+                          className="text-sm text-muted-foreground no-underline"
+                        >
+                          Pending
+                        </Term>
                       )}
                     </td>
                   </tr>

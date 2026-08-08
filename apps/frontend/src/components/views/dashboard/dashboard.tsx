@@ -68,7 +68,7 @@ export const Dashboard = () => {
             ) : performanceData ? (
               <PerformanceSummary
                 successCount={performanceData.stats.successCount}
-                totalCount={performanceData.stats.totalCalls}
+                directionalCount={performanceData.stats.directionalCount}
                 successRate={performanceData.stats.successRate}
               />
             ) : null}
