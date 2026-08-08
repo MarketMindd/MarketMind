@@ -9,6 +9,10 @@ import {
 } from '@market-mind/common';
 import { MarketDataEntity, RecommendationHistoryEntity, StockEntity } from '@market-mind/database';
 
+// A Hold call is a bet that the stock won't move much. It's graded a Success if price
+// stayed within this band, Miss if it swung beyond it in either direction.
+const HOLD_STABILITY_THRESHOLD_PCT = 5;
+
 @Injectable()
 export class PerformanceService {
   constructor(
@@ -95,15 +99,19 @@ export class PerformanceService {
   }
 
   private computeOutcome(status: string, returnPct: number): 'Success' | 'Miss' | 'N/A' {
+    if (returnPct === 0) return 'N/A';
     if (status === 'Invest') return returnPct > 0 ? 'Success' : 'Miss';
     if (status === 'Exit') return returnPct < 0 ? 'Success' : 'Miss';
+    if (status === 'Hold') {
+      return Math.abs(returnPct) <= HOLD_STABILITY_THRESHOLD_PCT ? 'Success' : 'Miss';
+    }
     return 'N/A';
   }
 
   private computeStats(rows: PerformanceRecommendation[]): PerformanceStats {
-    const directionalRows = rows.filter((r) => r.status !== StockRecommendation.HOLD);
-    const successCount = directionalRows.filter((r) => r.outcome === 'Success').length;
-    const directionalCount = directionalRows.length;
+    const gradedRows = rows.filter((r) => r.outcome !== 'N/A');
+    const successCount = gradedRows.filter((r) => r.outcome === 'Success').length;
+    const directionalCount = gradedRows.length;
     const successRate = directionalCount > 0 ? (successCount / directionalCount) * 100 : 0;
     const avgReturn =
       rows.length > 0 ? rows.reduce((sum, r) => sum + r.returnPct, 0) / rows.length : 0;
