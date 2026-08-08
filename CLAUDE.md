@@ -13,9 +13,12 @@ npm run start:frontend     # Start Vite frontend (localhost:4200)
 npm run build:api          # Webpack build for backend
 npm run build:frontend     # Vite build for frontend
 
-# Testing
+# Testing (Jest; frontend has no test target configured)
 npx nx test backend-api                              # Run all backend tests
-npx nx test backend-api --testFile=src/path/to/file.spec.ts  # Run a single test file
+npx nx test backend-api -- notification.service      # Run tests matching a path/name pattern
+
+# Recommendation pipeline simulator (runs against real APIs/DB using root .env)
+npm run simulate:recommendation
 
 # Database migrations
 npm run db:migrate                  # Apply pending migrations
@@ -73,6 +76,7 @@ NestJS module structure under `src/`:
 | `pipeline/` | Orchestrates data refresh + AI processing |
 | `notification/` | Email alerts via nodemailer when recommendations are generated |
 | `network/` | Shared HTTP client utility (used internally by other modules) |
+| `recommendation-simulator/` | Standalone CLI (`npm run simulate:recommendation`) that replays the recommendation pipeline outside the running server |
 
 All controllers are guarded by NestJS `AuthGuard` (`src/auth/auth.guard.ts`), which sets `request.user = jwtPayload`. Controllers access the user ID via `req.user.id` using the standard `@Request()` decorator. Use `@Public()` (`src/decorators/roles.decorator.ts`) to mark auth-exempt endpoints.
 
@@ -100,12 +104,15 @@ React 19 SPA with React Router v6. Routes are in `app.tsx`.
 - Toast notifications via `useToast` (wraps Radix UI toast).
 
 **Views** under `src/components/views/`:
+- `landing/` — public marketing page
 - `auth/` — sign-in, sign-up (public routes)
 - `onboarding/` — interests selection, risk tolerance (post-signup flow)
 - `dashboard/` — main landing after login
 - `portfolio/` — user holdings
 - `stockDetails/` — per-symbol analysis with "Ask AI" button
 - `chat/` — Gemini-style chat with collapsible sidebar, lazy session creation (DB record only written on first message send)
+- `profile/` — profile management, email notification preferences
+- `notFound/` — 404 fallback
 
 ---
 
@@ -131,15 +138,17 @@ Migrations live in `libs/database/src/migrations/`. Always generate via `npm run
 
 ## Environment Variables
 
-Required in `.env` at the project root:
+Required in `.env` at the **repo root** (`nx serve` runs from the workspace root, so `dotenv/config` in `main.ts` only ever loads the root `.env` — not `apps/backend-api/.env` or any other nested one):
 
 ```
-# Database
+# Database (or DATABASE_URL, which takes precedence if set)
 DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME, DB_SSL
 
 # Auth
 JWT_SECRET, JWT_REFRESH_SECRET
 JWT_EXPIRES_IN=3600s, JWT_REFRESH_EXPIRES_IN=604800s
+MAX_ACTIVE_SESSIONS=5
+GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, VITE_GOOGLE_CLIENT_ID
 
 # External APIs
 GEMINI_API_KEY, NEWSAPI_KEY, ALPHA_VANTAGE_API_KEY, MASSIVE_API_KEY
@@ -147,9 +156,19 @@ GEMINI_API_KEY, NEWSAPI_KEY, ALPHA_VANTAGE_API_KEY, MASSIVE_API_KEY
 # LLM provider (gemini | qwen). qwen = Colman Qwen3.6-27B, VPN-only.
 LLM_PROVIDER, LLM_BASE_URL, LLM_USERNAME, LLM_PASSWORD, LLM_MODEL, LLM_MAX_TOKENS
 
+# Outbound email (notification/) — all five are required together or sends are silently skipped
+SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, EMAIL_FROM
+SMTP_SECURE=true, SMTP_ALLOW_SELF_SIGNED=false
+
+# Misc
+MAX_STOCKS_COUNT=9
+PORT=3000, CLIENT_URL=http://localhost:4200
+
 # Frontend (Vite)
 VITE_API_BASE_URL=http://localhost:3000/api
 ```
+
+`appConfig` (`apps/backend-api/src/config/appConfig.ts`) reads every var once at module load with an empty-string/default fallback — it never throws for missing values (except `JWT_SECRET` in production), so a misconfigured or missing var fails silently downstream (e.g. `NotificationService` logs a warning and skips the email) rather than erroring at startup.
 
 ---
 

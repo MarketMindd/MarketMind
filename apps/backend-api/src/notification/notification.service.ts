@@ -1,9 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { RecommendationStatus, RiskTolerance, StockRecommendation } from '@market-mind/common';
-import { PortfolioEntity, UserProfileEntity } from '@market-mind/database';
 import * as nodemailer from 'nodemailer';
 import { Repository } from 'typeorm';
+import { RecommendationStatus, RiskTolerance, StockRecommendation } from '@market-mind/common';
+import { PortfolioEntity, UserProfileEntity } from '@market-mind/database';
 import { appConfig } from '../config/appConfig';
 import { RecommendationNotificationPayload } from './notification.types';
 
@@ -28,9 +28,7 @@ export class NotificationService {
     private readonly userProfileRepo: Repository<UserProfileEntity>,
   ) {}
 
-  async notifyRecommendationChange(
-    payload: RecommendationNotificationPayload,
-  ): Promise<void> {
+  async notifyRecommendationChange(payload: RecommendationNotificationPayload): Promise<void> {
     const recipients = await this.loadRecipients(payload.stockSymbol, payload.riskTolerance);
 
     if (recipients.length === 0) {
@@ -70,7 +68,7 @@ export class NotificationService {
     payload: RecommendationNotificationPayload,
     recipients: NotificationRecipient[],
   ): NotificationEmailPayload {
-    const subject = `${payload.stockSymbol}: our latest suggestion`;
+    const subject = `MarketMind: our latest suggestion for ${payload.stockSymbol}`;
     const baseUrl = appConfig.clientUrl.replace(/\/+$/, '');
     const dashboardUrl = `${baseUrl}/dashboard`;
     const recommendationUrl = `${baseUrl}/stock/${encodeURIComponent(payload.stockSymbol)}`;
@@ -85,7 +83,7 @@ export class NotificationService {
     );
 
     return {
-      from: appConfig.email.from,
+      from: `"Market Mind" <${appConfig.email.from}>`,
       to: recipients.map((recipient) => recipient.email),
       subject,
       text: [
@@ -142,9 +140,7 @@ export class NotificationService {
         user: appConfig.email.smtpUser,
         pass: appConfig.email.smtpPass,
       },
-      tls: appConfig.email.smtpAllowSelfSigned
-        ? { rejectUnauthorized: false }
-        : undefined,
+      tls: appConfig.email.smtpAllowSelfSigned ? { rejectUnauthorized: false } : undefined,
     });
 
     await transporter.sendMail(payload);
