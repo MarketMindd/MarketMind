@@ -1,4 +1,5 @@
 import { ArrowDown, ArrowUp, Briefcase } from 'lucide-react';
+import { useState } from 'react';
 import { PortfolioItem, Stock, StockRecommendation } from '@market-mind/common';
 import { AskAiButton } from '@/components/elements/askAiButton';
 import { RecommendationBadge } from '@/components/elements/recommendationBadge';
@@ -14,6 +15,7 @@ interface StockCardProps {
 }
 
 export const StockCard = ({ stock, onClick, className, portfolioData }: StockCardProps) => {
+  const [isAskAiHovered, setIsAskAiHovered] = useState(false);
   const isPositive = stock.marketData.priceChange >= 0;
   const directionWord = isPositive ? 'up' : 'down';
   const isAnalyzed = stock.aiRecommendation.status !== StockRecommendation.NOT_ANALYZED;
@@ -33,7 +35,11 @@ export const StockCard = ({ stock, onClick, className, portfolioData }: StockCar
   return (
     <div
       onClick={onClick}
-      className={cn('glass-card p-5 hover-lift cursor-pointer group flex flex-col', className)}
+      className={cn(
+        'glass-card p-5 cursor-pointer flex flex-col',
+        !isAskAiHovered && 'hover-lift group',
+        className,
+      )}
     >
       {/* Name first (beginners recognize names, not tickers) */}
       <div className="flex items-start justify-between mb-3 gap-3">
@@ -138,7 +144,12 @@ export const StockCard = ({ stock, onClick, className, portfolioData }: StockCar
         )}
       >
         <span className="text-xs text-primary font-medium group-hover:underline">See why →</span>
-        <AskAiButton symbol={stock.symbol} prompt={askPrompt} />
+        <span
+          onMouseEnter={() => setIsAskAiHovered(true)}
+          onMouseLeave={() => setIsAskAiHovered(false)}
+        >
+          <AskAiButton symbol={stock.symbol} prompt={askPrompt} />
+        </span>
       </div>
     </div>
   );
