@@ -19,18 +19,21 @@ export class NewsApiService implements NewsProviderService {
   constructor(private readonly networkService: NetworkService) {}
 
   async getNews(symbol: string): Promise<NewsArticle[]> {
-    const params = new URLSearchParams({
-      q: symbol,
-      pageSize: '5',
-      sortBy: 'publishedAt',
-      language: 'en',
-      apiKey: appConfig.newsApiKey,
-    });
-    const url = `https://newsapi.org/v2/everything?${params.toString()}`;
+    const buildUrl = (apiKey: string) => {
+      const params = new URLSearchParams({
+        q: symbol,
+        pageSize: '5',
+        sortBy: 'publishedAt',
+        language: 'en',
+        apiKey,
+      });
+      return `https://newsapi.org/v2/everything?${params.toString()}`;
+    };
 
     try {
-      return await this.networkService.get<NewsApiResponse, NewsArticle[]>(
-        url,
+      return await this.networkService.getWithKeyRotation<NewsApiResponse, NewsArticle[]>(
+        appConfig.newsApiKeys,
+        buildUrl,
         (res) => this.mapData(res.articles ?? []),
         { cacheTtlMs: NEWS_CACHE_TTL_MS },
       );

@@ -4,7 +4,7 @@ import { AlphaVantageService } from './alpha-vantage.service';
 
 jest.mock('../config/appConfig', () => ({
   appConfig: {
-    alphaVantageApiKey: 'test-key',
+    alphaVantageApiKeys: ['test-key'],
   },
 }));
 
@@ -19,7 +19,7 @@ describe('AlphaVantageService', () => {
         {
           provide: NetworkService,
           useValue: {
-            get: jest.fn(),
+            getWithKeyRotation: jest.fn(),
           },
         },
       ],
@@ -35,30 +35,36 @@ describe('AlphaVantageService', () => {
 
   describe('getNews', () => {
     it('should fetch and map news correctly', async () => {
-      (networkService.get as jest.Mock).mockImplementation(async (url, mapper) => {
-        const mockResponse = {
-          feed: [
-            {
-              title: 'Test Title 1',
-              summary: 'Test Summary 1',
-              time_published: '20231010T121500',
-              source_domain: 'SomeSource',
-            },
-            {
-              title: 'Test Title 2',
-              summary: null,
-              time_published: '',
-              source_domain: null,
-            },
-          ],
-        };
-        return mapper(mockResponse);
-      });
+      (networkService.getWithKeyRotation as jest.Mock).mockImplementation(
+        async (keys, buildUrl, mapper) => {
+          const mockResponse = {
+            feed: [
+              {
+                title: 'Test Title 1',
+                summary: 'Test Summary 1',
+                time_published: '20231010T121500',
+                source_domain: 'SomeSource',
+              },
+              {
+                title: 'Test Title 2',
+                summary: null,
+                time_published: '',
+                source_domain: null,
+              },
+            ],
+          };
+          expect(buildUrl('test-key')).toBe(
+            'https://www.alphavantage.co/query?function=NEWS_SENTIMENT&tickers=AAPL&limit=5&sort=LATEST&apikey=test-key',
+          );
+          return mapper(mockResponse);
+        },
+      );
 
       const result = await service.getNews('AAPL');
 
-      expect(networkService.get).toHaveBeenCalledWith(
-        'https://www.alphavantage.co/query?function=NEWS_SENTIMENT&tickers=AAPL&limit=5&sort=LATEST&apikey=test-key',
+      expect(networkService.getWithKeyRotation).toHaveBeenCalledWith(
+        ['test-key'],
+        expect.any(Function),
         expect.any(Function),
         expect.objectContaining({ cacheTtlMs: expect.any(Number) }),
       );
@@ -80,13 +86,17 @@ describe('AlphaVantageService', () => {
     });
 
     it('should return empty array on network error', async () => {
-      (networkService.get as jest.Mock).mockRejectedValue(new Error('Network error'));
+      (networkService.getWithKeyRotation as jest.Mock).mockRejectedValue(
+        new Error('Network error'),
+      );
       const result = await service.getNews('AAPL');
       expect(result).toEqual([]);
     });
 
     it('should handle missing feed data by returning empty array', async () => {
-      (networkService.get as jest.Mock).mockImplementation(async (url, mapper) => mapper({}));
+      (networkService.getWithKeyRotation as jest.Mock).mockImplementation(
+        async (keys, buildUrl, mapper) => mapper({}),
+      );
       const result = await service.getNews('AAPL');
       expect(result).toEqual([]);
     });

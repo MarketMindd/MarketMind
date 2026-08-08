@@ -30,6 +30,7 @@ export class NetworkService {
     url: string,
     mapper: (data: TRaw) => TData,
     options?: GetOptions,
+    cooldownId?: string,
   ): Promise<TData> {
     const ttl = options?.cacheTtlMs ?? 0;
 
@@ -39,12 +40,13 @@ export class NetworkService {
     }
 
     const host = this.hostOf(url);
-    const cooldownUntil = this.cooldownUntilByHost.get(host) ?? 0;
+    const cooldownKey = cooldownId ?? host;
+    const cooldownUntil = this.cooldownUntilByHost.get(cooldownKey) ?? 0;
     if (cooldownUntil > Date.now()) {
       throw new RateLimitError(host, cooldownUntil - Date.now());
     }
 
-    const raw = await this.fetchWithRetry<TRaw>(url, host);
+    const raw = await this.fetchWithRetry<TRaw>(url, host, cooldownKey);
 
     if (ttl > 0) {
       this.cache.set(url, { raw, expiresAt: Date.now() + ttl });
@@ -52,7 +54,29 @@ export class NetworkService {
     return mapper(raw);
   }
 
-  private async fetchWithRetry<TRaw>(url: string, host: string): Promise<TRaw> {
+  async getWithKeyRotation<TRaw, TData>(
+    keys: string[],
+    buildUrl: (apiKey: string) => string,
+    mapper: (data: TRaw) => TData,
+    options?: GetOptions,
+  ): Promise<TData> {
+    if (keys.length === 0) {
+      throw new Error('No API keys configured');
+    }
+
+    let lastError: unknown;
+    for (const key of keys) {
+      const url = buildUrl(key);
+      try {
+        return await this.get<TRaw, TData>(url, mapper, options, `${this.hostOf(url)}:${key}`);
+      } catch (error) {
+        lastError = error;
+      }
+    }
+    throw lastError instanceof Error ? lastError : new Error('All API keys exhausted');
+  }
+
+  private async fetchWithRetry<TRaw>(url: string, host: string, cooldownKey: string): Promise<TRaw> {
     try {
       return await retry(
         async (): Promise<TRaw> => {
@@ -60,7 +84,7 @@ export class NetworkService {
 
           if (res.status === 429) {
             const cooldownMs = this.parseRetryAfterMs(res) ?? DEFAULT_RATE_LIMIT_COOLDOWN_MS;
-            this.cooldownUntilByHost.set(host, Date.now() + cooldownMs);
+            this.cooldownUntilByHost.set(cooldownKey, Date.now() + cooldownMs);
             throw new RateLimitError(host, cooldownMs);
           }
           if (!res.ok) {

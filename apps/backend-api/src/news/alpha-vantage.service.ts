@@ -13,18 +13,21 @@ export class AlphaVantageService implements NewsProviderService {
   constructor(private readonly networkService: NetworkService) {}
 
   async getNews(symbol: string): Promise<NewsArticle[]> {
-    const params = new URLSearchParams({
-      function: 'NEWS_SENTIMENT',
-      tickers: symbol,
-      limit: '5',
-      sort: 'LATEST',
-      apikey: appConfig.alphaVantageApiKey,
-    });
-    const url = `https://www.alphavantage.co/query?${params.toString()}`;
+    const buildUrl = (apikey: string) => {
+      const params = new URLSearchParams({
+        function: 'NEWS_SENTIMENT',
+        tickers: symbol,
+        limit: '5',
+        sort: 'LATEST',
+        apikey,
+      });
+      return `https://www.alphavantage.co/query?${params.toString()}`;
+    };
 
     try {
-      return await this.networkService.get<AlphaVantageResponse, NewsArticle[]>(
-        url,
+      return await this.networkService.getWithKeyRotation<AlphaVantageResponse, NewsArticle[]>(
+        appConfig.alphaVantageApiKeys,
+        buildUrl,
         (res) => this.mapData(res.feed ?? []),
         { cacheTtlMs: NEWS_CACHE_TTL_MS },
       );

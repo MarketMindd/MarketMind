@@ -13,11 +13,31 @@ export class GeminiClientService implements LlmClient {
   private readonly logger = new Logger(GeminiClientService.name);
 
   async generateContent(prompt: string, customSchema?: Record<string, unknown>): Promise<string> {
-    if (!appConfig.geminiApiKey) {
+    const apiKeys = appConfig.geminiApiKeys;
+    if (apiKeys.length === 0) {
       throw new Error('GEMINI_API_KEY is not configured');
     }
 
-    const ai = new GoogleGenAI({ apiKey: appConfig.geminiApiKey });
+    let lastError: unknown;
+    for (const apiKey of apiKeys) {
+      try {
+        return await this.generateWithKey(apiKey, prompt, customSchema);
+      } catch (error) {
+        lastError = error;
+        this.logger.warn(
+          `Gemini key ...${apiKey.slice(-4)} failed, rotating: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
+    }
+    throw lastError instanceof Error ? lastError : new Error('All Gemini API keys exhausted');
+  }
+
+  private async generateWithKey(
+    apiKey: string,
+    prompt: string,
+    customSchema?: Record<string, unknown>,
+  ): Promise<string> {
+    const ai = new GoogleGenAI({ apiKey });
     const responseSchema = customSchema || z.toJSONSchema(aiResponseSchema);
 
     return retry(

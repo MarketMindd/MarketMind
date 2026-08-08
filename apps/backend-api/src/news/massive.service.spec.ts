@@ -4,7 +4,7 @@ import { MassiveApiService } from './massive.service';
 
 jest.mock('../config/appConfig', () => ({
   appConfig: {
-    massiveApiKey: 'test-massive-key',
+    massiveApiKeys: ['test-massive-key'],
   },
 }));
 
@@ -19,7 +19,7 @@ describe('MassiveApiService', () => {
         {
           provide: NetworkService,
           useValue: {
-            get: jest.fn(),
+            getWithKeyRotation: jest.fn(),
           },
         },
       ],
@@ -36,35 +36,45 @@ describe('MassiveApiService', () => {
   describe('getNews', () => {
     it('should fetch and map news correctly with insights formatting', async () => {
       const publishedUtcStr = '2024-06-24T18:33:53Z';
-      (networkService.get as jest.Mock).mockImplementation(async (url, mapper) => {
-        const mockResponse = {
-          results: [
-            {
-              title: 'Test Title 1',
-              description: 'Test Description 1',
-              published_utc: publishedUtcStr,
-              publisher: { name: 'Test Source 1' },
-              insights: [
-                { sentiment: 'positive', sentiment_reasoning: 'Good news for AAPL', ticker: 'AAPL' },
-                { sentiment: 'negative', sentiment_reasoning: 'Bad news for MSFT', ticker: 'MSFT' },
-              ],
-            },
-            {
-              title: 'Test Title 2',
-              description: null,
-              published_utc: publishedUtcStr,
-              publisher: undefined,
-              insights: [],
-            },
-          ],
-        };
-        return mapper(mockResponse);
-      });
+      (networkService.getWithKeyRotation as jest.Mock).mockImplementation(
+        async (keys, buildUrl, mapper) => {
+          const mockResponse = {
+            results: [
+              {
+                title: 'Test Title 1',
+                description: 'Test Description 1',
+                published_utc: publishedUtcStr,
+                publisher: { name: 'Test Source 1' },
+                insights: [
+                  {
+                    sentiment: 'positive',
+                    sentiment_reasoning: 'Good news for AAPL',
+                    ticker: 'AAPL',
+                  },
+                  { sentiment: 'negative', sentiment_reasoning: 'Bad news for MSFT', ticker: 'MSFT' },
+                ],
+              },
+              {
+                title: 'Test Title 2',
+                description: null,
+                published_utc: publishedUtcStr,
+                publisher: undefined,
+                insights: [],
+              },
+            ],
+          };
+          expect(buildUrl('test-massive-key')).toBe(
+            'https://api.massive.com/v2/reference/news?ticker=AAPL&limit=5&apiKey=test-massive-key',
+          );
+          return mapper(mockResponse);
+        },
+      );
 
       const result = await service.getNews('AAPL');
 
-      expect(networkService.get).toHaveBeenCalledWith(
-        'https://api.massive.com/v2/reference/news?ticker=AAPL&limit=5&apiKey=test-massive-key',
+      expect(networkService.getWithKeyRotation).toHaveBeenCalledWith(
+        ['test-massive-key'],
+        expect.any(Function),
         expect.any(Function),
         expect.objectContaining({ cacheTtlMs: expect.any(Number) }),
       );
@@ -86,13 +96,17 @@ describe('MassiveApiService', () => {
     });
 
     it('should return empty array on network error', async () => {
-      (networkService.get as jest.Mock).mockRejectedValue(new Error('Network error'));
+      (networkService.getWithKeyRotation as jest.Mock).mockRejectedValue(
+        new Error('Network error'),
+      );
       const result = await service.getNews('AAPL');
       expect(result).toEqual([]);
     });
 
     it('should handle missing results by returning empty array', async () => {
-      (networkService.get as jest.Mock).mockImplementation(async (url, mapper) => mapper({}));
+      (networkService.getWithKeyRotation as jest.Mock).mockImplementation(
+        async (keys, buildUrl, mapper) => mapper({}),
+      );
       const result = await service.getNews('AAPL');
       expect(result).toEqual([]);
     });

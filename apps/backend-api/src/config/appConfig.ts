@@ -4,6 +4,12 @@ import { parseBoolean } from '@market-mind/database';
 const parseLlmProvider = (value?: string): LlmProvider =>
   Object.values(LlmProvider).find((provider) => provider === value) ?? LlmProvider.Qwen;
 
+const parseApiKeys = (value?: string): string[] =>
+  (value ?? '')
+    .split(',')
+    .map((key) => key.trim())
+    .filter(Boolean);
+
 const getJwtSecret = (defaultSecret: string) => {
   const secret = process.env.JWT_SECRET;
   if (!secret) {
@@ -38,10 +44,10 @@ export const appConfig = {
     googleClientId: process.env.GOOGLE_CLIENT_ID ?? '',
     googleClientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
   },
-  newsApiKey: process.env.NEWSAPI_KEY ?? '',
-  alphaVantageApiKey: process.env.ALPHA_VANTAGE_API_KEY ?? '',
-  massiveApiKey: process.env.MASSIVE_API_KEY ?? '',
-  geminiApiKey: process.env.GEMINI_API_KEY ?? '',
+  newsApiKeys: parseApiKeys(process.env.NEWSAPI_KEY),
+  alphaVantageApiKeys: parseApiKeys(process.env.ALPHA_VANTAGE_API_KEY),
+  massiveApiKeys: parseApiKeys(process.env.MASSIVE_API_KEY),
+  geminiApiKeys: parseApiKeys(process.env.GEMINI_API_KEY),
   llm: {
     provider: parseLlmProvider(process.env.LLM_PROVIDER),
     qwen: {

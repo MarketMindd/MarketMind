@@ -128,4 +128,47 @@ describe('NetworkService', () => {
     await service.get(url, mapper).catch((e) => e);
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
+
+  it('rotates to the next API key when one is rate limited', async () => {
+    const fetchMock = global.fetch as jest.Mock;
+    fetchMock
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 429,
+        statusText: 'Too Many Requests',
+        headers: { get: () => null },
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ test: 'value' }),
+      });
+
+    const mapper = (data: { test: string }) => ({ mapped: data.test });
+    const buildUrl = (key: string) => `http://ratelimited.test/news?apiKey=${key}`;
+
+    const result = await service.getWithKeyRotation(['key1', 'key2'], buildUrl, mapper);
+
+    expect(result).toEqual({ mapped: 'value' });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock).toHaveBeenNthCalledWith(1, 'http://ratelimited.test/news?apiKey=key1');
+    expect(fetchMock).toHaveBeenNthCalledWith(2, 'http://ratelimited.test/news?apiKey=key2');
+  });
+
+  it('throws once every rotated key has failed', async () => {
+    const fetchMock = global.fetch as jest.Mock;
+    fetchMock.mockResolvedValue({
+      ok: false,
+      status: 429,
+      statusText: 'Too Many Requests',
+      headers: { get: () => null },
+    });
+
+    const mapper = (data: unknown) => data;
+    const buildUrl = (key: string) => `http://ratelimited.test/all?apiKey=${key}`;
+
+    await expect(service.getWithKeyRotation(['key1', 'key2'], buildUrl, mapper)).rejects.toThrow(
+      'Rate limited',
+    );
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
 });

@@ -13,16 +13,19 @@ export class MassiveApiService implements NewsProviderService {
   constructor(private readonly networkService: NetworkService) {}
 
   async getNews(symbol: string): Promise<NewsArticle[]> {
-    const params = new URLSearchParams({
-      ticker: symbol,
-      limit: '5',
-      apiKey: appConfig.massiveApiKey,
-    });
-    const url = `https://api.massive.com/v2/reference/news?${params.toString()}`;
+    const buildUrl = (apiKey: string) => {
+      const params = new URLSearchParams({
+        ticker: symbol,
+        limit: '5',
+        apiKey,
+      });
+      return `https://api.massive.com/v2/reference/news?${params.toString()}`;
+    };
 
     try {
-      return await this.networkService.get<MassiveResponse, NewsArticle[]>(
-        url,
+      return await this.networkService.getWithKeyRotation<MassiveResponse, NewsArticle[]>(
+        appConfig.massiveApiKeys,
+        buildUrl,
         (res) => this.mapData(res.results ?? [], symbol),
         { cacheTtlMs: NEWS_CACHE_TTL_MS },
       );

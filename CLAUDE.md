@@ -150,7 +150,7 @@ JWT_EXPIRES_IN=3600s, JWT_REFRESH_EXPIRES_IN=604800s
 MAX_ACTIVE_SESSIONS=5
 GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, VITE_GOOGLE_CLIENT_ID
 
-# External APIs
+# External APIs (comma-separate multiple keys, e.g. "key1,key2", to rotate on rate limit/error)
 GEMINI_API_KEY, NEWSAPI_KEY, ALPHA_VANTAGE_API_KEY, MASSIVE_API_KEY
 
 # LLM provider (gemini | qwen). qwen = Colman Qwen3.6-27B, VPN-only.
