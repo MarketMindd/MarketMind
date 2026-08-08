@@ -1,12 +1,14 @@
 export * from './entities/aiRecommendation';
-export * from './entities/userProfile';
-export * from './entities/stock';
 export * from './entities/marketData';
 export * from './entities/portfolio';
+export * from './entities/stock';
+export * from './entities/userProfile';
 export * from './enums/command';
 export * from './enums/explain-mode';
 export * from './enums/llm-provider';
 export * from './enums/risk-tolerance';
 export * from './enums/sector-interest';
-export * from './utils';
 export * from './types';
+export * from './types/performance.types';
+export * from './utils';
+

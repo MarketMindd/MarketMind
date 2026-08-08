@@ -20,6 +20,7 @@ import type {
   SignUpPayload,
   Stock,
   UpdateProfilePayload,
+  PerformanceResponse,
 } from '@market-mind/common';
 
 export type GoogleAuthParams = {
@@ -95,5 +96,10 @@ export type iClientQueriesProvider = {
       sessionId: string,
       options?: UseMutationOptions<ChatMessage, Error, SendMessagePayload>,
     ) => UseMutationResult<ChatMessage, Error, SendMessagePayload>;
+  };
+  performance: {
+    useGetPerformance: (
+      options?: Omit<UseQueryOptions<PerformanceResponse, Error>, 'queryKey' | 'queryFn'>,
+    ) => UseQueryResult<PerformanceResponse, Error>;
   };
 };

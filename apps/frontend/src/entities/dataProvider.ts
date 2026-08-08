@@ -14,6 +14,7 @@ import type {
   SignUpPayload,
   Stock,
   UpdateProfilePayload,
+  PerformanceResponse,
 } from '@market-mind/common';
 
 export interface iDataProvider {
@@ -43,5 +44,8 @@ export interface iDataProvider {
     deleteSession: (id: string) => Promise<{ success: boolean }>;
     getMessages: (sessionId: string) => Promise<ChatMessage[]>;
     sendMessage: (sessionId: string, payload: SendMessagePayload) => Promise<ChatMessage>;
+  };
+  performance: {
+    getPerformance: () => Promise<PerformanceResponse>;
   };
 }

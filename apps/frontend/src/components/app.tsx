@@ -14,6 +14,7 @@ import { StockDetails } from './views/stockDetails/stockDetails';
 import { Chat } from './views/chat/chat';
 import { Landing } from './views/landing/landing';
 import { Profile } from './views/profile/profile';
+import { Performance } from './views/performance/performance';
 import { TooltipProvider } from '@/components/ui/tooltip';
 
 const MainLayout = () => {
@@ -71,6 +72,14 @@ export const App = () => {
             element={
               <ProtectedRoute>
                 <Chat />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path={APP_ROUTES.PERFORMANCE}
+            element={
+              <ProtectedRoute>
+                <Performance />
               </ProtectedRoute>
             }
           />

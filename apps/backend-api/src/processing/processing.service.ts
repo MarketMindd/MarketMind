@@ -2,7 +2,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AiRecommendation, RecommendationStatus } from '@market-mind/common';
-import { RecommendationEntity } from '@market-mind/database';
+import {
+  MarketDataEntity,
+  RecommendationEntity,
+  RecommendationHistoryEntity,
+} from '@market-mind/database';
 import { NotificationService } from '../notification/notification.service';
 
 @Injectable()
@@ -12,6 +16,10 @@ export class ProcessingService {
   constructor(
     @InjectRepository(RecommendationEntity)
     private readonly recommendationRepo: Repository<RecommendationEntity>,
+    @InjectRepository(RecommendationHistoryEntity)
+    private readonly historyRepo: Repository<RecommendationHistoryEntity>,
+    @InjectRepository(MarketDataEntity)
+    private readonly marketDataRepo: Repository<MarketDataEntity>,
     private readonly notificationService: NotificationService,
   ) {}
 
@@ -43,6 +51,8 @@ export class ProcessingService {
         );
         this.logger.log(`Persisted ${rec.symbol}/${rec.riskTolerance}: ${rec.status}`);
 
+        await this.insertHistoryIfChanged(rec);
+
         if (this.shouldNotify(previousStatus, rec.status)) {
           try {
             await this.notificationService.notifyRecommendationChange({
@@ -63,6 +73,45 @@ export class ProcessingService {
           `Failed to persist ${rec.symbol}/${rec.riskTolerance}: ${error instanceof Error ? error.message : String(error)}`,
         );
       }
+    }
+  }
+
+  private async insertHistoryIfChanged(rec: AiRecommendation): Promise<void> {
+    try {
+      const lastHistory = await this.historyRepo.findOne({
+        where: {
+          stockSymbol: rec.symbol,
+          riskTolerance: rec.riskTolerance,
+        },
+        order: { createdAt: 'DESC' },
+      });
+
+      if (lastHistory?.status === rec.status) return;
+
+      const marketData = await this.marketDataRepo.findOne({
+        where: { stockSymbol: rec.symbol },
+        order: { time: 'DESC' },
+      });
+
+      if (!marketData) {
+        this.logger.warn(`No market data found for ${rec.symbol}; skipping history insert`);
+        return;
+      }
+
+      const historyRow = this.historyRepo.create({
+        stockSymbol: rec.symbol,
+        riskTolerance: rec.riskTolerance,
+        status: rec.status,
+        confidenceScore: rec.confidence,
+        entryPrice: Number(marketData.price),
+      });
+
+      await this.historyRepo.save(historyRow);
+      this.logger.log(`History: ${rec.symbol}/${rec.riskTolerance} -> ${rec.status}`);
+    } catch (error) {
+      this.logger.warn(
+        `Failed to insert history for ${rec.symbol}/${rec.riskTolerance}: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 

@@ -1,53 +1,27 @@
-import { Target, TrendingUp, Users, CheckCircle, XCircle } from 'lucide-react';
+import { CheckCircle, Target, TrendingUp, Users, XCircle } from 'lucide-react';
+import { StockRecommendation } from '@market-mind/common';
+import { useClientQueries } from '@/hooks/useClientQueries';
 import { cn } from '@/utils/tailwindUtils';
 
-export const mockPastRecommendations = [
-  {
-    id: '1',
-    ticker: 'NVDA',
-    recommendation: 'invest',
-    returnPercent: 45.2,
-    outcome: 'success',
-  },
-  {
-    id: '2',
-    ticker: 'AAPL',
-    recommendation: 'invest',
-    returnPercent: 12.4,
-    outcome: 'success',
-  },
-  {
-    id: '3',
-    ticker: 'TSLA',
-    recommendation: 'exit',
-    returnPercent: -15.2,
-    outcome: 'success', // Successfully avoided loss
-  },
-  {
-    id: '4',
-    ticker: 'MSFT',
-    recommendation: 'invest',
-    returnPercent: 8.7,
-    outcome: 'success',
-  },
-  {
-    id: '5',
-    ticker: 'SNOW',
-    recommendation: 'invest',
-    returnPercent: -5.4,
-    outcome: 'failure',
-  },
-];
-
 export const PerformanceStats = () => {
-  const successCount = mockPastRecommendations.filter((r) => r.outcome === 'success').length;
-  const totalCount = mockPastRecommendations.length;
-  const successRate = Math.round((successCount / totalCount) * 100);
+  const {
+    performance: { useGetPerformance },
+  } = useClientQueries();
+  const { data: performanceData, isLoading } = useGetPerformance();
 
-  const totalReturn = mockPastRecommendations.reduce((acc, r) => {
-    return acc + (r.outcome === 'success' ? r.returnPercent : -Math.abs(r.returnPercent));
-  }, 0);
-  const avgReturn = (totalReturn / totalCount).toFixed(1);
+  if (isLoading || !performanceData) {
+    return (
+      <section id="performance" className="py-20 px-4 sm:px-6 lg:px-8 bg-secondary/30">
+        <div className="max-w-7xl mx-auto flex items-center justify-center min-h-[400px]">
+          <span className="text-muted-foreground animate-pulse">Loading performance stats...</span>
+        </div>
+      </section>
+    );
+  }
+
+  const { stats, recommendations } = performanceData;
+  const { successCount, totalCalls: totalCount, successRate } = stats;
+  const avgReturn = stats.avgReturn.toFixed(1);
 
   return (
     <section id="performance" className="py-20 px-4 sm:px-6 lg:px-8 bg-secondary/30">
@@ -65,7 +39,9 @@ export const PerformanceStats = () => {
             <div className="w-14 h-14 rounded-xl bg-success/20 flex items-center justify-center mx-auto mb-4">
               <Target className="w-7 h-7 text-success" />
             </div>
-            <div className="text-5xl font-bold text-success mb-2">{successRate}%</div>
+            <div className="text-5xl font-bold text-success mb-2">
+              {Number(successRate.toFixed(1))}%
+            </div>
             <div className="text-muted-foreground">Success Rate</div>
             <div className="text-sm text-muted-foreground mt-1">
               {successCount} of {totalCount} calls
@@ -94,7 +70,7 @@ export const PerformanceStats = () => {
             </div>
             <div className="text-5xl font-bold text-foreground mb-2">{totalCount}</div>
             <div className="text-muted-foreground">Total Recommendations</div>
-            <div className="text-sm text-muted-foreground mt-1">Since September 2024</div>
+            <div className="text-sm text-muted-foreground mt-1">Since {stats.since}</div>
           </div>
         </div>
 
@@ -114,41 +90,44 @@ export const PerformanceStats = () => {
                 </tr>
               </thead>
               <tbody>
-                {mockPastRecommendations.slice(0, 5).map((rec, i) => (
+                {recommendations.slice(0, 5).map((rec, i) => (
                   <tr
                     key={rec.id}
                     className="border-b border-border/30 animate-fade-in"
                     style={{ animationDelay: `${0.1 + i * 0.05}s` }}
                   >
                     <td className="p-4">
-                      <span className="font-mono text-primary font-medium">{rec.ticker}</span>
+                      <span className="font-mono text-primary font-medium">{rec.stockSymbol}</span>
                     </td>
                     <td className="p-4">
                       <span
                         className={cn(
                           'px-2 py-1 rounded-full text-xs font-medium capitalize',
-                          rec.recommendation === 'invest' && 'bg-success/20 text-success',
-                          rec.recommendation === 'hold' && 'bg-warning/20 text-warning',
-                          rec.recommendation === 'exit' && 'bg-destructive/20 text-destructive',
+                          rec.status === StockRecommendation.INVEST && 'bg-success/20 text-success',
+                          rec.status === StockRecommendation.HOLD && 'bg-warning/20 text-warning',
+                          rec.status === StockRecommendation.EXIT &&
+                            'bg-destructive/20 text-destructive',
                         )}
                       >
-                        {rec.recommendation}
+                        {rec.status}
                       </span>
                     </td>
                     <td
                       className={cn(
                         'p-4 font-mono font-medium',
-                        rec.returnPercent > 0 ? 'text-success' : 'text-destructive',
+                        rec.returnPct > 0 ? 'text-success' : 'text-destructive',
                       )}
                     >
-                      {rec.returnPercent > 0 ? '+' : ''}
-                      {rec.returnPercent.toFixed(1)}%
+                      {rec.returnPct > 0 ? '+' : ''}
+                      {rec.returnPct.toFixed(1)}%
                     </td>
                     <td className="p-4">
-                      {rec.outcome === 'success' ? (
+                      {rec.outcome === 'Success' ? (
                         <CheckCircle size={18} className="text-success" />
-                      ) : (
+                      ) : rec.outcome === 'Miss' ? (
                         <XCircle size={18} className="text-destructive" />
+                      ) : (
+                        <span className="text-muted-foreground">-</span>
                       )}
                     </td>
                   </tr>

@@ -5,11 +5,13 @@ import { RecommendationSummary, ALL_FILTERS } from './recommendationSummary';
 import { RecommendedStocksList } from './recommendedStocksList';
 import { PortfolioSection } from './portfolioSection';
 import { useClientQueries } from '@/hooks/useClientQueries';
+import { PerformanceSummary } from './performanceSummary';
 
 export const Dashboard = () => {
   const {
     portfolio: { usePortfolio, useAiMarketSummary },
     stocks: { useGetAllStocks },
+    performance: { useGetPerformance },
   } = useClientQueries();
   const [filter, setFilter] = useState<typeof ALL_FILTERS | RecommendationStatus>(ALL_FILTERS);
 
@@ -43,6 +45,8 @@ export const Dashboard = () => {
     day: 'numeric',
   });
 
+  const { data: performanceData, isLoading: isPerformanceLoading } = useGetPerformance();
+
   return (
     <div className="min-h-screen bg-background">
       <main className="pt-28 sm:pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
@@ -55,13 +59,30 @@ export const Dashboard = () => {
 
         <DailyBrief marketSummary={marketSummary} isLoading={isSummaryLoading} />
 
-        <RecommendationSummary
-          investCount={investCount}
-          holdCount={holdCount}
-          exitCount={exitCount}
-          currentFilter={filter}
-          onFilterChange={setFilter}
-        />
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-8">
+          <div className="lg:col-span-1">
+            {isPerformanceLoading ? (
+               <div className="glass-card p-5 h-full flex items-center justify-center">
+                 <span className="text-muted-foreground text-sm animate-pulse">Loading...</span>
+               </div>
+            ) : performanceData ? (
+              <PerformanceSummary
+                successCount={performanceData.stats.successCount}
+                totalCount={performanceData.stats.totalCalls}
+                successRate={performanceData.stats.successRate}
+              />
+            ) : null}
+          </div>
+          <div className="lg:col-span-3">
+            <RecommendationSummary
+              investCount={investCount}
+              holdCount={holdCount}
+              exitCount={exitCount}
+              currentFilter={filter}
+              onFilterChange={setFilter}
+            />
+          </div>
+        </div>
 
         <RecommendedStocksList
           filteredRecommendedStocks={filteredRecommendedStocks}
