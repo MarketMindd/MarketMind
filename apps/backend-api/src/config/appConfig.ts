@@ -64,4 +64,8 @@ export const appConfig = {
         ? +process.env.MAX_STOCKS_COUNT
         : 9,
   },
+  https: {
+    keyPath: process.env.HTTPS_KEY_PATH ?? '',
+    certPath: process.env.HTTPS_CERT_PATH ?? '',
+  },
 } as const;

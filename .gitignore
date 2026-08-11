@@ -47,7 +47,7 @@ vite.config.*.timestamp*
 .vscode
 .github
 
-.env*
+.env.prod
 
 loveable-uis
 loveable-ui

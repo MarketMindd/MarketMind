@@ -1,11 +1,25 @@
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import 'dotenv/config';
+import * as fs from 'fs';
 import { AppModule } from './app/app.module';
 import { appConfig } from './config/appConfig';
 
 const bootstrap = async () => {
-  const app = await NestFactory.create(AppModule);
+  let httpsOptions = undefined;
+  if (process.env.NODE_ENV === 'production') {
+    try {
+      httpsOptions = {
+        key: fs.readFileSync(appConfig.https.keyPath),
+        cert: fs.readFileSync(appConfig.https.certPath),
+      };
+      Logger.log(`🔒 HTTPS enabled using provided certificates`);
+    } catch (e) {
+      Logger.error(`Failed to load HTTPS certificates: ${e.message}`);
+    }
+  }
+
+  const app = await NestFactory.create(AppModule, { httpsOptions });
   const globalPrefix = 'api';
   app.enableCors({
     origin: function (
