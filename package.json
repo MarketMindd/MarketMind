@@ -56,7 +56,6 @@
     "apps/*"
   ],
   "dependencies": {
-    "@nestjs/serve-static": "^4.0.2",
     "nodemailer": "^7.0.3",
     "react-ts-tradingview-widgets": "^1.2.8"
   }
