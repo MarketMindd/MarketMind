@@ -7,6 +7,7 @@
     "build:frontend": "nx build frontend --no-tui",
     "start:api": "nx serve backend-api --no-tui --skip-nx-cache",
     "build:api": "nx build backend-api --no-tui",
+    "build:production": "tsc -b libs/common/tsconfig.lib.json libs/database/tsconfig.lib.json && nx build backend-api && nx build frontend && mkdir -p apps/backend-api/dist/public && cp -r apps/frontend/dist/* apps/backend-api/dist/public/",
     "simulate:recommendation": "node -r tsconfig-paths/register -r @swc-node/register ./apps/backend-api/src/recommendation-simulator/main.ts",
     "db:migrate": "npm run db:migrate -w @market-mind/database",
     "db:migration:revert": "npm run db:migration:revert -w @market-mind/database",
@@ -55,6 +56,7 @@
     "apps/*"
   ],
   "dependencies": {
+    "@nestjs/serve-static": "^4.0.2",
     "nodemailer": "^7.0.3",
     "react-ts-tradingview-widgets": "^1.2.8"
   }
