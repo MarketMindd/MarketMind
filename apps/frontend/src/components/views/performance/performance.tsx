@@ -53,7 +53,12 @@ export const Performance = () => {
               </div>
               <span className="text-muted-foreground">Success Rate</span>
             </div>
-            <div className="text-4xl font-bold text-success">
+            <div
+              className={cn(
+                'text-4xl font-bold',
+                directionalCount > 0 ? 'text-success' : 'text-center text-muted-foreground',
+              )}
+            >
               {directionalCount > 0 ? `${successRate.toFixed(1)}%` : '—'}
             </div>
             <div className="text-sm text-muted-foreground mt-1">
@@ -73,16 +78,20 @@ export const Performance = () => {
             <div
               className={cn(
                 'text-4xl font-bold',
-                totalCalls === 0
-                  ? 'text-foreground'
+                directionalCount === 0
+                  ? 'text-center text-muted-foreground'
                   : avgReturn > 0
                     ? 'text-success'
-                    : 'text-destructive',
+                    : avgReturn < 0
+                      ? 'text-destructive'
+                      : 'text-foreground',
               )}
             >
-              {totalCalls === 0 ? '—' : `${avgReturn > 0 ? '+' : ''}${avgReturnDisplay}%`}
+              {directionalCount === 0 ? '—' : `${avgReturn > 0 ? '+' : ''}${avgReturnDisplay}%`}
             </div>
-            <div className="text-sm text-muted-foreground mt-1">Per recommendation</div>
+            <div className="text-sm text-muted-foreground mt-1">
+              {directionalCount === 0 ? 'No graded calls yet' : 'Per graded recommendation'}
+            </div>
           </div>
 
           <div className="glass-card p-6 animate-fade-in stagger-3">
@@ -156,11 +165,16 @@ export const Performance = () => {
                     <td
                       className={cn(
                         'p-4 font-mono font-medium',
-                        rec.returnPct > 0 ? 'text-success' : 'text-destructive',
+                        rec.outcome === 'N/A'
+                          ? 'text-muted-foreground'
+                          : rec.returnPct > 0
+                            ? 'text-success'
+                            : 'text-destructive',
                       )}
                     >
-                      {rec.returnPct > 0 ? '+' : ''}
-                      {rec.returnPct.toFixed(1)}%
+                      {rec.outcome === 'N/A'
+                        ? '—'
+                        : `${rec.returnPct > 0 ? '+' : ''}${rec.returnPct.toFixed(1)}%`}
                     </td>
                     <td className="p-4">
                       {rec.outcome === 'Success' ? (
