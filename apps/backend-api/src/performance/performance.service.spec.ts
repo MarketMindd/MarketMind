@@ -1,11 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { RiskTolerance } from '@market-mind/common';
-import {
-  MarketDataEntity,
-  RecommendationHistoryEntity,
-  StockEntity,
-} from '@market-mind/database';
+import { RiskTolerance, StockRecommendation } from '@market-mind/common';
+import { MarketDataEntity, RecommendationHistoryEntity, StockEntity } from '@market-mind/database';
 import { PerformanceService } from './performance.service';
 
 const makeHistoryRow = (
@@ -14,7 +10,7 @@ const makeHistoryRow = (
   id: 'uuid-1',
   stockSymbol: 'AAPL',
   riskTolerance: RiskTolerance.MEDIUM,
-  status: 'Invest',
+  status: StockRecommendation.INVEST,
   confidenceScore: 0.85,
   entryPrice: 165.2 as unknown as number,
   createdAt: new Date('2024-09-15'),
@@ -57,7 +53,7 @@ describe('PerformanceService', () => {
   it('returns empty response when no history rows exist', async () => {
     mockHistoryRepo.find.mockResolvedValue([]);
 
-    const result = await service.getPerformance('user-1');
+    const result = await service.getPerformance();
 
     expect(result.stats.totalCalls).toBe(0);
     expect(result.stats.successRate).toBe(0);
@@ -67,11 +63,11 @@ describe('PerformanceService', () => {
 
   it('computes Invest success correctly when return is positive', async () => {
     mockHistoryRepo.find.mockResolvedValue([
-      makeHistoryRow({ status: 'Invest', entryPrice: 100 as unknown as number }),
+      makeHistoryRow({ status: StockRecommendation.INVEST, entryPrice: 100 as unknown as number }),
     ]);
     mockMarketDataRepo.findOne.mockResolvedValue(makeMarketData(110));
 
-    const result = await service.getPerformance('user-1');
+    const result = await service.getPerformance();
 
     expect(result.recommendations[0].returnPct).toBe(10);
     expect(result.recommendations[0].outcome).toBe('Success');
@@ -79,11 +75,11 @@ describe('PerformanceService', () => {
 
   it('computes Invest miss correctly when return is not positive', async () => {
     mockHistoryRepo.find.mockResolvedValue([
-      makeHistoryRow({ status: 'Invest', entryPrice: 100 as unknown as number }),
+      makeHistoryRow({ status: StockRecommendation.INVEST, entryPrice: 100 as unknown as number }),
     ]);
     mockMarketDataRepo.findOne.mockResolvedValue(makeMarketData(90));
 
-    const result = await service.getPerformance('user-1');
+    const result = await service.getPerformance();
 
     expect(result.recommendations[0].returnPct).toBe(-10);
     expect(result.recommendations[0].outcome).toBe('Miss');
@@ -91,11 +87,11 @@ describe('PerformanceService', () => {
 
   it('computes Exit success correctly when return is negative', async () => {
     mockHistoryRepo.find.mockResolvedValue([
-      makeHistoryRow({ status: 'Exit', entryPrice: 100 as unknown as number }),
+      makeHistoryRow({ status: StockRecommendation.EXIT, entryPrice: 100 as unknown as number }),
     ]);
     mockMarketDataRepo.findOne.mockResolvedValue(makeMarketData(80));
 
-    const result = await service.getPerformance('user-1');
+    const result = await service.getPerformance();
 
     expect(result.recommendations[0].returnPct).toBe(-20);
     expect(result.recommendations[0].outcome).toBe('Success');
@@ -103,11 +99,11 @@ describe('PerformanceService', () => {
 
   it('computes Exit miss correctly when return is not negative', async () => {
     mockHistoryRepo.find.mockResolvedValue([
-      makeHistoryRow({ status: 'Exit', entryPrice: 100 as unknown as number }),
+      makeHistoryRow({ status: StockRecommendation.EXIT, entryPrice: 100 as unknown as number }),
     ]);
     mockMarketDataRepo.findOne.mockResolvedValue(makeMarketData(120));
 
-    const result = await service.getPerformance('user-1');
+    const result = await service.getPerformance();
 
     expect(result.recommendations[0].returnPct).toBe(20);
     expect(result.recommendations[0].outcome).toBe('Miss');
@@ -115,11 +111,11 @@ describe('PerformanceService', () => {
 
   it('treats Hold as success', async () => {
     mockHistoryRepo.find.mockResolvedValue([
-      makeHistoryRow({ status: 'Hold', entryPrice: 100 as unknown as number }),
+      makeHistoryRow({ status: StockRecommendation.HOLD, entryPrice: 100 as unknown as number }),
     ]);
     mockMarketDataRepo.findOne.mockResolvedValue(makeMarketData(50));
 
-    const result = await service.getPerformance('user-1');
+    const result = await service.getPerformance();
 
     expect(result.recommendations[0].returnPct).toBe(-50);
     expect(result.recommendations[0].outcome).toBe('Success');
@@ -130,19 +126,19 @@ describe('PerformanceService', () => {
       makeHistoryRow({
         id: 'uuid-1',
         stockSymbol: 'AAPL',
-        status: 'Invest',
+        status: StockRecommendation.INVEST,
         entryPrice: 100 as unknown as number,
       }),
       makeHistoryRow({
         id: 'uuid-2',
         stockSymbol: 'MSFT',
-        status: 'Hold',
+        status: StockRecommendation.HOLD,
         entryPrice: 100 as unknown as number,
       }),
       makeHistoryRow({
         id: 'uuid-3',
         stockSymbol: 'GOOG',
-        status: 'Invest',
+        status: StockRecommendation.INVEST,
         entryPrice: 100 as unknown as number,
       }),
     ]);
@@ -151,7 +147,7 @@ describe('PerformanceService', () => {
       .mockResolvedValueOnce(makeMarketData(50))
       .mockResolvedValueOnce(makeMarketData(90));
 
-    const result = await service.getPerformance('user-1');
+    const result = await service.getPerformance();
 
     expect(result.stats.successRate).toBe(50);
   });
@@ -161,19 +157,19 @@ describe('PerformanceService', () => {
       makeHistoryRow({
         id: 'uuid-1',
         stockSymbol: 'AAPL',
-        status: 'Invest',
+        status: StockRecommendation.INVEST,
         entryPrice: 100 as unknown as number,
       }),
       makeHistoryRow({
         id: 'uuid-2',
         stockSymbol: 'MSFT',
-        status: 'Hold',
+        status: StockRecommendation.HOLD,
         entryPrice: 100 as unknown as number,
       }),
       makeHistoryRow({
         id: 'uuid-3',
         stockSymbol: 'GOOG',
-        status: 'Exit',
+        status: StockRecommendation.EXIT,
         entryPrice: 100 as unknown as number,
       }),
     ]);
@@ -182,7 +178,7 @@ describe('PerformanceService', () => {
       .mockResolvedValueOnce(makeMarketData(80))
       .mockResolvedValueOnce(makeMarketData(105));
 
-    const result = await service.getPerformance('user-1');
+    const result = await service.getPerformance();
 
     expect(result.stats.avgReturn).toBeCloseTo((10 + -20 + 5) / 3);
   });
@@ -191,7 +187,7 @@ describe('PerformanceService', () => {
     mockHistoryRepo.find.mockResolvedValue([makeHistoryRow({ stockSymbol: 'AAPL' })]);
     mockMarketDataRepo.findOne.mockResolvedValue(null);
 
-    const result = await service.getPerformance('user-1');
+    const result = await service.getPerformance();
 
     expect(result.recommendations).toHaveLength(0);
     expect(result.stats.totalCalls).toBe(0);
@@ -203,7 +199,7 @@ describe('PerformanceService', () => {
       { symbol: 'AAPL', name: 'Apple Inc.', sector: 'Technology' },
     ]);
 
-    const result = await service.getPerformance('user-1');
+    const result = await service.getPerformance();
 
     expect(result.recommendations[0].companyName).toBe('Apple Inc.');
   });
@@ -212,7 +208,7 @@ describe('PerformanceService', () => {
     mockHistoryRepo.find.mockResolvedValue([makeHistoryRow({ stockSymbol: 'AAPL' })]);
     mockStockRepo.findBy.mockResolvedValue([]);
 
-    const result = await service.getPerformance('user-1');
+    const result = await service.getPerformance();
 
     expect(result.recommendations[0].companyName).toBe('AAPL');
   });
@@ -234,7 +230,7 @@ describe('PerformanceService', () => {
       }),
     );
 
-    const resultPromise = service.getPerformance('user-1');
+    const resultPromise = service.getPerformance();
     await Promise.resolve();
     await Promise.resolve();
 
