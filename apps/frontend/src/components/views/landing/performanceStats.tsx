@@ -41,12 +41,19 @@ export const PerformanceStats = () => {
             <div className="w-14 h-14 rounded-xl bg-success/20 flex items-center justify-center mx-auto mb-4">
               <Target className="w-7 h-7 text-success" />
             </div>
-            <div className="text-5xl font-bold text-success mb-2">
-              {Number(successRate.toFixed(1))}%
+            <div
+              className={cn(
+                'text-5xl font-bold mb-2',
+                directionalCount > 0 ? 'text-success' : 'text-center text-muted-foreground',
+              )}
+            >
+              {directionalCount > 0 ? `${successRate.toFixed(1)}%` : '—'}
             </div>
             <div className="text-muted-foreground">Success Rate</div>
             <div className="text-sm text-muted-foreground mt-1">
-              {successCount} of {directionalCount} graded calls
+              {directionalCount > 0
+                ? `${successCount} of ${directionalCount} graded calls`
+                : 'No graded calls yet'}
             </div>
           </div>
 
@@ -57,13 +64,21 @@ export const PerformanceStats = () => {
             <div
               className={cn(
                 'text-5xl font-bold mb-2',
-                Number(avgReturn) > 0 ? 'text-success' : 'text-destructive',
+                directionalCount === 0
+                  ? 'text-center text-muted-foreground'
+                  : Number(avgReturn) > 0
+                    ? 'text-success'
+                    : Number(avgReturn) < 0
+                      ? 'text-destructive'
+                      : 'text-foreground',
               )}
             >
-              +{avgReturn}%
+              {directionalCount === 0 ? '—' : `${Number(avgReturn) > 0 ? '+' : ''}${avgReturn}%`}
             </div>
             <div className="text-muted-foreground">Average Return</div>
-            <div className="text-sm text-muted-foreground mt-1">Per recommendation</div>
+            <div className="text-sm text-muted-foreground mt-1">
+              {directionalCount === 0 ? 'No graded calls yet' : 'Per graded recommendation'}
+            </div>
           </div>
 
           <div className="glass-card p-8 text-center animate-fade-in stagger-2">
@@ -117,11 +132,16 @@ export const PerformanceStats = () => {
                     <td
                       className={cn(
                         'p-4 font-mono font-medium',
-                        rec.returnPct > 0 ? 'text-success' : 'text-destructive',
+                        rec.outcome === 'N/A'
+                          ? 'text-muted-foreground'
+                          : rec.returnPct > 0
+                            ? 'text-success'
+                            : 'text-destructive',
                       )}
                     >
-                      {rec.returnPct > 0 ? '+' : ''}
-                      {rec.returnPct.toFixed(1)}%
+                      {rec.outcome === 'N/A'
+                        ? '—'
+                        : `${rec.returnPct > 0 ? '+' : ''}${rec.returnPct.toFixed(1)}%`}
                     </td>
                     <td className="p-4">
                       {rec.outcome === 'Success' ? (
