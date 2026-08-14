@@ -48,9 +48,7 @@ export const Landing = () => {
       {/* CTA */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-secondary/30">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-foreground mb-4">
-            Ready to Invest Smarter?
-          </h2>
+          <h2 className="text-3xl font-bold text-foreground mb-4">Ready to Invest Smarter?</h2>
           <p className="text-muted-foreground mb-8">
             Join thousands of investors using AI-powered insights to make better decisions.
           </p>
@@ -72,11 +70,10 @@ export const Landing = () => {
             </span>
           </div>
           <p className="text-xs text-muted-foreground text-center">
-            Demo application. Not financial advice. Past performance does not guarantee future results.
+            Not financial advice. Past performance does not guarantee future results.
           </p>
         </div>
       </footer>
     </div>
   );
 };
-

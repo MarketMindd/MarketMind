@@ -108,9 +108,7 @@ export const SignIn = () => {
               </div>
             </div>
 
-            <GoogleAuthButton
-              onAuth={(payload) => googleSignIn.mutate(payload)}
-            />
+            <GoogleAuthButton onAuth={(payload) => googleSignIn.mutate(payload)} />
           </form>
 
           <div className="mt-6 text-center">
@@ -125,8 +123,7 @@ export const SignIn = () => {
           </div>
 
           <p className="mt-8 text-xs text-center text-muted-foreground">
-            By continuing, you agree to our Terms of Service and Privacy Policy. This is a demo
-            application — no real data is stored.
+            By continuing, you agree to our Terms of Service and Privacy Policy.
           </p>
         </div>
       </div>
