@@ -20,7 +20,7 @@ import { AppService } from './app.service';
     ScheduleModule.forRoot(),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, 'public'),
-      exclude: ['/api/(.*)'],
+      exclude: ['/api', '/api/*splat'],
     }),
     AuthModule,
     MarketModule,
