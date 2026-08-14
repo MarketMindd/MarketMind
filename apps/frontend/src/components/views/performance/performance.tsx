@@ -53,9 +53,13 @@ export const Performance = () => {
               </div>
               <span className="text-muted-foreground">Success Rate</span>
             </div>
-            <div className="text-4xl font-bold text-success">{successRate.toFixed(1)}%</div>
+            <div className="text-4xl font-bold text-success">
+              {directionalCount > 0 ? `${successRate.toFixed(1)}%` : '—'}
+            </div>
             <div className="text-sm text-muted-foreground mt-1">
-              {successCount} of {directionalCount} graded calls
+              {directionalCount > 0
+                ? `${successCount} of ${directionalCount} graded calls`
+                : 'No graded calls yet'}
             </div>
           </div>
 
@@ -69,11 +73,14 @@ export const Performance = () => {
             <div
               className={cn(
                 'text-4xl font-bold',
-                avgReturn > 0 ? 'text-success' : 'text-destructive',
+                totalCalls === 0
+                  ? 'text-foreground'
+                  : avgReturn > 0
+                    ? 'text-success'
+                    : 'text-destructive',
               )}
             >
-              {avgReturn > 0 ? '+' : ''}
-              {avgReturnDisplay}%
+              {totalCalls === 0 ? '—' : `${avgReturn > 0 ? '+' : ''}${avgReturnDisplay}%`}
             </div>
             <div className="text-sm text-muted-foreground mt-1">Per recommendation</div>
           </div>
@@ -86,7 +93,9 @@ export const Performance = () => {
               <span className="text-muted-foreground">Total Calls</span>
             </div>
             <div className="text-4xl font-bold text-foreground">{totalCalls}</div>
-            <div className="text-sm text-muted-foreground mt-1">Since {formatDate(since)}</div>
+            <div className="text-sm text-muted-foreground mt-1">
+              {totalCalls === 0 ? 'No calls yet' : `Since ${formatDate(since)}`}
+            </div>
           </div>
         </div>
 
@@ -110,6 +119,13 @@ export const Performance = () => {
                 </tr>
               </thead>
               <tbody>
+                {recommendations.length === 0 && (
+                  <tr>
+                    <td colSpan={7} className="p-8 text-center text-sm text-muted-foreground">
+                      No recommendations yet. Check back once the AI has made some calls.
+                    </td>
+                  </tr>
+                )}
                 {recommendations.map((rec, i) => (
                   <tr
                     key={rec.id}

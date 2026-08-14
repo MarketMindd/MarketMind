@@ -32,27 +32,37 @@ export const PerformanceSummary = ({
         </Link>
       </div>
 
-      <div className="flex-1 flex flex-col justify-center text-center py-2">
-        <div className="flex items-center justify-center gap-2 mb-2">
-          <CheckCircle2 className="w-5 h-5 text-success" />
-          <span className="text-3xl font-bold text-foreground">
-            {successCount}
-            <span className="text-muted-foreground text-xl"> / {directionalCount}</span>
-          </span>
+      {directionalCount === 0 ? (
+        <div className="flex-1 flex flex-col items-center justify-center text-center py-2">
+          <Award className="w-5 h-5 text-muted-foreground mb-2" />
+          <p className="text-sm text-foreground mb-1">No graded picks yet</p>
+          <p className="text-xs text-muted-foreground">
+            Check back once recommendations have had time to play out.
+          </p>
         </div>
-        <p className="text-sm text-foreground mb-1">picks worked out</p>
-        <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
-          That's a{' '}
-          <Term
-            term={`Success rate: ${Number(successRate.toFixed(1))}%`}
-            explanation="The share of past AI recommendations that ended up making money."
-            hideIcon
-            className="text-success font-medium no-underline"
-          >
-            {Number(successRate.toFixed(1))}% hit rate
-          </Term>
-        </p>
-      </div>
+      ) : (
+        <div className="flex-1 flex flex-col justify-center text-center py-2">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <CheckCircle2 className="w-5 h-5 text-success" />
+            <span className="text-3xl font-bold text-foreground">
+              {successCount}
+              <span className="text-muted-foreground text-xl"> / {directionalCount}</span>
+            </span>
+          </div>
+          <p className="text-sm text-foreground mb-1">picks worked out</p>
+          <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+            That's a{' '}
+            <Term
+              term={`Success rate: ${Number(successRate.toFixed(1))}%`}
+              explanation="The share of past AI recommendations that ended up making money."
+              hideIcon
+              className="text-success font-medium no-underline"
+            >
+              {Number(successRate.toFixed(1))}% hit rate
+            </Term>
+          </p>
+        </div>
+      )}
     </div>
   );
 };
