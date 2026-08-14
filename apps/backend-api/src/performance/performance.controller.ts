@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Controller, Get, Request, UseGuards } from '@nestjs/common';
-import { AuthGuard } from '../auth/auth.guard';
+import { Controller, Get } from '@nestjs/common';
+import { Public } from '../decorators/roles.decorator';
 import { PerformanceService } from './performance.service';
 
 @Controller('performance')
-@UseGuards(AuthGuard)
 export class PerformanceController {
   constructor(private readonly performanceService: PerformanceService) {}
 
+  @Public()
   @Get()
-  async getPerformance(@Request() req: any) {
-    return this.performanceService.getPerformance(req.user.id);
+  async getPerformance() {
+    return this.performanceService.getPerformance();
   }
 }

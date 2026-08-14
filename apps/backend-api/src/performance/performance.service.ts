@@ -24,9 +24,7 @@ export class PerformanceService {
     private readonly marketDataRepo: Repository<MarketDataEntity>,
   ) {}
 
-  async getPerformance(userId: string): Promise<PerformanceResponse> {
-    void userId;
-
+  async getPerformance(): Promise<PerformanceResponse> {
     const historyRows = await this.fetchAllHistory();
     const symbols = this.extractUniqueSymbols(historyRows);
     const [companyNames, currentPrices] = await Promise.all([
