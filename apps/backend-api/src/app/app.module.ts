@@ -1,5 +1,7 @@
+import { join } from 'path';
 import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ServeStaticModule } from '@nestjs/serve-static';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { createDataSourceOptions } from '@market-mind/database';
 import { AuthModule } from '../auth/auth.module';
@@ -16,6 +18,10 @@ import { AppService } from './app.service';
   imports: [
     TypeOrmModule.forRoot(createDataSourceOptions()),
     ScheduleModule.forRoot(),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, 'public'),
+      exclude: ['/api', '/api/*splat'],
+    }),
     AuthModule,
     MarketModule,
     PortfolioModule,

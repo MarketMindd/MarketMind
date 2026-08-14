@@ -11,7 +11,7 @@ import { SymbolFilterStateEntity } from '../entities/symbol-filter-state.entity'
 import { UserProfileEntity } from '../entities/user-profile.entity';
 
 export const createDataSourceOptions = (): DataSourceOptions => {
-  const dbEnv = getDatabaseConfig();
+  const dbEnv = getDatabaseConfig(process.env);
 
   return {
     type: 'postgres',
