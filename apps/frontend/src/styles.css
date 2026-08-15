@@ -123,7 +123,7 @@
     @apply transition-all duration-300;
   }
 
-  .hover-lift:hover {
+  .hover-lift:hover:not(:has([data-tooltip-trigger]:hover)) {
     transform: translateY(-2px);
     box-shadow: 0 8px 32px hsl(222 47% 4% / 0.5);
   }

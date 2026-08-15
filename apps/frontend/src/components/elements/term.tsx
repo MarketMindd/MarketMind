@@ -24,6 +24,7 @@ export const Term = ({ children, term, explanation, className, hideIcon }: TermP
     <Tooltip>
       <TooltipTrigger asChild>
         <span
+          data-tooltip-trigger
           className={cn(
             'inline-flex items-baseline gap-0.5 underline decoration-dotted decoration-muted-foreground/50 underline-offset-2 cursor-help',
             className
