@@ -1,14 +1,28 @@
 import { Filter, Sparkles } from 'lucide-react';
+import { useEffect, useState, type Dispatch, type SetStateAction } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RecommendationStatus, Stock, StockRecommendation } from '@market-mind/common';
 import { Button } from '@/components/elements/button';
 import { StockCard } from '@/components/elements/stockCard';
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { ALL_FILTERS, recommendationDisplayLabel } from './recommendationSummary';
+
+const INITIAL_VISIBLE_STOCKS = 6;
 
 interface RecommendedStocksListProps {
   filteredRecommendedStocks: Stock[];
   filter: typeof ALL_FILTERS | RecommendationStatus;
   setFilter: (filter: typeof ALL_FILTERS | RecommendationStatus) => void;
+  selectedSectors: Stock['sector'][];
+  setSelectedSectors: Dispatch<SetStateAction<string[]>>;
+  availableSectors: string[];
   portfolioStocksCount: number;
 }
 
@@ -16,9 +30,28 @@ export const RecommendedStocksList = ({
   filteredRecommendedStocks,
   filter,
   setFilter,
+  selectedSectors,
+  setSelectedSectors,
+  availableSectors,
   portfolioStocksCount,
 }: RecommendedStocksListProps) => {
   const navigate = useNavigate();
+  const [visibleStockCount, setVisibleStockCount] = useState(INITIAL_VISIBLE_STOCKS);
+  const visibleStocks = filteredRecommendedStocks.slice(0, visibleStockCount);
+  const remainingStockCount = filteredRecommendedStocks.length - visibleStocks.length;
+  const selectedSectorsLabel = selectedSectors.length ? selectedSectors.join(', ') : 'All Sectors';
+
+  useEffect(() => {
+    setVisibleStockCount(INITIAL_VISIBLE_STOCKS);
+  }, [filter, selectedSectors]);
+
+  const toggleSector = (sector: string) => {
+    setSelectedSectors((currentSectors) =>
+      currentSectors.includes(sector)
+        ? currentSectors.filter((currentSector) => currentSector !== sector)
+        : [...currentSectors, sector],
+    );
+  };
 
   return (
     <div className="animate-fade-in stagger-3">
@@ -55,10 +88,61 @@ export const RecommendedStocksList = ({
             </Button>
           ))}
         </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="glass"
+              className="w-[340px] justify-between border-border/50 font-normal hover:border-primary/50"
+              aria-label={`Filter stocks by sector. Selected: ${selectedSectorsLabel}`}
+              title={selectedSectorsLabel}
+            >
+              <span className="flex min-w-0 items-center gap-2">
+                <span className="truncate">{selectedSectorsLabel}</span>
+                {selectedSectors.length > 0 && (
+                  <span className="rounded-md bg-primary/15 px-1.5 py-0.5 text-xs font-semibold text-primary">
+                    {selectedSectors.length}
+                  </span>
+                )}
+              </span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            align="start"
+            className="glass-card w-[340px] border-border/50 p-2 shadow-xl shadow-black/20"
+          >
+            <div className="flex items-center justify-between px-2 py-2">
+              <DropdownMenuLabel className="p-0 text-xs uppercase tracking-wide text-muted-foreground">
+                Filter by sector
+              </DropdownMenuLabel>
+              {selectedSectors.length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  className="text-primary hover:bg-primary/10 hover:text-primary"
+                  onClick={() => setSelectedSectors([])}
+                >
+                  Clear all
+                </Button>
+              )}
+            </div>
+            <DropdownMenuSeparator />
+            {availableSectors.map((availableSector) => (
+              <DropdownMenuCheckboxItem
+                key={availableSector}
+                checked={selectedSectors.includes(availableSector)}
+                onSelect={(event) => event.preventDefault()}
+                onCheckedChange={() => toggleSector(availableSector)}
+                className="mb-1 rounded-lg py-2.5 pl-9 pr-3 last:mb-0 data-[state=checked]:bg-primary/15 data-[state=checked]:text-primary"
+              >
+                {availableSector}
+              </DropdownMenuCheckboxItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {filteredRecommendedStocks.map((stock, i) => (
+        {visibleStocks.map((stock, i) => (
           <div
             key={stock.symbol}
             className="animate-fade-in"
@@ -69,11 +153,25 @@ export const RecommendedStocksList = ({
         ))}
       </div>
 
+      {filteredRecommendedStocks.length > 0 && (
+        <div className="mt-5 flex flex-col items-center gap-3">
+          <p className="text-sm text-muted-foreground">
+            Showing {visibleStocks.length} of {filteredRecommendedStocks.length} picks
+          </p>
+          {remainingStockCount > 0 && (
+            <Button
+              variant="outline"
+              onClick={() => setVisibleStockCount((count) => count + INITIAL_VISIBLE_STOCKS)}
+            >
+              Show {Math.min(INITIAL_VISIBLE_STOCKS, remainingStockCount)} more
+            </Button>
+          )}
+        </div>
+      )}
+
       {filteredRecommendedStocks.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-muted-foreground">
-            No stocks here right now — try another filter.
-          </p>
+          <p className="text-muted-foreground">No stocks here right now — try another filter.</p>
         </div>
       )}
     </div>

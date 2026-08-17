@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { RecommendationStatus, StockRecommendation } from '@market-mind/common';
-import { DailyBrief } from './dailyBrief';
-import { RecommendationSummary, ALL_FILTERS } from './recommendationSummary';
-import { RecommendedStocksList } from './recommendedStocksList';
-import { PortfolioSection } from './portfolioSection';
+import { RecommendationStatus, Stock, StockRecommendation } from '@market-mind/common';
 import { useClientQueries } from '@/hooks/useClientQueries';
+import { DailyBrief } from './dailyBrief';
 import { PerformanceSummary } from './performanceSummary';
+import { PortfolioSection } from './portfolioSection';
+import { ALL_FILTERS, RecommendationSummary } from './recommendationSummary';
+import { RecommendedStocksList } from './recommendedStocksList';
 
 export const Dashboard = () => {
   const {
@@ -14,6 +14,7 @@ export const Dashboard = () => {
     performance: { useGetPerformance },
   } = useClientQueries();
   const [filter, setFilter] = useState<typeof ALL_FILTERS | RecommendationStatus>(ALL_FILTERS);
+  const [selectedSectors, setSelectedSectors] = useState<Stock['sector'][]>([]);
 
   const { data: portfolio = [] } = usePortfolio();
   const { data: marketSummary, isLoading: isSummaryLoading } = useAiMarketSummary();
@@ -22,9 +23,12 @@ export const Dashboard = () => {
   const { data: stocks = [] } = useGetAllStocks();
   const portfolioStocks = stocks.filter((stock) => portfolioTickers.includes(stock.symbol));
   const recommendedStocks = stocks.filter((stock) => !portfolioTickers.includes(stock.symbol));
+  const availableSectors = [...new Set(recommendedStocks.map((stock) => stock.sector))].sort();
 
-  const filteredRecommendedStocks = recommendedStocks.filter((stock) =>
-    filter === ALL_FILTERS ? true : stock.aiRecommendation.status === filter,
+  const filteredRecommendedStocks = recommendedStocks.filter(
+    (stock) =>
+      (filter === ALL_FILTERS || stock.aiRecommendation.status === filter) &&
+      (selectedSectors.length === 0 || selectedSectors.includes(stock.sector)),
   );
 
   const investCount = stocks.filter(
@@ -36,8 +40,6 @@ export const Dashboard = () => {
   const exitCount = stocks.filter(
     (s) => s.aiRecommendation.status === StockRecommendation.EXIT,
   ).length;
-
-
 
   const today = new Date().toLocaleDateString(undefined, {
     weekday: 'long',
@@ -62,9 +64,9 @@ export const Dashboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-8">
           <div className="lg:col-span-1">
             {isPerformanceLoading ? (
-               <div className="glass-card p-5 h-full flex items-center justify-center">
-                 <span className="text-muted-foreground text-sm animate-pulse">Loading...</span>
-               </div>
+              <div className="glass-card p-5 h-full flex items-center justify-center">
+                <span className="text-muted-foreground text-sm animate-pulse">Loading...</span>
+              </div>
             ) : performanceData ? (
               <PerformanceSummary
                 successCount={performanceData.stats.successCount}
@@ -88,13 +90,13 @@ export const Dashboard = () => {
           filteredRecommendedStocks={filteredRecommendedStocks}
           filter={filter}
           setFilter={setFilter}
+          selectedSectors={selectedSectors}
+          setSelectedSectors={setSelectedSectors}
+          availableSectors={availableSectors}
           portfolioStocksCount={portfolioStocks.length}
         />
 
-        <PortfolioSection
-          portfolio={portfolio}
-          portfolioStocks={portfolioStocks}
-        />
+        <PortfolioSection portfolio={portfolio} portfolioStocks={portfolioStocks} />
       </main>
     </div>
   );
