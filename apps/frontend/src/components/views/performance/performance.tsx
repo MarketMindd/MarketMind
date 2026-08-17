@@ -15,10 +15,17 @@ export const Performance = () => {
     profile: { useGetProfile },
   } = useClientQueries();
 
-  const { data: profileData } = useGetProfile({ enabled: isAuthenticated });
+  const { data: profileData, isLoading: isProfileLoading } = useGetProfile({
+    enabled: isAuthenticated,
+  });
   const riskTolerance = isAuthenticated ? profileData?.riskTolerance : undefined;
+  const performanceReady = !isAuthenticated || riskTolerance !== undefined;
 
-  const { data: performanceData, isLoading } = useGetPerformance(riskTolerance);
+  const { data: performanceData, isLoading: isPerfLoading } = useGetPerformance(riskTolerance, {
+    enabled: performanceReady,
+  });
+
+  const isLoading = isProfileLoading || isPerfLoading;
 
   if (isLoading) {
     return (

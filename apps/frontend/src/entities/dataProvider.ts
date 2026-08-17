@@ -30,7 +30,7 @@ export interface iDataProvider {
   };
   stocks: {
     getStocks: (symbols: string[]) => Promise<Stock[]>;
-    getAllStocks: () => Promise<Stock[]>;
+    getAllStocks: (riskTolerance?: string) => Promise<Stock[]>;
     getBasicStocks: () => Promise<Stock[]>;
   };
   portfolio: {

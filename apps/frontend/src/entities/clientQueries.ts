@@ -61,6 +61,7 @@ export type iClientQueriesProvider = {
       options?: Omit<UseQueryOptions<Stock[], Error>, 'queryKey' | 'queryFn'>,
     ) => UseQueryResult<Stock[], Error>;
     useGetAllStocks: (
+      riskTolerance?: string,
       options?: Omit<UseQueryOptions<Stock[], Error>, 'queryKey' | 'queryFn'>,
     ) => UseQueryResult<Stock[], Error>;
     useGetBasicStocks: (

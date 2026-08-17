@@ -169,9 +169,10 @@ export const createFetchDataProvider = (): iDataProvider => {
     }
   };
 
-  const getAllStocks = async () => {
+  const getAllStocks = async (riskTolerance?: string) => {
     try {
-      const res = await apiClient.get('/stocks');
+      const url = riskTolerance ? `/stocks?riskTolerance=${riskTolerance}` : '/stocks';
+      const res = await apiClient.get(url);
       return res.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {

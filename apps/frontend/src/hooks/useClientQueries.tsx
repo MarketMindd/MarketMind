@@ -159,13 +159,14 @@ export const useClientQueries = (): iClientQueriesProvider => {
   };
 
   const useGetAllStocks = (
+    riskTolerance?: string,
     options?: Omit<UseQueryOptions<Stock[], Error>, 'queryKey' | 'queryFn'>,
   ) => {
     return useQuery<Stock[], Error>({
-      queryKey: ['allStocks'],
+      queryKey: ['allStocks', riskTolerance],
       queryFn: async () => {
         if (!ctx.dataProvider) return [];
-        return ctx.dataProvider.stocks.getAllStocks();
+        return ctx.dataProvider.stocks.getAllStocks(riskTolerance);
       },
       enabled: !!ctx.dataProvider,
       ...options,

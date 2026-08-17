@@ -83,7 +83,7 @@ export class NotificationService {
     );
 
     return {
-      from: `"Market Mind" <${appConfig.email.from}>`,
+      from: `"MarketMind" <${appConfig.email.from}>`,
       to: recipients.map((recipient) => recipient.email),
       subject,
       text: [
