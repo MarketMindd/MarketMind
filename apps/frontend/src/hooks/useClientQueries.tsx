@@ -330,11 +330,12 @@ export const useClientQueries = (): iClientQueriesProvider => {
   };
 
   const useGetPerformance = (
+    riskTolerance?: string,
     options?: Omit<UseQueryOptions<PerformanceResponse, Error>, 'queryKey' | 'queryFn'>,
   ) => {
     return useQuery<PerformanceResponse, Error>({
-      queryKey: ['performance'],
-      queryFn: () => ctx.dataProvider.performance.getPerformance(),
+      queryKey: ['performance', riskTolerance],
+      queryFn: () => ctx.dataProvider.performance.getPerformance(riskTolerance),
       ...options,
     });
   };

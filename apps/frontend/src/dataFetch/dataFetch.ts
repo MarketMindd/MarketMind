@@ -300,8 +300,10 @@ export const createFetchDataProvider = (): iDataProvider => {
       },
     },
     performance: {
-      getPerformance: async () => {
-        const res = await apiClient.get<PerformanceResponse>('/performance');
+      getPerformance: async (riskTolerance?: string) => {
+        const res = await apiClient.get<PerformanceResponse>('/performance', {
+          params: riskTolerance ? { riskTolerance } : undefined,
+        });
         return res.data;
       },
     },

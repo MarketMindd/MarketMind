@@ -1,6 +1,7 @@
 import { Award, CheckCircle, Loader2, Target, TrendingUp, XCircle } from 'lucide-react';
 import { RecommendationOutcome, StockRecommendation } from '@market-mind/common';
 import { Size } from '@/enums/recommendationBadge';
+import { useIsAuthenticated } from '@/hooks/useIsAuthenticated';
 import { useClientQueries } from '@/hooks/useClientQueries';
 import { formatDate } from '@/utils/dateUtils';
 import { cn } from '@/utils/tailwindUtils';
@@ -8,11 +9,16 @@ import { RecommendationBadge } from '../../elements/recommendationBadge';
 import { Term } from '../../elements/term';
 
 export const Performance = () => {
+  const isAuthenticated = useIsAuthenticated();
   const {
     performance: { useGetPerformance },
+    profile: { useGetProfile },
   } = useClientQueries();
 
-  const { data: performanceData, isLoading } = useGetPerformance();
+  const { data: profileData } = useGetProfile({ enabled: isAuthenticated });
+  const riskTolerance = isAuthenticated ? profileData?.riskTolerance : undefined;
+
+  const { data: performanceData, isLoading } = useGetPerformance(riskTolerance);
 
   if (isLoading) {
     return (

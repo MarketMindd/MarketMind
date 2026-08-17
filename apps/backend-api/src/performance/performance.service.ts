@@ -19,8 +19,8 @@ export class PerformanceService {
     private readonly stockRepo: Repository<StockEntity>,
   ) {}
 
-  async getPerformance(): Promise<PerformanceResponse> {
-    const historyRows = await this.fetchAllHistory();
+  async getPerformance(riskTolerance?: string): Promise<PerformanceResponse> {
+    const historyRows = await this.fetchHistory(riskTolerance);
     const companyNames = await this.resolveCompanyNames(this.extractUniqueSymbols(historyRows));
     const recommendations = this.buildRecommendationRows(historyRows, companyNames);
     const stats = this.computeStats(recommendations);
@@ -28,8 +28,22 @@ export class PerformanceService {
     return { stats, recommendations };
   }
 
-  private fetchAllHistory(): Promise<RecommendationHistoryEntity[]> {
-    return this.historyRepo.find({ order: { createdAt: 'DESC' } });
+  private fetchHistory(riskTolerance?: string): Promise<RecommendationHistoryEntity[]> {
+    if (riskTolerance) {
+      return this.historyRepo.find({
+        where: { riskTolerance: riskTolerance as RecommendationHistoryEntity['riskTolerance'] },
+        order: { createdAt: 'DESC' },
+      });
+    }
+
+    return this.historyRepo.query(`
+      SELECT DISTINCT ON ("stockSymbol", status) *
+      FROM recommendation_history
+      WHERE "currentPrice" IS NOT NULL
+        AND "returnPct" IS NOT NULL
+        AND outcome IS NOT NULL
+      ORDER BY "stockSymbol", status, "createdAt" DESC
+    `);
   }
 
   private extractUniqueSymbols(rows: RecommendationHistoryEntity[]): string[] {
@@ -55,7 +69,7 @@ export class PerformanceService {
           companyName: companyNames.get(r.stockSymbol) ?? r.stockSymbol,
           status: r.status as StockRecommendation,
           riskTolerance: r.riskTolerance,
-          date: r.createdAt.toISOString(),
+          date: new Date(r.createdAt).toISOString(),
           entryPrice: Number(r.entryPrice),
           currentPrice: Number(r.currentPrice),
           returnPct: Number(r.returnPct),
