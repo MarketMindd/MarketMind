@@ -99,6 +99,7 @@ export type iClientQueriesProvider = {
   };
   performance: {
     useGetPerformance: (
+      riskTolerance?: string,
       options?: Omit<UseQueryOptions<PerformanceResponse, Error>, 'queryKey' | 'queryFn'>,
     ) => UseQueryResult<PerformanceResponse, Error>;
   };

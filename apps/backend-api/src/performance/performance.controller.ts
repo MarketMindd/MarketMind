@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { Public } from '../decorators/roles.decorator';
 import { PerformanceService } from './performance.service';
 
@@ -9,7 +8,7 @@ export class PerformanceController {
 
   @Public()
   @Get()
-  async getPerformance() {
-    return this.performanceService.getPerformance();
+  async getPerformance(@Query('riskTolerance') riskTolerance?: string) {
+    return this.performanceService.getPerformance(riskTolerance);
   }
 }

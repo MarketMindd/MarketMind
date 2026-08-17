@@ -46,6 +46,6 @@ export interface iDataProvider {
     sendMessage: (sessionId: string, payload: SendMessagePayload) => Promise<ChatMessage>;
   };
   performance: {
-    getPerformance: () => Promise<PerformanceResponse>;
+    getPerformance: (riskTolerance?: string) => Promise<PerformanceResponse>;
   };
 }

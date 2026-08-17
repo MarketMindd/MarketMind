@@ -113,9 +113,18 @@ export const useClientQueries = (): iClientQueriesProvider => {
   const useUpdateProfile = (
     options?: UseMutationOptions<{ success: boolean }, Error, UpdateProfilePayload>,
   ) => {
+    const queryClient = useQueryClient();
     return useMutation<{ success: boolean }, Error, UpdateProfilePayload>({
       mutationFn: (payload) => ctx.dataProvider.profile.updateProfile(payload),
       ...options,
+      onSuccess: (data, variables, onMutateResult, context) => {
+        queryClient.invalidateQueries({ queryKey: ['portfolio', 'market-summary'] });
+        queryClient.invalidateQueries({ queryKey: ['allStocks'] });
+        queryClient.invalidateQueries({ queryKey: ['performance'] });
+        if (options?.onSuccess) {
+          options.onSuccess(data, variables, onMutateResult, context);
+        }
+      },
     });
   };
 
@@ -330,11 +339,12 @@ export const useClientQueries = (): iClientQueriesProvider => {
   };
 
   const useGetPerformance = (
+    riskTolerance?: string,
     options?: Omit<UseQueryOptions<PerformanceResponse, Error>, 'queryKey' | 'queryFn'>,
   ) => {
     return useQuery<PerformanceResponse, Error>({
-      queryKey: ['performance'],
-      queryFn: () => ctx.dataProvider.performance.getPerformance(),
+      queryKey: ['performance', riskTolerance],
+      queryFn: () => ctx.dataProvider.performance.getPerformance(riskTolerance),
       ...options,
     });
   };
