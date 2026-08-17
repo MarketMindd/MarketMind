@@ -25,9 +25,7 @@ export class AiService {
 
   async analyze(filtered: FilteredSnapshot): Promise<AiRecommendation[]> {
     const symbol = filtered.snapshot.symbol;
-    const uniqueRiskLevels = [
-      ...new Set(filtered.users.map((u) => u.riskTolerance)),
-    ] as RiskTolerance[];
+    const uniqueRiskLevels = [...new Set(filtered.riskTolerances)];
 
     if (uniqueRiskLevels.length === 0) return [];
 

@@ -5,17 +5,10 @@ import {
   PerformanceRecommendation,
   PerformanceResponse,
   PerformanceStats,
+  RecommendationOutcome,
   StockRecommendation,
 } from '@market-mind/common';
-import { MarketDataEntity, RecommendationHistoryEntity, StockEntity } from '@market-mind/database';
-
-// A Hold call is a bet that the stock won't move much. It's graded a Success if price
-// stayed within this band, Miss if it swung beyond it in either direction.
-const HOLD_STABILITY_THRESHOLD_PCT = 5;
-
-// Invest/Exit calls used to flip to Miss on any move against them, even 0.1% of same-day
-// noise. This band gives directional calls the same slack Hold already gets.
-const DIRECTIONAL_NOISE_THRESHOLD_PCT = 1;
+import { RecommendationHistoryEntity, StockEntity } from '@market-mind/database';
 
 @Injectable()
 export class PerformanceService {
@@ -24,18 +17,12 @@ export class PerformanceService {
     private readonly historyRepo: Repository<RecommendationHistoryEntity>,
     @InjectRepository(StockEntity)
     private readonly stockRepo: Repository<StockEntity>,
-    @InjectRepository(MarketDataEntity)
-    private readonly marketDataRepo: Repository<MarketDataEntity>,
   ) {}
 
   async getPerformance(): Promise<PerformanceResponse> {
     const historyRows = await this.fetchAllHistory();
-    const symbols = this.extractUniqueSymbols(historyRows);
-    const [companyNames, currentPrices] = await Promise.all([
-      this.resolveCompanyNames(symbols),
-      this.resolveCurrentPrices(symbols),
-    ]);
-    const recommendations = this.buildRecommendationRows(historyRows, companyNames, currentPrices);
+    const companyNames = await this.resolveCompanyNames(this.extractUniqueSymbols(historyRows));
+    const recommendations = this.buildRecommendationRows(historyRows, companyNames);
     const stats = this.computeStats(recommendations);
 
     return { stats, recommendations };
@@ -54,34 +41,12 @@ export class PerformanceService {
     return new Map(stocks.map((s) => [s.symbol, s.name]));
   }
 
-  private async resolveCurrentPrices(symbols: string[]): Promise<Map<string, number>> {
-    const results = await Promise.all(
-      symbols.map((sym) =>
-        this.marketDataRepo.findOne({
-          where: { stockSymbol: sym },
-          order: { time: 'DESC' },
-        }),
-      ),
-    );
-    const priceMap = new Map<string, number>();
-    symbols.forEach((sym, i) => {
-      const result = results[i];
-      if (result) priceMap.set(sym, Number(result.price));
-    });
-    return priceMap;
-  }
-
   private buildRecommendationRows(
     rows: RecommendationHistoryEntity[],
     companyNames: Map<string, string>,
-    currentPrices: Map<string, number>,
   ): PerformanceRecommendation[] {
     return rows.flatMap((r) => {
-      const currentPrice = currentPrices.get(r.stockSymbol);
-      const entryPrice = Number(r.entryPrice);
-      if (currentPrice === undefined || entryPrice === 0) return [];
-
-      const returnPct = ((currentPrice - entryPrice) / entryPrice) * 100;
+      if (r.currentPrice === null || r.returnPct === null || r.outcome === null) return [];
 
       return [
         {
@@ -91,34 +56,35 @@ export class PerformanceService {
           status: r.status as StockRecommendation,
           riskTolerance: r.riskTolerance,
           date: r.createdAt.toISOString(),
-          entryPrice,
-          currentPrice,
-          returnPct,
-          outcome: this.computeOutcome(r.status, returnPct),
+          entryPrice: Number(r.entryPrice),
+          currentPrice: Number(r.currentPrice),
+          returnPct: Number(r.returnPct),
+          outcome: r.outcome,
         },
       ];
     });
   }
 
-  private computeOutcome(status: string, returnPct: number): 'Success' | 'Miss' | 'N/A' {
-    if (returnPct === 0) return 'N/A';
-    if (status === 'Invest') return returnPct > -DIRECTIONAL_NOISE_THRESHOLD_PCT ? 'Success' : 'Miss';
-    if (status === 'Exit') return returnPct < DIRECTIONAL_NOISE_THRESHOLD_PCT ? 'Success' : 'Miss';
-    if (status === 'Hold') {
-      return Math.abs(returnPct) <= HOLD_STABILITY_THRESHOLD_PCT ? 'Success' : 'Miss';
-    }
-    return 'N/A';
-  }
-
   private computeStats(rows: PerformanceRecommendation[]): PerformanceStats {
-    const gradedRows = rows.filter((r) => r.outcome !== 'N/A' && r.status !== 'Hold');
-    const successCount = gradedRows.filter((r) => r.outcome === 'Success').length;
+    const gradedRows = rows.filter(
+      (r) => r.outcome !== RecommendationOutcome.NOT_APPLICABLE && r.status !== 'Hold',
+    );
+    const successCount = gradedRows.filter(
+      (r) => r.outcome === RecommendationOutcome.SUCCESS,
+    ).length;
     const directionalCount = gradedRows.length;
     const successRate = directionalCount > 0 ? (successCount / directionalCount) * 100 : 0;
     const avgReturn =
       rows.length > 0 ? rows.reduce((sum, r) => sum + r.returnPct, 0) / rows.length : 0;
     const since = rows.length > 0 ? rows[rows.length - 1].date : new Date().toISOString();
 
-    return { successRate, avgReturn, totalCalls: rows.length, successCount, directionalCount, since };
+    return {
+      successRate,
+      avgReturn,
+      totalCalls: rows.length,
+      successCount,
+      directionalCount,
+      since,
+    };
   }
 }

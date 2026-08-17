@@ -27,7 +27,6 @@ export class AddVolatileStocks1777500000000 implements MigrationInterface {
     { symbol: 'NET', name: 'Cloudflare, Inc.', sector: 'Technology' },
     { symbol: 'CLOV', name: 'Clover Health Investments, Corp.', sector: 'Healthcare' },
     { symbol: 'VST', name: 'Vistra Corp.', sector: 'Utilities' },
-    { symbol: 'CYBR', name: 'CyberArk Software Ltd.', sector: 'Technology' },
     { symbol: 'SPCX', name: 'Space Exploration Technologies Corp.', sector: 'Technology' },
     { symbol: 'WIX', name: 'Wix.com Ltd.', sector: 'Technology' },
     { symbol: 'TEVA', name: 'Teva Pharmaceutical Industries Ltd.', sector: 'Healthcare' },

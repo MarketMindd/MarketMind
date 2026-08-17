@@ -72,19 +72,22 @@ export class FilterService {
       return null;
     }
 
-    // Check users before hitting the news API — no point fetching news if nobody is tracking.
-    const users = await this.loadUserContexts(snapshot.symbol);
-    if (users.length === 0) {
-      this.logger.debug(`No users tracking ${snapshot.symbol}`);
-      return null;
-    }
+    // Every tracked stock gets recommendations for all risk tiers; owners narrow this
+    // set so we don't redo work for tiers nobody currently holds the stock at.
+    const owners = await this.loadUserContexts(snapshot.symbol);
+    const riskTolerances =
+      owners.length > 0
+        ? [...new Set(owners.map((owner) => owner.riskTolerance))]
+        : Object.values(RiskTolerance);
 
-    // Lazy news fetch — only runs for symbols that passed dedup AND have users.
     const news = await this.fetchNews(snapshot.symbol);
 
     const recentCutoff = new Date(snapshot.fetchedAt.getTime() - RECENT_NEWS_WINDOW_MS);
     const hasRecentNews = news.some((a) => a.publishedAt >= recentCutoff);
-    const isColdStart = await this.hasMissingRecommendationCoverage(snapshot.symbol, users);
+    const isColdStart = await this.hasMissingRecommendationCoverage(
+      snapshot.symbol,
+      riskTolerances,
+    );
 
     // Gate 2 — significance: forward if cumulative drift is large enough, recent news exists,
     // or tracked risk tolerances do not yet have recommendation coverage.
@@ -104,10 +107,11 @@ export class FilterService {
 
     this.logger.log(
       `${snapshot.symbol} passed filter: delta=${delta.toFixed(2)}%, ` +
-        `recentNews=${hasRecentNews}, coldStart=${isColdStart}, users=${users.length}`,
+        `recentNews=${hasRecentNews}, coldStart=${isColdStart}, owners=${owners.length}, ` +
+        `riskTolerances=${riskTolerances.length}`,
     );
 
-    return { snapshot, news, users };
+    return { snapshot, news, riskTolerances };
   }
 
   private async fetchNews(symbol: string): Promise<NewsArticle[]> {
@@ -165,10 +169,8 @@ export class FilterService {
 
   private async hasMissingRecommendationCoverage(
     symbol: string,
-    users: UserContext[],
+    trackedRiskTolerances: RiskTolerance[],
   ): Promise<boolean> {
-    const trackedRiskTolerances = [...new Set(users.map((user) => user.riskTolerance))];
-
     if (trackedRiskTolerances.length === 0) {
       return false;
     }

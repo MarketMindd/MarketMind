@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { StockRecommendation } from '../enums/command';
+import { RecommendationOutcome } from '../enums/recommendation-outcome';
 import { RiskTolerance } from '../enums/risk-tolerance';
 
 export interface PerformanceRecommendation {
@@ -12,7 +13,7 @@ export interface PerformanceRecommendation {
   entryPrice: number;
   currentPrice: number;
   returnPct: number;
-  outcome: 'Success' | 'Miss' | 'N/A';
+  outcome: RecommendationOutcome;
 }
 
 export interface PerformanceStats {
@@ -39,7 +40,7 @@ export const performanceRecommendationSchema = z.object({
   entryPrice: z.number(),
   currentPrice: z.number(),
   returnPct: z.number(),
-  outcome: z.enum(['Success', 'Miss', 'N/A']),
+  outcome: z.nativeEnum(RecommendationOutcome),
 });
 
 export const performanceResponseSchema = z.object({

@@ -268,10 +268,17 @@ describe('FilterService', () => {
     expect(result).toBeNull();
   });
 
-  it('returns null and skips news API when no users track the symbol', async () => {
+  it('still evaluates all risk tolerances when no users track the symbol', async () => {
     mockPortfolioRepo.find.mockResolvedValueOnce([]);
-    await service.filter(makeSnapshot(5));
-    expect(mockGetNewsApiNews).not.toHaveBeenCalled();
+    mockRecommendationRepo.find.mockResolvedValueOnce([]);
+
+    const result = await service.filter(makeSnapshot(5));
+
+    expect(mockGetNewsApiNews).toHaveBeenCalled();
+    expect(result).not.toBeNull();
+    expect(result?.riskTolerances).toEqual(
+      expect.arrayContaining([RiskTolerance.LOW, RiskTolerance.MEDIUM, RiskTolerance.HIGH]),
+    );
   });
 
   it('news fetch failure is non-fatal — pipeline continues with empty articles', async () => {

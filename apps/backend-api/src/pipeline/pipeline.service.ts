@@ -20,7 +20,7 @@ export class PipelineService {
     if (!filtered) return;
 
     this.logger.log(
-      `Pipeline: ${snapshot.symbol} → AI (${filtered.users.length} users, ` +
+      `Pipeline: ${snapshot.symbol} → AI (${filtered.riskTolerances.length} risk tiers, ` +
         `${filtered.news.length} articles)`,
     );
 

@@ -1,11 +1,11 @@
+import { Award, CheckCircle, Loader2, Target, TrendingUp, XCircle } from 'lucide-react';
+import { RecommendationOutcome, StockRecommendation } from '@market-mind/common';
 import { Size } from '@/enums/recommendationBadge';
 import { useClientQueries } from '@/hooks/useClientQueries';
 import { formatDate } from '@/utils/dateUtils';
 import { cn } from '@/utils/tailwindUtils';
-import { StockRecommendation } from '@market-mind/common';
-import { Award, CheckCircle, Loader2, Target, TrendingUp, XCircle } from 'lucide-react';
-import { Term } from '../../elements/term';
 import { RecommendationBadge } from '../../elements/recommendationBadge';
+import { Term } from '../../elements/term';
 
 export const Performance = () => {
   const {
@@ -30,7 +30,8 @@ export const Performance = () => {
     );
   }
 
-  const { successRate, avgReturn, totalCalls, successCount, directionalCount, since } = performanceData.stats;
+  const { successRate, avgReturn, totalCalls, successCount, directionalCount, since } =
+    performanceData.stats;
   const recommendations = performanceData.recommendations;
 
   const avgReturnDisplay = avgReturn.toFixed(1);
@@ -165,24 +166,24 @@ export const Performance = () => {
                     <td
                       className={cn(
                         'p-4 font-mono font-medium',
-                        rec.outcome === 'N/A'
+                        rec.outcome === RecommendationOutcome.NOT_APPLICABLE
                           ? 'text-muted-foreground'
                           : rec.returnPct > 0
                             ? 'text-success'
                             : 'text-destructive',
                       )}
                     >
-                      {rec.outcome === 'N/A'
+                      {rec.outcome === RecommendationOutcome.NOT_APPLICABLE
                         ? '—'
                         : `${rec.returnPct > 0 ? '+' : ''}${rec.returnPct.toFixed(1)}%`}
                     </td>
                     <td className="p-4">
-                      {rec.outcome === 'Success' ? (
+                      {rec.outcome === RecommendationOutcome.SUCCESS ? (
                         <div className="flex items-center gap-2 text-success">
                           <CheckCircle size={18} />
                           <span className="text-sm font-medium">Success</span>
                         </div>
-                      ) : rec.outcome === 'Miss' ? (
+                      ) : rec.outcome === RecommendationOutcome.MISS ? (
                         <div className="flex items-center gap-2 text-destructive">
                           <XCircle size={18} />
                           <span className="text-sm font-medium">Miss</span>

@@ -16,7 +16,7 @@ export interface UserContext {
 export interface FilteredSnapshot {
   snapshot: MarketSnapshot;
   news: NewsArticle[];
-  users: UserContext[];
+  riskTolerances: RiskTolerance[];
 }
 
 export interface AlphaVantageFeedItem {

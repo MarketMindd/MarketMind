@@ -1,9 +1,9 @@
 import { CheckCircle, Target, TrendingUp, Users, XCircle } from 'lucide-react';
-import { StockRecommendation } from '@market-mind/common';
+import { RecommendationOutcome, StockRecommendation } from '@market-mind/common';
+import { Term } from '@/components/elements/term';
 import { useClientQueries } from '@/hooks/useClientQueries';
 import { formatDate } from '@/utils/dateUtils';
 import { cn } from '@/utils/tailwindUtils';
-import { Term } from '@/components/elements/term';
 
 export const PerformanceStats = () => {
   const {
@@ -87,7 +87,9 @@ export const PerformanceStats = () => {
             </div>
             <div className="text-5xl font-bold text-foreground mb-2">{totalCount}</div>
             <div className="text-muted-foreground">Total Recommendations</div>
-            <div className="text-sm text-muted-foreground mt-1">Since {formatDate(stats.since)}</div>
+            <div className="text-sm text-muted-foreground mt-1">
+              Since {formatDate(stats.since)}
+            </div>
           </div>
         </div>
 
@@ -132,21 +134,21 @@ export const PerformanceStats = () => {
                     <td
                       className={cn(
                         'p-4 font-mono font-medium',
-                        rec.outcome === 'N/A'
+                        rec.outcome === RecommendationOutcome.NOT_APPLICABLE
                           ? 'text-muted-foreground'
                           : rec.returnPct > 0
                             ? 'text-success'
                             : 'text-destructive',
                       )}
                     >
-                      {rec.outcome === 'N/A'
+                      {rec.outcome === RecommendationOutcome.NOT_APPLICABLE
                         ? '—'
                         : `${rec.returnPct > 0 ? '+' : ''}${rec.returnPct.toFixed(1)}%`}
                     </td>
                     <td className="p-4">
-                      {rec.outcome === 'Success' ? (
+                      {rec.outcome === RecommendationOutcome.SUCCESS ? (
                         <CheckCircle size={18} className="text-success" />
-                      ) : rec.outcome === 'Miss' ? (
+                      ) : rec.outcome === RecommendationOutcome.MISS ? (
                         <XCircle size={18} className="text-destructive" />
                       ) : (
                         <Term

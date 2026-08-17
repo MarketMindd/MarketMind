@@ -1,5 +1,5 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { RiskTolerance } from '@market-mind/common';
+import { RecommendationOutcome, RiskTolerance } from '@market-mind/common';
 import type { RecommendationStatus } from '@market-mind/common';
 
 @Entity({ name: 'recommendation_history' })
@@ -28,4 +28,21 @@ export class RecommendationHistoryEntity {
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt!: Date;
+
+  @Column({ type: 'decimal', precision: 15, scale: 4, nullable: true })
+  currentPrice!: number | null;
+
+  @Column({ type: 'decimal', precision: 8, scale: 4, nullable: true })
+  returnPct!: number | null;
+
+  @Column({
+    type: 'enum',
+    enum: RecommendationOutcome,
+    enumName: 'recommendation_outcome_enum',
+    nullable: true,
+  })
+  outcome!: RecommendationOutcome | null;
+
+  @Column({ type: 'boolean', default: false })
+  isFrozen!: boolean;
 }

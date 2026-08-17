@@ -6,9 +6,9 @@ export * from './entities/userProfile';
 export * from './enums/command';
 export * from './enums/explain-mode';
 export * from './enums/llm-provider';
+export * from './enums/recommendation-outcome';
 export * from './enums/risk-tolerance';
 export * from './enums/sector-interest';
 export * from './types';
 export * from './types/performance.types';
 export * from './utils';
-

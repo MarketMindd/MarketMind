@@ -18,7 +18,7 @@ const makeSnapshot = (): MarketSnapshot => ({
 const makeFiltered = (): FilteredSnapshot => ({
   snapshot: makeSnapshot(),
   news: [],
-  users: [{ userId: 'u1', riskTolerance: RiskTolerance.MEDIUM }],
+  riskTolerances: [RiskTolerance.MEDIUM],
 });
 
 describe('PipelineService', () => {

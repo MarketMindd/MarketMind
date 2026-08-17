@@ -15,9 +15,7 @@ const makeRecommendation = (symbol: string, riskTolerance: RiskTolerance): AiRec
   generatedAt: new Date(),
 });
 
-const makeSnapshot = (
-  users: { userId: string; riskTolerance: RiskTolerance }[],
-): FilteredSnapshot => ({
+const makeSnapshot = (riskTolerances: RiskTolerance[]): FilteredSnapshot => ({
   snapshot: {
     symbol: 'AAPL',
     price: 150,
@@ -26,7 +24,7 @@ const makeSnapshot = (
     fetchedAt: new Date(),
   },
   news: [],
-  users,
+  riskTolerances,
 });
 
 describe('AiService', () => {
@@ -56,20 +54,16 @@ describe('AiService', () => {
     service = module.get<AiService>(AiService);
   });
 
-  it('returns empty array when user list is empty', async () => {
+  it('returns empty array when risk tolerance list is empty', async () => {
     const result = await service.analyze(makeSnapshot([]));
     expect(result).toEqual([]);
     expect(mockLlmClient.generateContent).not.toHaveBeenCalled();
   });
 
-  it('calls Gemini exactly once for multiple users sharing the same risk tolerance', async () => {
+  it('calls Gemini exactly once for duplicate risk tolerances', async () => {
     mockResponseParser.parse.mockReturnValue(makeRecommendation('AAPL', RiskTolerance.MEDIUM));
-    const users = [
-      { userId: 'u1', riskTolerance: RiskTolerance.MEDIUM },
-      { userId: 'u2', riskTolerance: RiskTolerance.MEDIUM },
-      { userId: 'u3', riskTolerance: RiskTolerance.MEDIUM },
-    ];
-    await service.analyze(makeSnapshot(users));
+    const riskTolerances = [RiskTolerance.MEDIUM, RiskTolerance.MEDIUM, RiskTolerance.MEDIUM];
+    await service.analyze(makeSnapshot(riskTolerances));
     expect(mockLlmClient.generateContent).toHaveBeenCalledTimes(1);
   });
 
@@ -78,12 +72,8 @@ describe('AiService', () => {
       .mockReturnValueOnce(makeRecommendation('AAPL', RiskTolerance.LOW))
       .mockReturnValueOnce(makeRecommendation('AAPL', RiskTolerance.HIGH));
 
-    const users = [
-      { userId: 'u1', riskTolerance: RiskTolerance.LOW },
-      { userId: 'u2', riskTolerance: RiskTolerance.HIGH },
-      { userId: 'u3', riskTolerance: RiskTolerance.LOW },
-    ];
-    const result = await service.analyze(makeSnapshot(users));
+    const riskTolerances = [RiskTolerance.LOW, RiskTolerance.HIGH, RiskTolerance.LOW];
+    const result = await service.analyze(makeSnapshot(riskTolerances));
     expect(mockLlmClient.generateContent).toHaveBeenCalledTimes(2);
     expect(result).toHaveLength(2);
   });
@@ -94,11 +84,8 @@ describe('AiService', () => {
       .mockResolvedValueOnce('raw');
     mockResponseParser.parse.mockReturnValueOnce(makeRecommendation('AAPL', RiskTolerance.HIGH));
 
-    const users = [
-      { userId: 'u1', riskTolerance: RiskTolerance.LOW },
-      { userId: 'u2', riskTolerance: RiskTolerance.HIGH },
-    ];
-    const result = await service.analyze(makeSnapshot(users));
+    const riskTolerances = [RiskTolerance.LOW, RiskTolerance.HIGH];
+    const result = await service.analyze(makeSnapshot(riskTolerances));
     expect(result).toHaveLength(1);
     expect(result[0].riskTolerance).toBe(RiskTolerance.HIGH);
   });
@@ -106,11 +93,8 @@ describe('AiService', () => {
   it('returns empty array when all risk groups fail', async () => {
     mockLlmClient.generateContent.mockRejectedValue(new Error('API down'));
 
-    const users = [
-      { userId: 'u1', riskTolerance: RiskTolerance.LOW },
-      { userId: 'u2', riskTolerance: RiskTolerance.HIGH },
-    ];
-    const result = await service.analyze(makeSnapshot(users));
+    const riskTolerances = [RiskTolerance.LOW, RiskTolerance.HIGH];
+    const result = await service.analyze(makeSnapshot(riskTolerances));
     expect(result).toEqual([]);
   });
 });
