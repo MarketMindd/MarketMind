@@ -29,21 +29,16 @@ export class PerformanceService {
   }
 
   private fetchHistory(riskTolerance?: string): Promise<RecommendationHistoryEntity[]> {
-    if (riskTolerance) {
-      return this.historyRepo.find({
-        where: { riskTolerance: riskTolerance as RecommendationHistoryEntity['riskTolerance'] },
-        order: { createdAt: 'DESC' },
-      });
-    }
-
-    return this.historyRepo.query(`
-      SELECT DISTINCT ON ("stockSymbol", status) *
-      FROM recommendation_history
-      WHERE "currentPrice" IS NOT NULL
-        AND "returnPct" IS NOT NULL
-        AND outcome IS NOT NULL
-      ORDER BY "stockSymbol", status, "createdAt" DESC
-    `);
+    return this.historyRepo.query(
+      `SELECT DISTINCT ON ("stockSymbol") *
+       FROM recommendation_history
+       WHERE "currentPrice" IS NOT NULL
+         AND "returnPct" IS NOT NULL
+         AND outcome IS NOT NULL
+         ${riskTolerance ? `AND "riskTolerance" = $1` : ''}
+       ORDER BY "stockSymbol", "createdAt" DESC`,
+      riskTolerance ? [riskTolerance] : [],
+    );
   }
 
   private extractUniqueSymbols(rows: RecommendationHistoryEntity[]): string[] {

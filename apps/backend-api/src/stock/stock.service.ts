@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Stock } from '@market-mind/common';
+import { RiskTolerance, Stock } from '@market-mind/common';
 import { MarketDataEntity, RecommendationEntity, StockEntity } from '@market-mind/database';
 import { DEFAULT_STOCK_RECOMMENDATION } from './consts';
 import type { RawStock } from './types';
@@ -13,16 +13,16 @@ export class StockService {
     private readonly stockRepo: Repository<StockEntity>,
   ) {}
 
-  async getStocksBySymbols(symbols: string[]): Promise<Stock[]> {
+  async getStocksBySymbols(symbols: string[], riskTolerance?: RiskTolerance): Promise<Stock[]> {
     if (!symbols || symbols.length === 0) return [];
+
+    const joinCondition = riskTolerance
+      ? 'recommendation.stockSymbol = stocks.symbol AND recommendation.riskTolerance = :riskTolerance'
+      : 'recommendation.stockSymbol = stocks.symbol';
 
     const rawData: RawStock[] = await this.stockRepo
       .createQueryBuilder('stocks')
-      .leftJoin(
-        RecommendationEntity,
-        'recommendation',
-        'recommendation.stockSymbol = stocks.symbol',
-      )
+      .leftJoin(RecommendationEntity, 'recommendation', joinCondition, { riskTolerance })
       .innerJoin(MarketDataEntity, 'marketData', 'marketData.stockSymbol = stocks.symbol')
       .select([
         'stocks.symbol as "symbol"',
@@ -48,14 +48,14 @@ export class StockService {
     return rawData.map((data) => this.mapRawStock(data));
   }
 
-  async getAllStocks(): Promise<Stock[]> {
+  async getAllStocks(riskTolerance?: RiskTolerance): Promise<Stock[]> {
+    const joinCondition = riskTolerance
+      ? 'recommendation.stockSymbol = stocks.symbol AND recommendation.riskTolerance = :riskTolerance'
+      : 'recommendation.stockSymbol = stocks.symbol';
+
     const rawData: RawStock[] = await this.stockRepo
       .createQueryBuilder('stocks')
-      .leftJoin(
-        RecommendationEntity,
-        'recommendation',
-        'recommendation.stockSymbol = stocks.symbol',
-      )
+      .leftJoin(RecommendationEntity, 'recommendation', joinCondition, { riskTolerance })
       .leftJoin(MarketDataEntity, 'marketData', 'marketData.stockSymbol = stocks.symbol')
       .select([
         'stocks.symbol as "symbol"',

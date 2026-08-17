@@ -12,15 +12,17 @@ export const Dashboard = () => {
     portfolio: { usePortfolio, useAiMarketSummary },
     stocks: { useGetAllStocks },
     performance: { useGetPerformance },
+    profile: { useGetProfile },
   } = useClientQueries();
   const [filter, setFilter] = useState<typeof ALL_FILTERS | RecommendationStatus>(ALL_FILTERS);
   const [selectedSectors, setSelectedSectors] = useState<Stock['sector'][]>([]);
 
+  const { data: profileData } = useGetProfile();
   const { data: portfolio = [] } = usePortfolio();
   const { data: marketSummary, isLoading: isSummaryLoading } = useAiMarketSummary();
   const portfolioTickers = portfolio.map((p) => p.ticker);
 
-  const { data: stocks = [] } = useGetAllStocks();
+  const { data: stocks = [] } = useGetAllStocks(profileData?.riskTolerance);
   const portfolioStocks = stocks.filter((stock) => portfolioTickers.includes(stock.symbol));
   const recommendedStocks = stocks.filter((stock) => !portfolioTickers.includes(stock.symbol));
   const availableSectors = [...new Set(recommendedStocks.map((stock) => stock.sector))].sort();
