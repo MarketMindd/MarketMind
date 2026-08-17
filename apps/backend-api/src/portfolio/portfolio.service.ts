@@ -112,6 +112,10 @@ export class PortfolioService {
     }
   }
 
+  clearUserSummaryCache(userId: string): void {
+    this.summaryCache.delete(userId);
+  }
+
   async getAiMarketSummary(userId: string): Promise<MarketSummaryResult> {
     const cached = this.summaryCache.get(userId);
 

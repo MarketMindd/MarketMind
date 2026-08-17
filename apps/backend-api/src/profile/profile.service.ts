@@ -3,12 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import type { GetProfileResponse, UpdateProfilePayload } from '@market-mind/common';
 import { UserProfileEntity } from '@market-mind/database';
+import { PortfolioService } from '../portfolio/portfolio.service';
 
 @Injectable()
 export class ProfileService {
   constructor(
     @InjectRepository(UserProfileEntity)
     private readonly usersRepo: Repository<UserProfileEntity>,
+    private readonly portfolioService: PortfolioService,
   ) {}
 
   async getProfile(userId: string): Promise<GetProfileResponse> {
@@ -31,5 +33,6 @@ export class ProfileService {
     if (payload.emailNotifications !== undefined) user.emailNotifications = payload.emailNotifications;
 
     await this.usersRepo.save(user);
+    this.portfolioService.clearUserSummaryCache(userId);
   }
 }
