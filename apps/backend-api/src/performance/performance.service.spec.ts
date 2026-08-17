@@ -85,6 +85,30 @@ describe('PerformanceService', () => {
     expect(result.recommendations[0].outcome).toBe('Miss');
   });
 
+  it('treats Invest as success when the dip is within the noise band', async () => {
+    mockHistoryRepo.find.mockResolvedValue([
+      makeHistoryRow({ status: StockRecommendation.INVEST, entryPrice: 100 as unknown as number }),
+    ]);
+    mockMarketDataRepo.findOne.mockResolvedValue(makeMarketData(99.5));
+
+    const result = await service.getPerformance();
+
+    expect(result.recommendations[0].returnPct).toBeCloseTo(-0.5);
+    expect(result.recommendations[0].outcome).toBe('Success');
+  });
+
+  it('treats Invest as miss when the dip exceeds the noise band', async () => {
+    mockHistoryRepo.find.mockResolvedValue([
+      makeHistoryRow({ status: StockRecommendation.INVEST, entryPrice: 100 as unknown as number }),
+    ]);
+    mockMarketDataRepo.findOne.mockResolvedValue(makeMarketData(98));
+
+    const result = await service.getPerformance();
+
+    expect(result.recommendations[0].returnPct).toBeCloseTo(-2);
+    expect(result.recommendations[0].outcome).toBe('Miss');
+  });
+
   it('computes Exit success correctly when return is negative', async () => {
     mockHistoryRepo.find.mockResolvedValue([
       makeHistoryRow({ status: StockRecommendation.EXIT, entryPrice: 100 as unknown as number }),
@@ -109,7 +133,19 @@ describe('PerformanceService', () => {
     expect(result.recommendations[0].outcome).toBe('Miss');
   });
 
-  it('treats Hold as success', async () => {
+  it('treats Hold as success when price stays within the stability band', async () => {
+    mockHistoryRepo.find.mockResolvedValue([
+      makeHistoryRow({ status: StockRecommendation.HOLD, entryPrice: 100 as unknown as number }),
+    ]);
+    mockMarketDataRepo.findOne.mockResolvedValue(makeMarketData(98));
+
+    const result = await service.getPerformance();
+
+    expect(result.recommendations[0].returnPct).toBe(-2);
+    expect(result.recommendations[0].outcome).toBe('Success');
+  });
+
+  it('treats Hold as miss when price swings beyond the stability band', async () => {
     mockHistoryRepo.find.mockResolvedValue([
       makeHistoryRow({ status: StockRecommendation.HOLD, entryPrice: 100 as unknown as number }),
     ]);
@@ -118,7 +154,7 @@ describe('PerformanceService', () => {
     const result = await service.getPerformance();
 
     expect(result.recommendations[0].returnPct).toBe(-50);
-    expect(result.recommendations[0].outcome).toBe('Success');
+    expect(result.recommendations[0].outcome).toBe('Miss');
   });
 
   it('excludes Hold rows from the success rate denominator', async () => {

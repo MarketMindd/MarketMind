@@ -40,7 +40,14 @@ export const App = () => {
   return (
     <TooltipProvider>
       <Routes>
-        <Route path={APP_ROUTES.HOME} element={<Landing />} />
+        <Route
+          path={APP_ROUTES.HOME}
+          element={
+            <PublicRoute>
+              <Landing />
+            </PublicRoute>
+          }
+        />
 
         <Route element={<MainLayout />}>
           <Route

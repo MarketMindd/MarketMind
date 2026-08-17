@@ -13,6 +13,10 @@ import { MarketDataEntity, RecommendationHistoryEntity, StockEntity } from '@mar
 // stayed within this band, Miss if it swung beyond it in either direction.
 const HOLD_STABILITY_THRESHOLD_PCT = 5;
 
+// Invest/Exit calls used to flip to Miss on any move against them, even 0.1% of same-day
+// noise. This band gives directional calls the same slack Hold already gets.
+const DIRECTIONAL_NOISE_THRESHOLD_PCT = 1;
+
 @Injectable()
 export class PerformanceService {
   constructor(
@@ -98,8 +102,8 @@ export class PerformanceService {
 
   private computeOutcome(status: string, returnPct: number): 'Success' | 'Miss' | 'N/A' {
     if (returnPct === 0) return 'N/A';
-    if (status === 'Invest') return returnPct > 0 ? 'Success' : 'Miss';
-    if (status === 'Exit') return returnPct < 0 ? 'Success' : 'Miss';
+    if (status === 'Invest') return returnPct > -DIRECTIONAL_NOISE_THRESHOLD_PCT ? 'Success' : 'Miss';
+    if (status === 'Exit') return returnPct < DIRECTIONAL_NOISE_THRESHOLD_PCT ? 'Success' : 'Miss';
     if (status === 'Hold') {
       return Math.abs(returnPct) <= HOLD_STABILITY_THRESHOLD_PCT ? 'Success' : 'Miss';
     }
@@ -107,7 +111,7 @@ export class PerformanceService {
   }
 
   private computeStats(rows: PerformanceRecommendation[]): PerformanceStats {
-    const gradedRows = rows.filter((r) => r.outcome !== 'N/A');
+    const gradedRows = rows.filter((r) => r.outcome !== 'N/A' && r.status !== 'Hold');
     const successCount = gradedRows.filter((r) => r.outcome === 'Success').length;
     const directionalCount = gradedRows.length;
     const successRate = directionalCount > 0 ? (successCount / directionalCount) * 100 : 0;
