@@ -22,7 +22,14 @@ export const PerformanceStats = () => {
   }
 
   const { stats, recommendations } = performanceData;
-  const { successCount, totalCalls: totalCount, directionalCount, successRate } = stats;
+  const {
+    successCount,
+    totalCalls: totalCount,
+    directionalCount,
+    successRate,
+    holdSuccessCount,
+    holdGradedCount,
+  } = stats;
   const avgReturn = stats.avgReturn.toFixed(1);
 
   return (
@@ -52,9 +59,21 @@ export const PerformanceStats = () => {
             <div className="text-muted-foreground">Success Rate</div>
             <div className="text-sm text-muted-foreground mt-1">
               {directionalCount > 0
-                ? `${successCount} of ${directionalCount} graded calls`
+                ? `${successCount} of ${directionalCount} Invest/Exit calls`
                 : 'No graded calls yet'}
             </div>
+            {holdGradedCount > 0 && (
+              <div className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">
+                <Term
+                  term="Hold calls are scored separately"
+                  explanation="Hold means the AI expected the stock to stay put, so it isn't a bet on direction. Counting Hold calls in the hit rate would let an AI look accurate by never committing to anything."
+                  hideIcon
+                  className="no-underline cursor-help"
+                >
+                  {holdSuccessCount} of {holdGradedCount} Hold calls stayed stable
+                </Term>
+              </div>
+            )}
           </div>
 
           <div className="glass-card p-8 text-center animate-fade-in stagger-1">
@@ -146,14 +165,22 @@ export const PerformanceStats = () => {
                         : `${rec.returnPct > 0 ? '+' : ''}${rec.returnPct.toFixed(1)}%`}
                     </td>
                     <td className="p-4">
-                      {rec.outcome === RecommendationOutcome.SUCCESS ? (
-                        <CheckCircle size={18} className="text-success" />
-                      ) : rec.outcome === RecommendationOutcome.MISS ? (
-                        <XCircle size={18} className="text-destructive" />
+                      {rec.outcome === RecommendationOutcome.SUCCESS ||
+                      rec.outcome === RecommendationOutcome.MISS ? (
+                        <div className="flex items-center gap-2">
+                          {rec.outcome === RecommendationOutcome.SUCCESS ? (
+                            <CheckCircle size={18} className="text-success" />
+                          ) : (
+                            <XCircle size={18} className="text-destructive" />
+                          )}
+                          {rec.status === StockRecommendation.HOLD && (
+                            <span className="text-xs text-muted-foreground">not counted</span>
+                          )}
+                        </div>
                       ) : (
                         <Term
                           term="Pending"
-                          explanation="No price movement yet since this call was made (markets may be closed), so it can't be graded as a win or a loss yet."
+                          explanation="The price hasn't moved more than 1% since this call was made, so it's still within day-to-day noise and can't fairly be graded a win or a loss."
                           hideIcon
                           className="text-muted-foreground no-underline"
                         >
