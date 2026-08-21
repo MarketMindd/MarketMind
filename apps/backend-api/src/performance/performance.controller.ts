@@ -8,7 +8,14 @@ export class PerformanceController {
 
   @Public()
   @Get()
-  async getPerformance(@Query('riskTolerance') riskTolerance?: string) {
-    return this.performanceService.getPerformance(riskTolerance);
+  async getPerformance(
+    @Query('riskTolerance') riskTolerance?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const parsedLimit = limit ? Number(limit) : undefined;
+    return this.performanceService.getPerformance(
+      riskTolerance,
+      Number.isFinite(parsedLimit) && parsedLimit! > 0 ? parsedLimit : undefined,
+    );
   }
 }
