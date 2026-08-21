@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import * as nodemailer from 'nodemailer';
 import { RiskTolerance, StockRecommendation } from '@market-mind/common';
 import { UserProfileEntity } from '@market-mind/database';
-import * as nodemailer from 'nodemailer';
 import { appConfig } from '../config/appConfig';
 import { NotificationService } from './notification.service';
 import { RecommendationNotificationPayload } from './notification.types';
@@ -109,7 +109,7 @@ describe('NotificationService', () => {
     };
 
     expect(body.to).toEqual(['alice@example.com', 'bob@example.com']);
-    expect(body.subject).toBe('AAPL: our latest suggestion');
+    expect(body.subject).toBe('MarketMind: our latest suggestion for AAPL');
     expect(body.text).toContain(
       'We took another look at AAPL and wanted to share our latest view.',
     );
@@ -159,7 +159,9 @@ describe('NotificationService', () => {
   });
 
   it('uses invest-specific copy for invest recommendations', async () => {
-    await service.notifyRecommendationChange(makePayload({ newStatus: StockRecommendation.INVEST }));
+    await service.notifyRecommendationChange(
+      makePayload({ newStatus: StockRecommendation.INVEST }),
+    );
 
     const body = sendMail.mock.calls[0][0] as { text: string };
 
