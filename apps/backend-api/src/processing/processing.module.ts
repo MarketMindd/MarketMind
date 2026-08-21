@@ -10,11 +10,7 @@ import { ProcessingService } from './processing.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      RecommendationEntity,
-      RecommendationHistoryEntity,
-      MarketDataEntity,
-    ]),
+    TypeOrmModule.forFeature([RecommendationEntity, RecommendationHistoryEntity, MarketDataEntity]),
     NotificationModule,
   ],
   providers: [ProcessingService],

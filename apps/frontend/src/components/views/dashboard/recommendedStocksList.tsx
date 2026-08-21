@@ -54,7 +54,7 @@ export const RecommendedStocksList = ({
   };
 
   return (
-    <div className="animate-fade-in stagger-3">
+    <div className="animate-fade-in">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-3">
           <Sparkles className="w-5 h-5 text-primary" />
@@ -146,7 +146,7 @@ export const RecommendedStocksList = ({
           <div
             key={stock.symbol}
             className="animate-fade-in"
-            style={{ animationDelay: `${0.2 + i * 0.1}s` }}
+            style={{ animationDelay: `${(i % INITIAL_VISIBLE_STOCKS) * 0.1}s` }}
           >
             <StockCard stock={stock} onClick={() => navigate(`/stock/${stock.symbol}`)} />
           </div>

@@ -10,7 +10,7 @@
           "{projectRoot}/dist"
         ],
         "options": {
-          "command": "webpack-cli build",
+          "command": "tsc -b ../../libs/common/tsconfig.lib.json ../../libs/database/tsconfig.lib.json && webpack-cli build",
           "args": [
             "--node-env=production"
           ],
