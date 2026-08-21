@@ -43,7 +43,7 @@ export const StockCard = ({ stock, onClick, className, portfolioData }: StockCar
     >
       {/* Name first (beginners recognize names, not tickers) */}
       <div className="flex items-start justify-between mb-3 gap-3">
-        <div className="min-w-0">
+        <div className="flex-1 min-w-0">
           <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors truncate">
             {stock.name}
           </h3>
