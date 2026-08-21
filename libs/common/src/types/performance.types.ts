@@ -22,6 +22,8 @@ export interface PerformanceStats {
   totalCalls: number;
   successCount: number;
   directionalCount: number;
+  holdSuccessCount: number;
+  holdGradedCount: number;
   since: string;
 }
 
@@ -50,6 +52,8 @@ export const performanceResponseSchema = z.object({
     totalCalls: z.number().int().nonnegative(),
     successCount: z.number().int().nonnegative(),
     directionalCount: z.number().int().nonnegative(),
+    holdSuccessCount: z.number().int().nonnegative(),
+    holdGradedCount: z.number().int().nonnegative(),
     since: z.string(),
   }),
   recommendations: z.array(performanceRecommendationSchema),
