@@ -1,5 +1,5 @@
 import { Filter, Sparkles } from 'lucide-react';
-import { useEffect, useState, type Dispatch, type SetStateAction } from 'react';
+import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RecommendationStatus, Stock, StockRecommendation } from '@market-mind/common';
 import { Button } from '@/components/elements/button';
@@ -15,6 +15,13 @@ import {
 import { ALL_FILTERS, recommendationDisplayLabel } from './recommendationSummary';
 
 const INITIAL_VISIBLE_STOCKS = 6;
+const ANIMATION_DELAY_INCREMENT_SECONDS = 0.1; // 100 ms
+const FADE_IN_DURATION_MS = 400;
+const BUFFER_MS = 50; // Extra time to ensure the last card's animation completes before removing the glow suppression
+const REVEAL_GLOW_SUPPRESSION_MS =
+  FADE_IN_DURATION_MS +
+  (INITIAL_VISIBLE_STOCKS - 1) * (ANIMATION_DELAY_INCREMENT_SECONDS * 1000) +
+  BUFFER_MS;
 
 interface RecommendedStocksListProps {
   filteredRecommendedStocks: Stock[];
@@ -37,6 +44,8 @@ export const RecommendedStocksList = ({
 }: RecommendedStocksListProps) => {
   const navigate = useNavigate();
   const [visibleStockCount, setVisibleStockCount] = useState(INITIAL_VISIBLE_STOCKS);
+  const [isRevealAnimationRunning, setIsRevealAnimationRunning] = useState(false);
+  const revealGlowTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const visibleStocks = filteredRecommendedStocks.slice(0, visibleStockCount);
   const remainingStockCount = filteredRecommendedStocks.length - visibleStocks.length;
   const selectedSectorsLabel = selectedSectors.length ? selectedSectors.join(', ') : 'All Sectors';
@@ -45,12 +54,33 @@ export const RecommendedStocksList = ({
     setVisibleStockCount(INITIAL_VISIBLE_STOCKS);
   }, [filter, selectedSectors]);
 
+  useEffect(() => {
+    return () => {
+      if (revealGlowTimeoutRef.current) {
+        clearTimeout(revealGlowTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const toggleSector = (sector: string) => {
     setSelectedSectors((currentSectors) =>
       currentSectors.includes(sector)
         ? currentSectors.filter((currentSector) => currentSector !== sector)
         : [...currentSectors, sector],
     );
+  };
+
+  const handleShowMore = () => {
+    setVisibleStockCount((count) => count + INITIAL_VISIBLE_STOCKS);
+    setIsRevealAnimationRunning(true);
+
+    if (revealGlowTimeoutRef.current) {
+      clearTimeout(revealGlowTimeoutRef.current);
+    }
+
+    revealGlowTimeoutRef.current = setTimeout(() => {
+      setIsRevealAnimationRunning(false);
+    }, REVEAL_GLOW_SUPPRESSION_MS);
   };
 
   return (
@@ -141,12 +171,16 @@ export const RecommendedStocksList = ({
         </DropdownMenu>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div
+        className={`grid gap-6 md:grid-cols-2 lg:grid-cols-3 ${isRevealAnimationRunning ? 'suppress-stock-hover-glow' : ''}`}
+      >
         {visibleStocks.map((stock, i) => (
           <div
             key={stock.symbol}
             className="animate-fade-in"
-            style={{ animationDelay: `${(i % INITIAL_VISIBLE_STOCKS) * 0.1}s` }}
+            style={{
+              animationDelay: `${(i % INITIAL_VISIBLE_STOCKS) * ANIMATION_DELAY_INCREMENT_SECONDS}s`,
+            }}
           >
             <StockCard stock={stock} onClick={() => navigate(`/stock/${stock.symbol}`)} />
           </div>
@@ -159,10 +193,7 @@ export const RecommendedStocksList = ({
             Showing {visibleStocks.length} of {filteredRecommendedStocks.length} picks
           </p>
           {remainingStockCount > 0 && (
-            <Button
-              variant="outline"
-              onClick={() => setVisibleStockCount((count) => count + INITIAL_VISIBLE_STOCKS)}
-            >
+            <Button variant="outline" onClick={handleShowMore}>
               Show {Math.min(INITIAL_VISIBLE_STOCKS, remainingStockCount)} more
             </Button>
           )}

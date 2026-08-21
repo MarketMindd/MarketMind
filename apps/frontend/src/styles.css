@@ -133,6 +133,10 @@
     box-shadow: 0 8px 32px hsl(222 47% 4% / 0.5);
   }
 
+  .suppress-stock-hover-glow .hover-lift:hover:not(:has([data-tooltip-trigger]:hover)) {
+    box-shadow: none;
+  }
+
   .stagger-1 {
     animation-delay: 0.1s;
   }
