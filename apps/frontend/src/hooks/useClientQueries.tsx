@@ -18,6 +18,7 @@ import type {
   GoogleSignInPayload,
   MarketSummaryResult,
   OAuthResponse,
+  PerformanceResponse,
   PortfolioItemWithStock,
   SavePortfolioPayload,
   SendMessagePayload,
@@ -25,7 +26,6 @@ import type {
   SignUpPayload,
   Stock,
   UpdateProfilePayload,
-  PerformanceResponse,
 } from '@market-mind/common';
 import { APP_ROUTES } from '@/consts/routes';
 import type { GoogleAuthParams, iClientQueriesProvider } from '@/entities/clientQueries';
@@ -118,7 +118,8 @@ export const useClientQueries = (): iClientQueriesProvider => {
       mutationFn: (payload) => ctx.dataProvider.profile.updateProfile(payload),
       ...options,
       onSuccess: (data, variables, onMutateResult, context) => {
-        queryClient.invalidateQueries({ queryKey: ['portfolio', 'market-summary'] });
+        queryClient.removeQueries({ queryKey: ['portfolio', 'market-summary'] });
+        queryClient.invalidateQueries({ queryKey: ['profile'] });
         queryClient.invalidateQueries({ queryKey: ['allStocks'] });
         queryClient.invalidateQueries({ queryKey: ['performance'] });
         if (options?.onSuccess) {
@@ -200,9 +201,17 @@ export const useClientQueries = (): iClientQueriesProvider => {
   const useSavePortfolio = (
     options?: UseMutationOptions<{ success: boolean }, Error, SavePortfolioPayload>,
   ) => {
+    const queryClient = useQueryClient();
     return useMutation<{ success: boolean }, Error, SavePortfolioPayload>({
       mutationFn: (payload) => ctx.dataProvider.portfolio.savePortfolio(payload),
       ...options,
+      onSuccess: (data, variables, onMutateResult, context) => {
+        queryClient.removeQueries({ queryKey: ['portfolio', 'market-summary'] });
+        queryClient.invalidateQueries({ queryKey: ['portfolio'], exact: true });
+        if (options?.onSuccess) {
+          options.onSuccess(data, variables, onMutateResult, context);
+        }
+      },
     });
   };
 
