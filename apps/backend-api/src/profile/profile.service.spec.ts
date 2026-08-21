@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { RiskTolerance, SectorInterest } from '@market-mind/common';
 import { UserProfileEntity } from '@market-mind/database';
+import { PortfolioService } from '../portfolio/portfolio.service';
 import { ProfileService } from './profile.service';
 
 const makeUser = (overrides: Partial<UserProfileEntity> = {}): UserProfileEntity => ({
@@ -15,23 +16,28 @@ const makeUser = (overrides: Partial<UserProfileEntity> = {}): UserProfileEntity
   refreshTokens: [],
   createdAt: new Date(),
   updatedAt: new Date(),
+  aiSummaryCache: null,
+  aiSummaryCachedAt: null,
   ...overrides,
 });
 
 describe('ProfileService', () => {
   let service: ProfileService;
   let usersRepo: { findOneByOrFail: jest.Mock; save: jest.Mock };
+  let portfolioService: { clearUserSummaryCache: jest.Mock };
 
   beforeEach(async () => {
     usersRepo = {
       findOneByOrFail: jest.fn(),
       save: jest.fn().mockResolvedValue(undefined),
     };
+    portfolioService = { clearUserSummaryCache: jest.fn().mockResolvedValue(undefined) };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ProfileService,
         { provide: getRepositoryToken(UserProfileEntity), useValue: usersRepo },
+        { provide: PortfolioService, useValue: portfolioService },
       ],
     }).compile();
 
@@ -88,6 +94,14 @@ describe('ProfileService', () => {
       expect(user.riskTolerance).toBe(RiskTolerance.MEDIUM);
       expect(user.emailNotifications).toBe(true);
       expect(usersRepo.save).toHaveBeenCalledWith(user);
+    });
+
+    it('clears the cached AI summary so it regenerates against the new profile', async () => {
+      usersRepo.findOneByOrFail.mockResolvedValue(makeUser());
+
+      await service.updateProfile('user-1', { riskTolerance: RiskTolerance.HIGH });
+
+      expect(portfolioService.clearUserSummaryCache).toHaveBeenCalledWith('user-1');
     });
   });
 });

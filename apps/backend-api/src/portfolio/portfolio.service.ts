@@ -19,7 +19,6 @@ const AI_SUMMARY_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 @Injectable()
 export class PortfolioService {
   private readonly logger = new Logger(PortfolioService.name);
-  private readonly summaryCache = new Map<string, { result: MarketSummaryResult; cachedAt: number }>();
 
   constructor(
     @InjectRepository(PortfolioEntity)
@@ -110,22 +109,32 @@ export class PortfolioService {
     if (itemsToSave.length > 0) {
       await this.portfolioRepo.save(itemsToSave);
     }
+
+    await this.clearUserSummaryCache(userId);
   }
 
-  clearUserSummaryCache(userId: string): void {
-    this.summaryCache.delete(userId);
+  async clearUserSummaryCache(userId: string): Promise<void> {
+    await this.userRepo.update({ id: userId }, { aiSummaryCache: null, aiSummaryCachedAt: null });
+  }
+
+  private readCachedSummary(user: UserProfileEntity): MarketSummaryResult | null {
+    if (!user.aiSummaryCache || !user.aiSummaryCachedAt) return null;
+
+    const age = Date.now() - new Date(user.aiSummaryCachedAt).getTime();
+    if (age >= AI_SUMMARY_CACHE_TTL_MS) return null;
+
+    return user.aiSummaryCache as MarketSummaryResult;
   }
 
   async getAiMarketSummary(userId: string): Promise<MarketSummaryResult> {
-    const cached = this.summaryCache.get(userId);
-
-    if (cached && Date.now() - cached.cachedAt < AI_SUMMARY_CACHE_TTL_MS) {
-      return cached.result;
-    }
-
     const user = await this.userRepo.findOne({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException('User not found');
+    }
+
+    const cached = this.readCachedSummary(user);
+    if (cached) {
+      return cached;
     }
 
     const portfolio = await this.getPortfolio(userId);
@@ -146,7 +155,10 @@ export class PortfolioService {
         interests: user.interests ?? [],
       };
 
-      this.summaryCache.set(userId, { result, cachedAt: Date.now() });
+      await this.userRepo.update(
+        { id: userId },
+        { aiSummaryCache: result, aiSummaryCachedAt: new Date() },
+      );
       return result;
     } catch (error) {
       this.logger.error(
