@@ -40,7 +40,7 @@ export class PerformanceService {
        WHERE "currentPrice" IS NOT NULL
          AND "returnPct" IS NOT NULL
          AND outcome IS NOT NULL
-         ${riskTolerance ? `AND "riskTolerance" = $1` : ''}
+         ${riskTolerance ? 'AND "riskTolerance" = $1' : ''}
        ORDER BY "createdAt" DESC`,
       riskTolerance ? [riskTolerance] : [],
     );

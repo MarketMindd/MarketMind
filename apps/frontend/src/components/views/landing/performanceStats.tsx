@@ -132,68 +132,74 @@ export const PerformanceStats = () => {
                 </tr>
               </thead>
               <tbody>
-                {recommendations.slice(0, 5).map((rec, i) => (
-                  <tr
-                    key={rec.id}
-                    className="border-b border-border/30 animate-fade-in"
-                    style={{ animationDelay: `${0.1 + i * 0.05}s` }}
-                  >
-                    <td className="p-4">
-                      <span className="font-mono text-primary font-medium">{rec.stockSymbol}</span>
-                    </td>
-                    <td className="p-4">
-                      <span
+                {recommendations
+                  .filter((rec) => rec.outcome !== RecommendationOutcome.NOT_APPLICABLE)
+                  .slice(0, 5)
+                  .map((rec, i) => (
+                    <tr
+                      key={rec.id}
+                      className="border-b border-border/30 animate-fade-in"
+                      style={{ animationDelay: `${0.1 + i * 0.05}s` }}
+                    >
+                      <td className="p-4">
+                        <span className="font-mono text-primary font-medium">
+                          {rec.stockSymbol}
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <span
+                          className={cn(
+                            'px-2 py-1 rounded-full text-xs font-medium capitalize',
+                            rec.status === StockRecommendation.INVEST &&
+                              'bg-success/20 text-success',
+                            rec.status === StockRecommendation.HOLD && 'bg-warning/20 text-warning',
+                            rec.status === StockRecommendation.EXIT &&
+                              'bg-destructive/20 text-destructive',
+                          )}
+                        >
+                          {rec.status}
+                        </span>
+                      </td>
+                      <td
                         className={cn(
-                          'px-2 py-1 rounded-full text-xs font-medium capitalize',
-                          rec.status === StockRecommendation.INVEST && 'bg-success/20 text-success',
-                          rec.status === StockRecommendation.HOLD && 'bg-warning/20 text-warning',
-                          rec.status === StockRecommendation.EXIT &&
-                            'bg-destructive/20 text-destructive',
+                          'p-4 font-mono font-medium',
+                          rec.outcome === RecommendationOutcome.NOT_APPLICABLE
+                            ? 'text-muted-foreground'
+                            : rec.returnPct > 0
+                              ? 'text-success'
+                              : 'text-destructive',
                         )}
                       >
-                        {rec.status}
-                      </span>
-                    </td>
-                    <td
-                      className={cn(
-                        'p-4 font-mono font-medium',
-                        rec.outcome === RecommendationOutcome.NOT_APPLICABLE
-                          ? 'text-muted-foreground'
-                          : rec.returnPct > 0
-                            ? 'text-success'
-                            : 'text-destructive',
-                      )}
-                    >
-                      {rec.outcome === RecommendationOutcome.NOT_APPLICABLE
-                        ? '—'
-                        : `${rec.returnPct > 0 ? '+' : ''}${rec.returnPct.toFixed(1)}%`}
-                    </td>
-                    <td className="p-4">
-                      {rec.outcome === RecommendationOutcome.SUCCESS ||
-                      rec.outcome === RecommendationOutcome.MISS ? (
-                        <div className="flex items-center gap-2">
-                          {rec.outcome === RecommendationOutcome.SUCCESS ? (
-                            <CheckCircle size={18} className="text-success" />
-                          ) : (
-                            <XCircle size={18} className="text-destructive" />
-                          )}
-                          {rec.status === StockRecommendation.HOLD && (
-                            <span className="text-xs text-muted-foreground">Not Counted</span>
-                          )}
-                        </div>
-                      ) : (
-                        <Term
-                          term="Pending"
-                          explanation={`The price hasn't moved more than ${DIRECTIONAL_NOISE_THRESHOLD_PCT}% since this call was made, so it's still within day-to-day noise and can't fairly be graded a win or a loss.`}
-                          hideIcon
-                          className="text-muted-foreground no-underline"
-                        >
-                          Pending
-                        </Term>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                        {rec.outcome === RecommendationOutcome.NOT_APPLICABLE
+                          ? '—'
+                          : `${rec.returnPct > 0 ? '+' : ''}${rec.returnPct.toFixed(1)}%`}
+                      </td>
+                      <td className="p-4">
+                        {rec.outcome === RecommendationOutcome.SUCCESS ||
+                        rec.outcome === RecommendationOutcome.MISS ? (
+                          <div className="flex items-center gap-2">
+                            {rec.outcome === RecommendationOutcome.SUCCESS ? (
+                              <CheckCircle size={18} className="text-success" />
+                            ) : (
+                              <XCircle size={18} className="text-destructive" />
+                            )}
+                            {rec.status === StockRecommendation.HOLD && (
+                              <span className="text-xs text-muted-foreground">Not Counted</span>
+                            )}
+                          </div>
+                        ) : (
+                          <Term
+                            term="Pending"
+                            explanation={`The price hasn't moved more than ${DIRECTIONAL_NOISE_THRESHOLD_PCT}% since this call was made, so it's still within day-to-day noise and can't fairly be graded a win or a loss.`}
+                            hideIcon
+                            className="text-muted-foreground no-underline"
+                          >
+                            Pending
+                          </Term>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
           </div>
