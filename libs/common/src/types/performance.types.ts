@@ -8,6 +8,10 @@ import { RiskTolerance } from '../enums/risk-tolerance';
 // ungraded rather than counting as a free win.
 export const DIRECTIONAL_NOISE_THRESHOLD_PCT = 1;
 
+// A Hold call is a bet that the stock won't move much. It's graded a Success if price
+// stayed within this band, Miss if it swung beyond it in either direction.
+export const HOLD_STABILITY_THRESHOLD_PCT = 5;
+
 export interface PerformanceRecommendation {
   id: string;
   stockSymbol: string;

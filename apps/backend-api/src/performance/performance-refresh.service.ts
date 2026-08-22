@@ -4,16 +4,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { LessThanOrEqual, Repository } from 'typeorm';
 import {
   DIRECTIONAL_NOISE_THRESHOLD_PCT,
+  HOLD_STABILITY_THRESHOLD_PCT,
   RecommendationOutcome,
   StockRecommendation,
 } from '@market-mind/common';
 import { MarketDataEntity, RecommendationHistoryEntity } from '@market-mind/database';
 
 const FREEZE_WINDOW_MS = 24 * 60 * 60 * 1000;
-
-// A Hold call is a bet that the stock won't move much. It's graded a Success if price
-// stayed within this band, Miss if it swung beyond it in either direction.
-const HOLD_STABILITY_THRESHOLD_PCT = 5;
 
 @Injectable()
 export class PerformanceRefreshService {

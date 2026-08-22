@@ -6,6 +6,7 @@ import { Size } from '@/enums/recommendationBadge';
 import { useClientQueries } from '@/hooks/useClientQueries';
 import { useIsAuthenticated } from '@/hooks/useIsAuthenticated';
 import { formatDate } from '@/utils/dateUtils';
+import { getOutcomeExplanation } from '@/utils/performanceUtils';
 import { cn } from '@/utils/tailwindUtils';
 import { RecommendationBadge } from '../../elements/recommendationBadge';
 import { Term } from '../../elements/term';
@@ -237,21 +238,35 @@ export const Performance = () => {
                     </td>
                     <td className="p-4">
                       {rec.outcome === RecommendationOutcome.SUCCESS ? (
-                        <div className="flex items-center gap-2 text-success">
-                          <CheckCircle size={18} />
-                          <span className="text-sm font-medium">Success</span>
-                          {rec.status === StockRecommendation.HOLD && (
-                            <span className="text-xs text-muted-foreground">(not counted)</span>
-                          )}
-                        </div>
+                        <Term
+                          term="Success"
+                          explanation={getOutcomeExplanation(rec.status)}
+                          hideIcon
+                          className="no-underline"
+                        >
+                          <div className="flex items-center gap-2 text-success">
+                            <CheckCircle size={18} />
+                            <span className="text-sm font-medium">Success</span>
+                            {rec.status === StockRecommendation.HOLD && (
+                              <span className="text-xs text-muted-foreground">(not counted)</span>
+                            )}
+                          </div>
+                        </Term>
                       ) : rec.outcome === RecommendationOutcome.MISS ? (
-                        <div className="flex items-center gap-2 text-destructive">
-                          <XCircle size={18} />
-                          <span className="text-sm font-medium">Miss</span>
-                          {rec.status === StockRecommendation.HOLD && (
-                            <span className="text-xs text-muted-foreground">(not counted)</span>
-                          )}
-                        </div>
+                        <Term
+                          term="Miss"
+                          explanation={getOutcomeExplanation(rec.status)}
+                          hideIcon
+                          className="no-underline"
+                        >
+                          <div className="flex items-center gap-2 text-destructive">
+                            <XCircle size={18} />
+                            <span className="text-sm font-medium">Miss</span>
+                            {rec.status === StockRecommendation.HOLD && (
+                              <span className="text-xs text-muted-foreground">(not counted)</span>
+                            )}
+                          </div>
+                        </Term>
                       ) : (
                         <Term
                           term="Pending"

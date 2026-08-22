@@ -7,6 +7,7 @@ import {
 import { Term } from '@/components/elements/term';
 import { useClientQueries } from '@/hooks/useClientQueries';
 import { formatDate } from '@/utils/dateUtils';
+import { getOutcomeExplanation } from '@/utils/performanceUtils';
 import { cn } from '@/utils/tailwindUtils';
 
 export const PerformanceStats = () => {
@@ -177,16 +178,23 @@ export const PerformanceStats = () => {
                       <td className="p-4">
                         {rec.outcome === RecommendationOutcome.SUCCESS ||
                         rec.outcome === RecommendationOutcome.MISS ? (
-                          <div className="flex items-center gap-2">
-                            {rec.outcome === RecommendationOutcome.SUCCESS ? (
-                              <CheckCircle size={18} className="text-success" />
-                            ) : (
-                              <XCircle size={18} className="text-destructive" />
-                            )}
-                            {rec.status === StockRecommendation.HOLD && (
-                              <span className="text-xs text-muted-foreground">Not Counted</span>
-                            )}
-                          </div>
+                          <Term
+                            term={rec.outcome === RecommendationOutcome.SUCCESS ? 'Success' : 'Miss'}
+                            explanation={getOutcomeExplanation(rec.status)}
+                            hideIcon
+                            className="no-underline"
+                          >
+                            <div className="flex items-center gap-2">
+                              {rec.outcome === RecommendationOutcome.SUCCESS ? (
+                                <CheckCircle size={18} className="text-success" />
+                              ) : (
+                                <XCircle size={18} className="text-destructive" />
+                              )}
+                              {rec.status === StockRecommendation.HOLD && (
+                                <span className="text-xs text-muted-foreground">Not Counted</span>
+                              )}
+                            </div>
+                          </Term>
                         ) : (
                           <Term
                             term="Pending"
