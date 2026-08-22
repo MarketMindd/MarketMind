@@ -3,6 +3,11 @@ import { StockRecommendation } from '../enums/command';
 import { RecommendationOutcome } from '../enums/recommendation-outcome';
 import { RiskTolerance } from '../enums/risk-tolerance';
 
+// Invest/Exit are directional bets, so they are only graded once the price has moved further
+// than this band. Inside it the move is indistinguishable from noise and the call stays
+// ungraded rather than counting as a free win.
+export const DIRECTIONAL_NOISE_THRESHOLD_PCT = 1;
+
 export interface PerformanceRecommendation {
   id: string;
   stockSymbol: string;

@@ -2,7 +2,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LessThanOrEqual, Repository } from 'typeorm';
-import { RecommendationOutcome, StockRecommendation } from '@market-mind/common';
+import {
+  DIRECTIONAL_NOISE_THRESHOLD_PCT,
+  RecommendationOutcome,
+  StockRecommendation,
+} from '@market-mind/common';
 import { MarketDataEntity, RecommendationHistoryEntity } from '@market-mind/database';
 
 const FREEZE_WINDOW_MS = 24 * 60 * 60 * 1000;
@@ -10,11 +14,6 @@ const FREEZE_WINDOW_MS = 24 * 60 * 60 * 1000;
 // A Hold call is a bet that the stock won't move much. It's graded a Success if price
 // stayed within this band, Miss if it swung beyond it in either direction.
 const HOLD_STABILITY_THRESHOLD_PCT = 5;
-
-// Invest/Exit are directional bets, so they are only graded once the price has moved further
-// than this band. Inside it the move is indistinguishable from noise and the call stays
-// ungraded rather than counting as a free win.
-const DIRECTIONAL_NOISE_THRESHOLD_PCT = 1;
 
 @Injectable()
 export class PerformanceRefreshService {

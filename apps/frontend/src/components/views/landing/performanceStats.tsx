@@ -1,5 +1,9 @@
 import { CheckCircle, Target, TrendingUp, Users, XCircle } from 'lucide-react';
-import { RecommendationOutcome, StockRecommendation } from '@market-mind/common';
+import {
+  DIRECTIONAL_NOISE_THRESHOLD_PCT,
+  RecommendationOutcome,
+  StockRecommendation,
+} from '@market-mind/common';
 import { Term } from '@/components/elements/term';
 import { useClientQueries } from '@/hooks/useClientQueries';
 import { formatDate } from '@/utils/dateUtils';
@@ -174,13 +178,13 @@ export const PerformanceStats = () => {
                             <XCircle size={18} className="text-destructive" />
                           )}
                           {rec.status === StockRecommendation.HOLD && (
-                            <span className="text-xs text-muted-foreground">not counted</span>
+                            <span className="text-xs text-muted-foreground">Not Counted</span>
                           )}
                         </div>
                       ) : (
                         <Term
                           term="Pending"
-                          explanation="The price hasn't moved more than 1% since this call was made, so it's still within day-to-day noise and can't fairly be graded a win or a loss."
+                          explanation={`The price hasn't moved more than ${DIRECTIONAL_NOISE_THRESHOLD_PCT}% since this call was made, so it's still within day-to-day noise and can't fairly be graded a win or a loss.`}
                           hideIcon
                           className="text-muted-foreground no-underline"
                         >

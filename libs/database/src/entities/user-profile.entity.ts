@@ -5,7 +5,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { RiskTolerance, SectorInterest } from '@market-mind/common';
+import { MarketSummaryResult, RiskTolerance, SectorInterest } from '@market-mind/common';
 
 @Entity({ name: 'user_profiles' })
 export class UserProfileEntity {
@@ -48,7 +48,7 @@ export class UserProfileEntity {
   refreshTokens!: string[];
 
   @Column({ type: 'jsonb', nullable: true })
-  aiSummaryCache!: unknown | null;
+  aiSummaryCache!: MarketSummaryResult | null;
 
   @Column({ type: 'timestamptz', nullable: true })
   aiSummaryCachedAt!: Date | null;
