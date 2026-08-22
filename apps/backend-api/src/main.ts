@@ -13,7 +13,7 @@ const bootstrap = async () => {
         key: fs.readFileSync(appConfig.https.keyPath),
         cert: fs.readFileSync(appConfig.https.certPath),
       };
-      Logger.log(`🔒 HTTPS enabled using provided certificates`);
+      Logger.log('🔒 HTTPS enabled using provided certificates');
     } catch (e) {
       Logger.error(`Failed to load HTTPS certificates: ${e.message}`);
     }

@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -9,6 +10,7 @@ import { RiskTolerance } from '@market-mind/common';
 import type { RecommendationStatus } from '@market-mind/common';
 
 @Entity({ name: 'recommendations' })
+@Index('IDX_recommendations_symbol_risk_updated', ['stockSymbol', 'riskTolerance', 'updatedAt'])
 export class RecommendationEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
