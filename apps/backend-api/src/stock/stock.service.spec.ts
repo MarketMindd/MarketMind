@@ -9,19 +9,8 @@ import { RawStock } from './types';
 describe('StockService', () => {
   let service: StockService;
 
-  const mockQueryBuilder = {
-    leftJoin: jest.fn().mockReturnThis(),
-    innerJoin: jest.fn().mockReturnThis(),
-    select: jest.fn().mockReturnThis(),
-    where: jest.fn().mockReturnThis(),
-    distinctOn: jest.fn().mockReturnThis(),
-    orderBy: jest.fn().mockReturnThis(),
-    addOrderBy: jest.fn().mockReturnThis(),
-    getRawMany: jest.fn(),
-  };
-
   const mockRepository = {
-    createQueryBuilder: jest.fn(() => mockQueryBuilder),
+    query: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -47,7 +36,7 @@ describe('StockService', () => {
     it('should return empty array if no symbols provided', async () => {
       const result = await service.getStocksBySymbols([]);
       expect(result).toEqual([]);
-      expect(mockRepository.createQueryBuilder).not.toHaveBeenCalled();
+      expect(mockRepository.query).not.toHaveBeenCalled();
     });
 
     it('should return mapped stock with AI recommendation', async () => {
@@ -66,7 +55,7 @@ describe('StockService', () => {
         longTermOutlook: 'Long-term fundamentals remain strong.',
       };
 
-      mockQueryBuilder.getRawMany.mockResolvedValueOnce([mockRawData]);
+      mockRepository.query.mockResolvedValueOnce([mockRawData]);
 
       const result = await service.getStocksBySymbols(['AAPL']);
 
@@ -108,7 +97,7 @@ describe('StockService', () => {
         longTermOutlook: null,
       };
 
-      mockQueryBuilder.getRawMany.mockResolvedValueOnce([mockRawData]);
+      mockRepository.query.mockResolvedValueOnce([mockRawData]);
 
       const result = await service.getStocksBySymbols(['TSLA']);
 

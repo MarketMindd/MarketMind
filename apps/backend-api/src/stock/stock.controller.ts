@@ -1,7 +1,7 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { getSymbolsQuerySchema, RiskTolerance, Stock } from '@market-mind/common';
-import { ZodValidationPipe } from '../pipes/zodValidatorPipe';
 import { Public } from '../decorators/roles.decorator';
+import { ZodValidationPipe } from '../pipes/zodValidatorPipe';
 import { StockService } from './stock.service';
 
 @Controller('stocks')
@@ -22,6 +22,7 @@ export class StockController {
     if (!symbols || symbols.length === 0) {
       return this.stockService.getAllStocks(riskTolerance);
     }
+
     return this.stockService.getStocksBySymbols(symbols, riskTolerance);
   }
 }
