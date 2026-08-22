@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { RiskTolerance } from '@market-mind/common';
+import { RiskTolerance, StockRecommendation } from '@market-mind/common';
 import { ResponseParserService } from './response-parser.service';
 
 describe('ResponseParserService', () => {
@@ -14,7 +14,7 @@ describe('ResponseParserService', () => {
   });
 
   const validPayload = {
-    status: 'Invest',
+    status: StockRecommendation.INVEST,
     confidence: 0.8,
     rationale: 'Strong momentum',
     aiSummary: 'Invest with confidence on improving momentum.',
@@ -25,7 +25,7 @@ describe('ResponseParserService', () => {
 
   it('parses valid JSON successfully', () => {
     const result = service.parse(validJson, 'AAPL', RiskTolerance.MEDIUM);
-    expect(result.status).toBe('Invest');
+    expect(result.status).toBe(StockRecommendation.INVEST);
     expect(result.confidence).toBe(0.8);
     expect(result.rationale).toBe('Strong momentum');
     expect(result.aiSummary).toBe('Invest with confidence on improving momentum.');
@@ -43,13 +43,13 @@ describe('ResponseParserService', () => {
   it('strips plain fenced JSON blocks', () => {
     const fenced = '```\n' + validJson + '\n```';
     const result = service.parse(fenced, 'AAPL', RiskTolerance.HIGH);
-    expect(result.status).toBe('Invest');
+    expect(result.status).toBe(StockRecommendation.INVEST);
   });
 
   it('strips json-tagged fenced JSON blocks', () => {
     const fenced = '```json\n' + validJson + '\n```';
     const result = service.parse(fenced, 'TSLA', RiskTolerance.LOW);
-    expect(result.status).toBe('Invest');
+    expect(result.status).toBe(StockRecommendation.INVEST);
   });
 
   it('throws on malformed JSON', () => {
@@ -104,6 +104,6 @@ describe('ResponseParserService', () => {
 
   it('trims surrounding whitespace before parsing', () => {
     const result = service.parse('  ' + validJson + '  ', 'AAPL', RiskTolerance.LOW);
-    expect(result.status).toBe('Invest');
+    expect(result.status).toBe(StockRecommendation.INVEST);
   });
 });

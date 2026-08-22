@@ -59,12 +59,12 @@ export const StockDetails = () => {
         {/* Header — name + plain recommendation */}
         <div className="glass-card p-6 mb-6 animate-fade-in stagger-1">
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
-            <div>
-              <h1 className="text-2xl font-bold text-foreground mb-1">{stock.name}</h1>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl font-bold text-foreground mb-1 truncate">{stock.name}</h1>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <span className="font-mono">{stock.symbol}</span>
                 <span>·</span>
-                <span>{stock.sector}</span>
+                <span className="truncate">{stock.sector}</span>
               </div>
             </div>
             {isAnalyzed && (

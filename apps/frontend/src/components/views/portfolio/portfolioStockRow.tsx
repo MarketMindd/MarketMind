@@ -14,10 +14,10 @@ export const PortfolioStockRow = ({ stock, currentPrice }: PortfolioStockRowProp
 
   return (
     <tr className="border-b border-border/50">
-      <td className="py-3 px-2">
-        <div>
+      <td className="py-3 px-2 max-w-[200px]">
+        <div className="min-w-0">
           <span className="font-mono text-primary font-medium">{stock.ticker}</span>
-          <p className="text-xs text-muted-foreground">{stock.stock?.name}</p>
+          <p className="text-xs text-muted-foreground truncate">{stock.stock?.name}</p>
         </div>
       </td>
       <td className="text-right py-3 px-2 font-medium">{stock.shares}</td>

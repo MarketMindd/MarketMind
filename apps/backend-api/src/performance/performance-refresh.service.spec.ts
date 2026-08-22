@@ -93,6 +93,65 @@ describe('PerformanceRefreshService', () => {
     ]);
   });
 
+  it('leaves an Invest call ungraded while the move is inside the noise band', async () => {
+    mockHistoryRepo.find.mockResolvedValue([
+      makeHistoryRow({ status: StockRecommendation.INVEST }),
+    ]);
+    mockMarketDataRepo.findOne.mockResolvedValue(makeMarketData(100.5));
+
+    await service.refresh();
+
+    expect(mockHistoryRepo.save).toHaveBeenCalledWith([
+      expect.objectContaining({ returnPct: 0.5, outcome: RecommendationOutcome.NOT_APPLICABLE }),
+    ]);
+  });
+
+  it('grades an Invest call a Miss when the stock falls beyond the noise band', async () => {
+    mockHistoryRepo.find.mockResolvedValue([
+      makeHistoryRow({ status: StockRecommendation.INVEST }),
+    ]);
+    mockMarketDataRepo.findOne.mockResolvedValue(makeMarketData(95));
+
+    await service.refresh();
+
+    expect(mockHistoryRepo.save).toHaveBeenCalledWith([
+      expect.objectContaining({ returnPct: -5, outcome: RecommendationOutcome.MISS }),
+    ]);
+  });
+
+  it('grades an Exit call a Success only when the stock actually falls', async () => {
+    mockHistoryRepo.find.mockResolvedValue([makeHistoryRow({ status: StockRecommendation.EXIT })]);
+    mockMarketDataRepo.findOne.mockResolvedValue(makeMarketData(90));
+
+    await service.refresh();
+
+    expect(mockHistoryRepo.save).toHaveBeenCalledWith([
+      expect.objectContaining({ returnPct: -10, outcome: RecommendationOutcome.SUCCESS }),
+    ]);
+  });
+
+  it('grades an Exit call a Miss when the stock rises beyond the noise band', async () => {
+    mockHistoryRepo.find.mockResolvedValue([makeHistoryRow({ status: StockRecommendation.EXIT })]);
+    mockMarketDataRepo.findOne.mockResolvedValue(makeMarketData(110));
+
+    await service.refresh();
+
+    expect(mockHistoryRepo.save).toHaveBeenCalledWith([
+      expect.objectContaining({ returnPct: 10, outcome: RecommendationOutcome.MISS }),
+    ]);
+  });
+
+  it('still grades a Hold call on the wider stability band', async () => {
+    mockHistoryRepo.find.mockResolvedValue([makeHistoryRow({ status: StockRecommendation.HOLD })]);
+    mockMarketDataRepo.findOne.mockResolvedValue(makeMarketData(103));
+
+    await service.refresh();
+
+    expect(mockHistoryRepo.save).toHaveBeenCalledWith([
+      expect.objectContaining({ returnPct: 3, outcome: RecommendationOutcome.SUCCESS }),
+    ]);
+  });
+
   it('freezes a row at the next call entry price once the recommendation changes', async () => {
     const supersededRow = makeHistoryRow({
       id: 'uuid-old',

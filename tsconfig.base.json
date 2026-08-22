@@ -24,6 +24,7 @@
       "@market-mind/common/enums": ["./libs/common/src/enums/index.ts"],
       "@market-mind/common/utils": ["./libs/common/src/utils/index.ts"],
       "@market-mind/database": ["./libs/database/src/index.ts"],
+      "@market-mind/database/*": ["./libs/database/src/*"],
       "@market-mind/database/config": ["./libs/database/src/config/index.ts"],
       "@market-mind/database/datasource": ["./libs/database/src/datasource/index.ts"],
       "@market-mind/database/entities": ["./libs/database/src/entities/index.ts"],

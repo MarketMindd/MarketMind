@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { AiRecommendation, RiskTolerance, StockRecommendation } from '@market-mind/common';
@@ -202,6 +203,7 @@ describe('ProcessingService', () => {
       status: 'Invest',
       createdAt: new Date(),
     });
+    mockMarketDataRepo.findOne.mockResolvedValue({ price: '165.20', time: new Date() });
 
     await service.process([makeRec({ status: StockRecommendation.HOLD })]);
 
@@ -240,21 +242,20 @@ describe('ProcessingService', () => {
     );
   });
 
-  it('uses entryPrice = 0 and logs warning when no market_data row exists', async () => {
+  it('skips history insert and logs a warning when no market_data row exists', async () => {
     mockHistoryRepo.findOne.mockResolvedValue(null);
     mockMarketDataRepo.findOne.mockResolvedValue(null);
+    const warnSpy = jest.spyOn(Logger.prototype, 'warn').mockImplementation();
 
     await service.process([makeRec()]);
 
-    expect(mockHistoryRepo.save).toHaveBeenCalledWith(
-      expect.objectContaining({
-        entryPrice: 0,
-      }),
-    );
+    expect(mockHistoryRepo.save).not.toHaveBeenCalled();
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('No market data found for AAPL'));
   });
 
   it('history insert failure does not abort processing of remaining recommendations', async () => {
     mockHistoryRepo.findOne.mockResolvedValue(null);
+    mockMarketDataRepo.findOne.mockResolvedValue({ price: '165.20', time: new Date() });
     mockHistoryRepo.save.mockRejectedValueOnce(new Error('history unavailable'));
 
     await expect(

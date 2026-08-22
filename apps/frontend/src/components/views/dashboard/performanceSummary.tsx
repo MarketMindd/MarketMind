@@ -1,18 +1,20 @@
+import { Award, CheckCircle2, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { Award, ChevronRight, CheckCircle2 } from 'lucide-react';
-import { Term } from '../../elements/term';
 import { APP_ROUTES } from '@/consts/routes';
+import { Term } from '../../elements/term';
 
 interface PerformanceSummaryProps {
   successCount: number;
   directionalCount: number;
   successRate: number;
+  riskTolerance?: string;
 }
 
 export const PerformanceSummary = ({
   successCount,
   directionalCount,
   successRate,
+  riskTolerance,
 }: PerformanceSummaryProps) => {
   return (
     <div className="glass-card p-5 h-full flex flex-col">
@@ -49,7 +51,9 @@ export const PerformanceSummary = ({
               <span className="text-muted-foreground text-xl"> / {directionalCount}</span>
             </span>
           </div>
-          <p className="text-sm text-foreground mb-1">picks worked out</p>
+          <p className="text-sm text-foreground mb-1">
+            picks worked out{riskTolerance ? ` at ${riskTolerance.toLowerCase()} risk` : ''}
+          </p>
           <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
             That's a{' '}
             <Term

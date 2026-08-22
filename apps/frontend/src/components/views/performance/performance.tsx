@@ -1,8 +1,10 @@
-import { Award, CheckCircle, Loader2, Target, TrendingUp, XCircle } from 'lucide-react';
+import { ArrowLeft, Award, CheckCircle, Loader2, Target, TrendingUp, XCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { RecommendationOutcome, StockRecommendation } from '@market-mind/common';
+import { APP_ROUTES } from '@/consts/routes';
 import { Size } from '@/enums/recommendationBadge';
-import { useIsAuthenticated } from '@/hooks/useIsAuthenticated';
 import { useClientQueries } from '@/hooks/useClientQueries';
+import { useIsAuthenticated } from '@/hooks/useIsAuthenticated';
 import { formatDate } from '@/utils/dateUtils';
 import { cn } from '@/utils/tailwindUtils';
 import { RecommendationBadge } from '../../elements/recommendationBadge';
@@ -43,19 +45,45 @@ export const Performance = () => {
     );
   }
 
-  const { successRate, avgReturn, totalCalls, successCount, directionalCount, since } =
-    performanceData.stats;
+  const {
+    successRate,
+    avgReturn,
+    totalCalls,
+    successCount,
+    directionalCount,
+    holdSuccessCount,
+    holdGradedCount,
+    since,
+  } = performanceData.stats;
   const recommendations = performanceData.recommendations;
 
   const avgReturnDisplay = avgReturn.toFixed(1);
 
   return (
     <div className="min-h-screen bg-background">
-      <main className="pt-28 sm:pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
+      <main className="pt-28 sm:pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8 animate-fade-in">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Performance Transparency</h1>
-          <p className="text-muted-foreground">Track record of our AI recommendations</p>
+          <Link
+            to={APP_ROUTES.DASHBOARD}
+            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors mb-4"
+          >
+            <ArrowLeft size={16} />
+            Back to dashboard
+          </Link>
+          <div className="flex items-center gap-3 mb-2 flex-wrap">
+            <h1 className="text-3xl font-bold text-foreground">Performance Transparency</h1>
+            {riskTolerance && (
+              <span className="px-3 py-1 rounded-full border border-primary/40 bg-primary/10 text-primary text-sm font-medium">
+                {riskTolerance} risk
+              </span>
+            )}
+          </div>
+          <p className="text-muted-foreground">
+            {riskTolerance
+              ? `Track record of our AI recommendations for ${riskTolerance.toLowerCase()}-risk portfolios like yours`
+              : 'Track record of our AI recommendations across all risk levels'}
+          </p>
         </div>
 
         {/* Stats Cards */}
@@ -77,9 +105,21 @@ export const Performance = () => {
             </div>
             <div className="text-sm text-muted-foreground mt-1">
               {directionalCount > 0
-                ? `${successCount} of ${directionalCount} graded calls`
+                ? `${successCount} of ${directionalCount} Invest/Exit calls`
                 : 'No graded calls yet'}
             </div>
+            {holdGradedCount > 0 && (
+              <div className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">
+                <Term
+                  term="Hold calls are scored separately"
+                  explanation="Hold means the AI expected the stock to stay put, so it isn't a bet on direction. Counting Hold calls in the hit rate would let an AI look accurate by never committing to anything."
+                  hideIcon
+                  className="no-underline cursor-help"
+                >
+                  {holdSuccessCount} of {holdGradedCount} Hold calls stayed stable
+                </Term>
+              </div>
+            )}
           </div>
 
           <div className="glass-card p-6 animate-fade-in stagger-2">
@@ -125,7 +165,12 @@ export const Performance = () => {
         {/* Recommendations Table */}
         <div className="glass-card overflow-hidden animate-fade-in stagger-4">
           <div className="p-4 border-b border-border/50">
-            <h2 className="font-semibold text-foreground">Past Recommendations</h2>
+            <h2 className="font-semibold text-foreground">Recommendation History</h2>
+            {recommendations.length < totalCalls && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Showing the {recommendations.length} most recent of {totalCalls} calls.
+              </p>
+            )}
           </div>
 
           <div className="overflow-x-auto">
@@ -195,16 +240,22 @@ export const Performance = () => {
                         <div className="flex items-center gap-2 text-success">
                           <CheckCircle size={18} />
                           <span className="text-sm font-medium">Success</span>
+                          {rec.status === StockRecommendation.HOLD && (
+                            <span className="text-xs text-muted-foreground">(not counted)</span>
+                          )}
                         </div>
                       ) : rec.outcome === RecommendationOutcome.MISS ? (
                         <div className="flex items-center gap-2 text-destructive">
                           <XCircle size={18} />
                           <span className="text-sm font-medium">Miss</span>
+                          {rec.status === StockRecommendation.HOLD && (
+                            <span className="text-xs text-muted-foreground">(not counted)</span>
+                          )}
                         </div>
                       ) : (
                         <Term
                           term="Pending"
-                          explanation="No price movement yet since this call was made (markets may be closed), so it can't be graded as a win or a loss yet."
+                          explanation="The price hasn't moved more than 1% since this call was made, so it's still within day-to-day noise and can't fairly be graded a win or a loss."
                           hideIcon
                           className="text-sm text-muted-foreground no-underline"
                         >

@@ -1,8 +1,8 @@
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { StrictMode } from 'react';
 import * as ReactDOM from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
-import { App } from './components/app';
+import { RouterProvider } from 'react-router-dom';
+import { router } from './components/app';
 import { Toaster } from './components/elements/toaster';
 import { createFetchDataProvider } from './dataFetch/dataFetch';
 import { ClientQueriesProvider } from './hooks/useClientQueries';
@@ -18,9 +18,7 @@ root.render(
     <ClientQueriesProvider dataProvider={dataProvider}>
       <Toaster />
       <StrictMode>
-        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-          <App />
-        </BrowserRouter>
+        <RouterProvider router={router} future={{ v7_startTransition: true }} />
       </StrictMode>
     </ClientQueriesProvider>
   </GoogleOAuthProvider>,

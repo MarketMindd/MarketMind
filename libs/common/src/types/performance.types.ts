@@ -3,6 +3,11 @@ import { StockRecommendation } from '../enums/command';
 import { RecommendationOutcome } from '../enums/recommendation-outcome';
 import { RiskTolerance } from '../enums/risk-tolerance';
 
+// Invest/Exit are directional bets, so they are only graded once the price has moved further
+// than this band. Inside it the move is indistinguishable from noise and the call stays
+// ungraded rather than counting as a free win.
+export const DIRECTIONAL_NOISE_THRESHOLD_PCT = 1;
+
 export interface PerformanceRecommendation {
   id: string;
   stockSymbol: string;
@@ -22,6 +27,8 @@ export interface PerformanceStats {
   totalCalls: number;
   successCount: number;
   directionalCount: number;
+  holdSuccessCount: number;
+  holdGradedCount: number;
   since: string;
 }
 
@@ -50,6 +57,8 @@ export const performanceResponseSchema = z.object({
     totalCalls: z.number().int().nonnegative(),
     successCount: z.number().int().nonnegative(),
     directionalCount: z.number().int().nonnegative(),
+    holdSuccessCount: z.number().int().nonnegative(),
+    holdGradedCount: z.number().int().nonnegative(),
     since: z.string(),
   }),
   recommendations: z.array(performanceRecommendationSchema),

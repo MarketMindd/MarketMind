@@ -30,9 +30,10 @@ export class ProfileService {
     if (payload.fullName !== undefined) user.fullName = payload.fullName;
     if (payload.riskTolerance !== undefined) user.riskTolerance = payload.riskTolerance;
     if (payload.interests !== undefined) user.interests = payload.interests;
-    if (payload.emailNotifications !== undefined) user.emailNotifications = payload.emailNotifications;
+    if (payload.emailNotifications !== undefined)
+      user.emailNotifications = payload.emailNotifications;
 
     await this.usersRepo.save(user);
-    this.portfolioService.clearUserSummaryCache(userId);
+    await this.portfolioService.clearUserSummaryCache(userId);
   }
 }

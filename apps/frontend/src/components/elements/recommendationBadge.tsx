@@ -80,10 +80,10 @@ export const RecommendationBadge = ({
   const iconSizes: Record<typeof size, number> = { sm: 12, md: 14, lg: 16 };
 
   return (
-    <div className="inline-flex items-center gap-2">
+    <div className="inline-flex items-center gap-2 shrink-0">
       <div
         className={cn(
-          'inline-flex items-center rounded-full border font-medium',
+          'inline-flex items-center rounded-full border font-medium whitespace-nowrap',
           className,
           sizeClasses[size],
         )}

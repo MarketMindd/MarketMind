@@ -17,7 +17,7 @@ export const Dashboard = () => {
   const [filter, setFilter] = useState<typeof ALL_FILTERS | RecommendationStatus>(ALL_FILTERS);
   const [selectedSectors, setSelectedSectors] = useState<Stock['sector'][]>([]);
 
-  const { data: profileData } = useGetProfile();
+  const { data: profileData, isLoading: isProfileLoading } = useGetProfile();
   const { data: portfolio = [] } = usePortfolio();
   const { data: marketSummary, isLoading: isSummaryLoading } = useAiMarketSummary();
   const portfolioTickers = portfolio.map((p) => p.ticker);
@@ -49,7 +49,14 @@ export const Dashboard = () => {
     day: 'numeric',
   });
 
-  const { data: performanceData, isLoading: isPerformanceLoading } = useGetPerformance();
+  const hasRiskTolerance = profileData?.riskTolerance !== undefined;
+  const { data: performanceData, isError: isPerformanceError } = useGetPerformance(
+    profileData?.riskTolerance,
+    { enabled: hasRiskTolerance },
+  );
+
+  const isPerformanceSettled = performanceData !== undefined || isPerformanceError;
+  const isPerformanceLoading = isProfileLoading || (hasRiskTolerance && !isPerformanceSettled);
 
   return (
     <div className="min-h-screen bg-background">
@@ -74,8 +81,15 @@ export const Dashboard = () => {
                 successCount={performanceData.stats.successCount}
                 directionalCount={performanceData.stats.directionalCount}
                 successRate={performanceData.stats.successRate}
+                riskTolerance={profileData?.riskTolerance}
               />
-            ) : null}
+            ) : (
+              <div className="glass-card p-5 h-full flex items-center justify-center text-center">
+                <span className="text-sm text-muted-foreground">
+                  Couldn't load performance right now.
+                </span>
+              </div>
+            )}
           </div>
           <div className="lg:col-span-3">
             <RecommendationSummary

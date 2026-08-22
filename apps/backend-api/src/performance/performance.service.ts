@@ -10,6 +10,8 @@ import {
 } from '@market-mind/common';
 import { RecommendationHistoryEntity, StockEntity } from '@market-mind/database';
 
+const DEFAULT_RECOMMENDATIONS_LIMIT = 100;
+
 @Injectable()
 export class PerformanceService {
   constructor(
@@ -19,24 +21,27 @@ export class PerformanceService {
     private readonly stockRepo: Repository<StockEntity>,
   ) {}
 
-  async getPerformance(riskTolerance?: string): Promise<PerformanceResponse> {
+  async getPerformance(
+    riskTolerance?: string,
+    limit: number = DEFAULT_RECOMMENDATIONS_LIMIT,
+  ): Promise<PerformanceResponse> {
     const historyRows = await this.fetchHistory(riskTolerance);
     const companyNames = await this.resolveCompanyNames(this.extractUniqueSymbols(historyRows));
     const recommendations = this.buildRecommendationRows(historyRows, companyNames);
     const stats = this.computeStats(recommendations);
 
-    return { stats, recommendations };
+    return { stats, recommendations: recommendations.slice(0, limit) };
   }
 
   private fetchHistory(riskTolerance?: string): Promise<RecommendationHistoryEntity[]> {
     return this.historyRepo.query(
-      `SELECT DISTINCT ON ("stockSymbol") *
+      `SELECT *
        FROM recommendation_history
        WHERE "currentPrice" IS NOT NULL
          AND "returnPct" IS NOT NULL
          AND outcome IS NOT NULL
          ${riskTolerance ? `AND "riskTolerance" = $1` : ''}
-       ORDER BY "stockSymbol", "createdAt" DESC`,
+       ORDER BY "createdAt" DESC`,
       riskTolerance ? [riskTolerance] : [],
     );
   }
@@ -76,7 +81,8 @@ export class PerformanceService {
 
   private computeStats(rows: PerformanceRecommendation[]): PerformanceStats {
     const gradedRows = rows.filter(
-      (r) => r.outcome !== RecommendationOutcome.NOT_APPLICABLE && r.status !== 'Hold',
+      (r) =>
+        r.outcome !== RecommendationOutcome.NOT_APPLICABLE && r.status !== StockRecommendation.HOLD,
     );
     const successCount = gradedRows.filter(
       (r) => r.outcome === RecommendationOutcome.SUCCESS,
@@ -84,8 +90,21 @@ export class PerformanceService {
     const directionalCount = gradedRows.length;
     const successRate = directionalCount > 0 ? (successCount / directionalCount) * 100 : 0;
     const avgReturn =
-      rows.length > 0 ? rows.reduce((sum, r) => sum + r.returnPct, 0) / rows.length : 0;
-    const since = rows.length > 0 ? rows[rows.length - 1].date : new Date().toISOString();
+      directionalCount > 0
+        ? gradedRows.reduce((sum, r) => sum + r.returnPct, 0) / directionalCount
+        : 0;
+    const holdRows = rows.filter(
+      (r) =>
+        r.status === StockRecommendation.HOLD && r.outcome !== RecommendationOutcome.NOT_APPLICABLE,
+    );
+    const holdSuccessCount = holdRows.filter(
+      (r) => r.outcome === RecommendationOutcome.SUCCESS,
+    ).length;
+
+    const since =
+      rows.length > 0
+        ? rows.reduce((earliest, r) => (r.date < earliest ? r.date : earliest), rows[0].date)
+        : new Date().toISOString();
 
     return {
       successRate,
@@ -93,6 +112,8 @@ export class PerformanceService {
       totalCalls: rows.length,
       successCount,
       directionalCount,
+      holdSuccessCount,
+      holdGradedCount: holdRows.length,
       since,
     };
   }

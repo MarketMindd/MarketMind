@@ -2,7 +2,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LessThanOrEqual, Repository } from 'typeorm';
-import { RecommendationOutcome } from '@market-mind/common';
+import {
+  DIRECTIONAL_NOISE_THRESHOLD_PCT,
+  RecommendationOutcome,
+  StockRecommendation,
+} from '@market-mind/common';
 import { MarketDataEntity, RecommendationHistoryEntity } from '@market-mind/database';
 
 const FREEZE_WINDOW_MS = 24 * 60 * 60 * 1000;
@@ -10,10 +14,6 @@ const FREEZE_WINDOW_MS = 24 * 60 * 60 * 1000;
 // A Hold call is a bet that the stock won't move much. It's graded a Success if price
 // stayed within this band, Miss if it swung beyond it in either direction.
 const HOLD_STABILITY_THRESHOLD_PCT = 5;
-
-// Invest/Exit calls used to flip to Miss on any move against them, even 0.1% of same-day
-// noise. This band gives directional calls the same slack Hold already gets.
-const DIRECTIONAL_NOISE_THRESHOLD_PCT = 1;
 
 @Injectable()
 export class PerformanceRefreshService {
@@ -124,19 +124,17 @@ export class PerformanceRefreshService {
     return lookup;
   }
 
-  private computeOutcome(status: string, returnPct: number): RecommendationOutcome {
+  private computeOutcome(status: StockRecommendation, returnPct: number): RecommendationOutcome {
     if (returnPct === 0) return RecommendationOutcome.NOT_APPLICABLE;
-    if (status === 'Invest') {
-      return returnPct > -DIRECTIONAL_NOISE_THRESHOLD_PCT
-        ? RecommendationOutcome.SUCCESS
-        : RecommendationOutcome.MISS;
+    if (status === StockRecommendation.INVEST || status === StockRecommendation.EXIT) {
+      if (Math.abs(returnPct) <= DIRECTIONAL_NOISE_THRESHOLD_PCT) {
+        return RecommendationOutcome.NOT_APPLICABLE;
+      }
+      const movedUp = returnPct > 0;
+      const calledUp = status === StockRecommendation.INVEST;
+      return movedUp === calledUp ? RecommendationOutcome.SUCCESS : RecommendationOutcome.MISS;
     }
-    if (status === 'Exit') {
-      return returnPct < DIRECTIONAL_NOISE_THRESHOLD_PCT
-        ? RecommendationOutcome.SUCCESS
-        : RecommendationOutcome.MISS;
-    }
-    if (status === 'Hold') {
+    if (status === StockRecommendation.HOLD) {
       return Math.abs(returnPct) <= HOLD_STABILITY_THRESHOLD_PCT
         ? RecommendationOutcome.SUCCESS
         : RecommendationOutcome.MISS;
