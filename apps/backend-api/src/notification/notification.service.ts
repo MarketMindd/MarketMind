@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as nodemailer from 'nodemailer';
-import { Transporter } from 'nodemailer';
+import type { Transporter } from 'nodemailer';
 import { Repository } from 'typeorm';
 import { RecommendationStatus, RiskTolerance, StockRecommendation } from '@market-mind/common';
 import { PortfolioEntity, UserProfileEntity } from '@market-mind/database';
@@ -48,9 +48,27 @@ export class NotificationService {
 
     const transporter = this.createTransporter();
 
-    await Promise.all(
+    const results = await Promise.allSettled(
       recipients.map((recipient) => transporter.sendMail(this.buildEmail(payload, recipient))),
     );
+
+    this.logFailedSends(payload, recipients, results);
+  }
+
+  private logFailedSends(
+    payload: RecommendationNotificationPayload,
+    recipients: NotificationRecipient[],
+    results: PromiseSettledResult<unknown>[],
+  ): void {
+    results.forEach((result, index) => {
+      if (result.status !== 'rejected') return;
+
+      const reason = result.reason instanceof Error ? result.reason.message : String(result.reason);
+
+      this.logger.warn(
+        `Email failed for ${recipients[index].email} (${payload.stockSymbol}/${payload.riskTolerance}): ${reason}`,
+      );
+    });
   }
 
   private async loadRecipients(
