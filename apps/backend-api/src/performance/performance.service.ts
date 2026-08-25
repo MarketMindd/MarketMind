@@ -80,26 +80,14 @@ export class PerformanceService {
   }
 
   private computeStats(rows: PerformanceRecommendation[]): PerformanceStats {
-    const gradedRows = rows.filter(
-      (r) =>
-        r.outcome !== RecommendationOutcome.NOT_APPLICABLE && r.status !== StockRecommendation.HOLD,
-    );
+    const gradedRows = rows.filter((r) => r.outcome !== RecommendationOutcome.NOT_APPLICABLE);
     const successCount = gradedRows.filter(
       (r) => r.outcome === RecommendationOutcome.SUCCESS,
     ).length;
-    const directionalCount = gradedRows.length;
-    const successRate = directionalCount > 0 ? (successCount / directionalCount) * 100 : 0;
+    const gradedCount = gradedRows.length;
+    const successRate = gradedCount > 0 ? (successCount / gradedCount) * 100 : 0;
     const avgReturn =
-      directionalCount > 0
-        ? gradedRows.reduce((sum, r) => sum + r.returnPct, 0) / directionalCount
-        : 0;
-    const holdRows = rows.filter(
-      (r) =>
-        r.status === StockRecommendation.HOLD && r.outcome !== RecommendationOutcome.NOT_APPLICABLE,
-    );
-    const holdSuccessCount = holdRows.filter(
-      (r) => r.outcome === RecommendationOutcome.SUCCESS,
-    ).length;
+      gradedCount > 0 ? gradedRows.reduce((sum, r) => sum + r.returnPct, 0) / gradedCount : 0;
 
     const since =
       rows.length > 0
@@ -111,9 +99,7 @@ export class PerformanceService {
       avgReturn,
       totalCalls: rows.length,
       successCount,
-      directionalCount,
-      holdSuccessCount,
-      holdGradedCount: holdRows.length,
+      gradedCount,
       since,
     };
   }

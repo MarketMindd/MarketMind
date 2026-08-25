@@ -79,7 +79,7 @@ export const Dashboard = () => {
             ) : performanceData ? (
               <PerformanceSummary
                 successCount={performanceData.stats.successCount}
-                directionalCount={performanceData.stats.directionalCount}
+                gradedCount={performanceData.stats.gradedCount}
                 successRate={performanceData.stats.successRate}
                 riskTolerance={profileData?.riskTolerance}
               />
