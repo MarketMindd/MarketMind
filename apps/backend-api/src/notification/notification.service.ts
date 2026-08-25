@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as nodemailer from 'nodemailer';
+import type { Transporter } from 'nodemailer';
 import { Repository } from 'typeorm';
 import { RecommendationStatus, RiskTolerance, StockRecommendation } from '@market-mind/common';
 import { PortfolioEntity, UserProfileEntity } from '@market-mind/database';
@@ -14,7 +15,7 @@ interface NotificationRecipient {
 
 interface NotificationEmailPayload {
   from: string;
-  to: string[];
+  to: string;
   subject: string;
   text: string;
 }
@@ -45,8 +46,29 @@ export class NotificationService {
       return;
     }
 
-    const email = this.buildEmail(payload, recipients);
-    await this.sendEmail(email);
+    const transporter = this.createTransporter();
+
+    const results = await Promise.allSettled(
+      recipients.map((recipient) => transporter.sendMail(this.buildEmail(payload, recipient))),
+    );
+
+    this.logFailedSends(payload, recipients, results);
+  }
+
+  private logFailedSends(
+    payload: RecommendationNotificationPayload,
+    recipients: NotificationRecipient[],
+    results: PromiseSettledResult<unknown>[],
+  ): void {
+    results.forEach((result, index) => {
+      if (result.status !== 'rejected') return;
+
+      const reason = result.reason instanceof Error ? result.reason.message : String(result.reason);
+
+      this.logger.warn(
+        `Email failed for ${recipients[index].email} (${payload.stockSymbol}/${payload.riskTolerance}): ${reason}`,
+      );
+    });
   }
 
   private async loadRecipients(
@@ -66,16 +88,14 @@ export class NotificationService {
 
   private buildEmail(
     payload: RecommendationNotificationPayload,
-    recipients: NotificationRecipient[],
+    recipient: NotificationRecipient,
   ): NotificationEmailPayload {
     const subject = `MarketMind: our latest suggestion for ${payload.stockSymbol}`;
     const baseUrl = appConfig.clientUrl.replace(/\/+$/, '');
     const dashboardUrl = `${baseUrl}/dashboard`;
     const recommendationUrl = `${baseUrl}/stock/${encodeURIComponent(payload.stockSymbol)}`;
-    const greetingNames = recipients
-      .map((recipient) => recipient.fullName?.trim() ?? '')
-      .filter((fullName) => fullName.length > 0);
-    const greeting = greetingNames.length === 1 ? `Hi ${greetingNames[0]},` : 'Hi,';
+    const greetingName = recipient.fullName?.trim() ?? '';
+    const greeting = greetingName.length > 0 ? `Hi ${greetingName},` : 'Hi,';
     const suggestionLine = this.buildSuggestionLine(
       payload.stockSymbol,
       payload.newStatus,
@@ -84,7 +104,7 @@ export class NotificationService {
 
     return {
       from: `"MarketMind" <${appConfig.email.from}>`,
-      to: recipients.map((recipient) => recipient.email),
+      to: recipient.email,
       subject,
       text: [
         greeting,
@@ -131,8 +151,8 @@ export class NotificationService {
     );
   }
 
-  private async sendEmail(payload: NotificationEmailPayload): Promise<void> {
-    const transporter = nodemailer.createTransport({
+  private createTransporter(): Transporter {
+    return nodemailer.createTransport({
       host: appConfig.email.smtpHost,
       port: appConfig.email.smtpPort,
       secure: appConfig.email.smtpSecure,
@@ -142,7 +162,5 @@ export class NotificationService {
       },
       tls: appConfig.email.smtpAllowSelfSigned ? { rejectUnauthorized: false } : undefined,
     });
-
-    await transporter.sendMail(payload);
   }
 }

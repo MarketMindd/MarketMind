@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import * as nodemailer from 'nodemailer';
@@ -100,15 +101,19 @@ describe('NotificationService', () => {
       },
       tls: undefined,
     });
-    expect(sendMail).toHaveBeenCalledTimes(1);
+    expect(sendMail).toHaveBeenCalledTimes(2);
 
-    const body = sendMail.mock.calls[0][0] as {
-      to: string[];
-      subject: string;
-      text: string;
-    };
+    const bodies = sendMail.mock.calls.map(
+      (call) => call[0] as { to: string; subject: string; text: string },
+    );
+    const [body] = bodies;
 
-    expect(body.to).toEqual(['alice@example.com', 'bob@example.com']);
+    expect(bodies.map((sentEmail) => sentEmail.to)).toEqual([
+      'alice@example.com',
+      'bob@example.com',
+    ]);
+    expect(bodies[0].text.startsWith('Hi Alice,')).toBe(true);
+    expect(bodies[1].text.startsWith('Hi Bob,')).toBe(true);
     expect(body.subject).toBe('MarketMind: our latest suggestion for AAPL');
     expect(body.text).toContain(
       'We took another look at AAPL and wanted to share our latest view.',
@@ -179,12 +184,18 @@ describe('NotificationService', () => {
     expect(sendMail).not.toHaveBeenCalled();
   });
 
-  it('surfaces SMTP send failures to the caller', async () => {
+  it('logs failed sends and still delivers to the remaining recipients', async () => {
+    const warn = jest.spyOn(Logger.prototype, 'warn').mockImplementation();
     sendMail.mockRejectedValueOnce(new Error('SMTP unavailable'));
 
-    await expect(service.notifyRecommendationChange(makePayload())).rejects.toThrow(
-      'SMTP unavailable',
+    await expect(service.notifyRecommendationChange(makePayload())).resolves.toBeUndefined();
+
+    expect(sendMail).toHaveBeenCalledTimes(2);
+    expect(warn).toHaveBeenCalledWith(
+      'Email failed for alice@example.com (AAPL/Medium): SMTP unavailable',
     );
+
+    warn.mockRestore();
   });
 
   it('allows self-signed certificates when explicitly enabled', async () => {

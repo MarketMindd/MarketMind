@@ -82,7 +82,7 @@ describe('PerformanceService', () => {
     expect(result.stats.totalCalls).toBe(0);
   });
 
-  it('excludes Hold rows from the success rate denominator', async () => {
+  it('counts Hold rows in the success rate denominator', async () => {
     mockHistoryRepo.query.mockResolvedValue([
       makeHistoryRow({
         id: 'uuid-1',
@@ -106,8 +106,8 @@ describe('PerformanceService', () => {
 
     const result = await service.getPerformance();
 
-    expect(result.stats.successRate).toBe(50);
-    expect(result.stats.directionalCount).toBe(2);
+    expect(result.stats.successRate).toBeCloseTo(100 / 3);
+    expect(result.stats.gradedCount).toBe(3);
   });
 
   it('computes average return across graded rows only', async () => {
@@ -122,7 +122,7 @@ describe('PerformanceService', () => {
     expect(result.stats.avgReturn).toBeCloseTo((10 + -20 + 5) / 3);
   });
 
-  it('excludes Hold and ungraded rows from the average return', async () => {
+  it('excludes ungraded rows from the average return', async () => {
     mockHistoryRepo.query.mockResolvedValue([
       makeHistoryRow({ id: 'uuid-1', stockSymbol: 'AAPL', returnPct: 10 as unknown as number }),
       makeHistoryRow({
@@ -142,7 +142,7 @@ describe('PerformanceService', () => {
 
     const result = await service.getPerformance();
 
-    expect(result.stats.avgReturn).toBeCloseTo(15);
+    expect(result.stats.avgReturn).toBeCloseTo((10 + 40 + 20) / 3);
     expect(result.stats.totalCalls).toBe(4);
   });
 
@@ -166,7 +166,7 @@ describe('PerformanceService', () => {
     expect(result.recommendations[0].companyName).toBe('AAPL');
   });
 
-  it('reports Hold accuracy separately from the directional hit rate', async () => {
+  it('grades Hold rows alongside directional ones and skips ungraded Holds', async () => {
     mockHistoryRepo.query.mockResolvedValue([
       makeHistoryRow({
         id: 'uuid-1',
@@ -196,10 +196,8 @@ describe('PerformanceService', () => {
 
     const result = await service.getPerformance();
 
-    expect(result.stats.directionalCount).toBe(1);
-    expect(result.stats.successCount).toBe(1);
-    expect(result.stats.holdGradedCount).toBe(2);
-    expect(result.stats.holdSuccessCount).toBe(1);
+    expect(result.stats.gradedCount).toBe(3);
+    expect(result.stats.successCount).toBe(2);
   });
 
   it('caps returned recommendations to the default limit while keeping full stats', async () => {
@@ -264,7 +262,7 @@ describe('PerformanceService', () => {
     const result = await service.getPerformance();
 
     expect(result.stats.totalCalls).toBe(2);
-    expect(result.stats.directionalCount).toBe(2);
+    expect(result.stats.gradedCount).toBe(2);
     expect(result.stats.successCount).toBe(1);
   });
 

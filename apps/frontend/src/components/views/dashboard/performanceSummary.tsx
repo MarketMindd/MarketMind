@@ -5,14 +5,14 @@ import { Term } from '../../elements/term';
 
 interface PerformanceSummaryProps {
   successCount: number;
-  directionalCount: number;
+  gradedCount: number;
   successRate: number;
   riskTolerance?: string;
 }
 
 export const PerformanceSummary = ({
   successCount,
-  directionalCount,
+  gradedCount,
   successRate,
   riskTolerance,
 }: PerformanceSummaryProps) => {
@@ -34,7 +34,7 @@ export const PerformanceSummary = ({
         </Link>
       </div>
 
-      {directionalCount === 0 ? (
+      {gradedCount === 0 ? (
         <div className="flex-1 flex flex-col items-center justify-center text-center py-2">
           <Award className="w-5 h-5 text-muted-foreground mb-2" />
           <p className="text-sm text-foreground mb-1">No graded picks yet</p>
@@ -48,7 +48,7 @@ export const PerformanceSummary = ({
             <CheckCircle2 className="w-5 h-5 text-success" />
             <span className="text-3xl font-bold text-foreground">
               {successCount}
-              <span className="text-muted-foreground text-xl"> / {directionalCount}</span>
+              <span className="text-muted-foreground text-xl"> / {gradedCount}</span>
             </span>
           </div>
           <p className="text-sm text-foreground mb-1">

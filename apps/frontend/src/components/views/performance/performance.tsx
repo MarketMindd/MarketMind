@@ -46,16 +46,8 @@ export const Performance = () => {
     );
   }
 
-  const {
-    successRate,
-    avgReturn,
-    totalCalls,
-    successCount,
-    directionalCount,
-    holdSuccessCount,
-    holdGradedCount,
-    since,
-  } = performanceData.stats;
+  const { successRate, avgReturn, totalCalls, successCount, gradedCount, since } =
+    performanceData.stats;
   const recommendations = performanceData.recommendations;
 
   const avgReturnDisplay = avgReturn.toFixed(1);
@@ -99,28 +91,16 @@ export const Performance = () => {
             <div
               className={cn(
                 'text-4xl font-bold',
-                directionalCount > 0 ? 'text-success' : 'text-center text-muted-foreground',
+                gradedCount > 0 ? 'text-success' : 'text-center text-muted-foreground',
               )}
             >
-              {directionalCount > 0 ? `${successRate.toFixed(1)}%` : '—'}
+              {gradedCount > 0 ? `${successRate.toFixed(1)}%` : '—'}
             </div>
             <div className="text-sm text-muted-foreground mt-1">
-              {directionalCount > 0
-                ? `${successCount} of ${directionalCount} Invest/Exit calls`
+              {gradedCount > 0
+                ? `${successCount} of ${gradedCount} graded calls`
                 : 'No graded calls yet'}
             </div>
-            {holdGradedCount > 0 && (
-              <div className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">
-                <Term
-                  term="Hold calls are scored separately"
-                  explanation="Hold means the AI expected the stock to stay put, so it isn't a bet on direction. Counting Hold calls in the hit rate would let an AI look accurate by never committing to anything."
-                  hideIcon
-                  className="no-underline cursor-help"
-                >
-                  {holdSuccessCount} of {holdGradedCount} Hold calls stayed stable
-                </Term>
-              </div>
-            )}
           </div>
 
           <div className="glass-card p-6 animate-fade-in stagger-2">
@@ -133,7 +113,7 @@ export const Performance = () => {
             <div
               className={cn(
                 'text-4xl font-bold',
-                directionalCount === 0
+                gradedCount === 0
                   ? 'text-center text-muted-foreground'
                   : avgReturn > 0
                     ? 'text-success'
@@ -142,10 +122,10 @@ export const Performance = () => {
                       : 'text-foreground',
               )}
             >
-              {directionalCount === 0 ? '—' : `${avgReturn > 0 ? '+' : ''}${avgReturnDisplay}%`}
+              {gradedCount === 0 ? '—' : `${avgReturn > 0 ? '+' : ''}${avgReturnDisplay}%`}
             </div>
             <div className="text-sm text-muted-foreground mt-1">
-              {directionalCount === 0 ? 'No graded calls yet' : 'Per graded recommendation'}
+              {gradedCount === 0 ? 'No graded calls yet' : 'Per graded recommendation'}
             </div>
           </div>
 
@@ -247,9 +227,6 @@ export const Performance = () => {
                           <div className="flex items-center gap-2 text-success">
                             <CheckCircle size={18} />
                             <span className="text-sm font-medium">Success</span>
-                            {rec.status === StockRecommendation.HOLD && (
-                              <span className="text-xs text-muted-foreground">(not counted)</span>
-                            )}
                           </div>
                         </Term>
                       ) : rec.outcome === RecommendationOutcome.MISS ? (
@@ -262,9 +239,6 @@ export const Performance = () => {
                           <div className="flex items-center gap-2 text-destructive">
                             <XCircle size={18} />
                             <span className="text-sm font-medium">Miss</span>
-                            {rec.status === StockRecommendation.HOLD && (
-                              <span className="text-xs text-muted-foreground">(not counted)</span>
-                            )}
                           </div>
                         </Term>
                       ) : (

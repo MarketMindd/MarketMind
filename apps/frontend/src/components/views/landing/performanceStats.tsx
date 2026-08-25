@@ -27,14 +27,7 @@ export const PerformanceStats = () => {
   }
 
   const { stats, recommendations } = performanceData;
-  const {
-    successCount,
-    totalCalls: totalCount,
-    directionalCount,
-    successRate,
-    holdSuccessCount,
-    holdGradedCount,
-  } = stats;
+  const { successCount, totalCalls: totalCount, gradedCount, successRate } = stats;
   const avgReturn = stats.avgReturn.toFixed(1);
 
   return (
@@ -56,29 +49,17 @@ export const PerformanceStats = () => {
             <div
               className={cn(
                 'text-5xl font-bold mb-2',
-                directionalCount > 0 ? 'text-success' : 'text-center text-muted-foreground',
+                gradedCount > 0 ? 'text-success' : 'text-center text-muted-foreground',
               )}
             >
-              {directionalCount > 0 ? `${successRate.toFixed(1)}%` : '—'}
+              {gradedCount > 0 ? `${successRate.toFixed(1)}%` : '—'}
             </div>
             <div className="text-muted-foreground">Success Rate</div>
             <div className="text-sm text-muted-foreground mt-1">
-              {directionalCount > 0
-                ? `${successCount} of ${directionalCount} Invest/Exit calls`
+              {gradedCount > 0
+                ? `${successCount} of ${gradedCount} graded calls`
                 : 'No graded calls yet'}
             </div>
-            {holdGradedCount > 0 && (
-              <div className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">
-                <Term
-                  term="Hold calls are scored separately"
-                  explanation="Hold means the AI expected the stock to stay put, so it isn't a bet on direction. Counting Hold calls in the hit rate would let an AI look accurate by never committing to anything."
-                  hideIcon
-                  className="no-underline cursor-help"
-                >
-                  {holdSuccessCount} of {holdGradedCount} Hold calls stayed stable
-                </Term>
-              </div>
-            )}
           </div>
 
           <div className="glass-card p-8 text-center animate-fade-in stagger-1">
@@ -88,7 +69,7 @@ export const PerformanceStats = () => {
             <div
               className={cn(
                 'text-5xl font-bold mb-2',
-                directionalCount === 0
+                gradedCount === 0
                   ? 'text-center text-muted-foreground'
                   : Number(avgReturn) > 0
                     ? 'text-success'
@@ -97,11 +78,11 @@ export const PerformanceStats = () => {
                       : 'text-foreground',
               )}
             >
-              {directionalCount === 0 ? '—' : `${Number(avgReturn) > 0 ? '+' : ''}${avgReturn}%`}
+              {gradedCount === 0 ? '—' : `${Number(avgReturn) > 0 ? '+' : ''}${avgReturn}%`}
             </div>
             <div className="text-muted-foreground">Average Return</div>
             <div className="text-sm text-muted-foreground mt-1">
-              {directionalCount === 0 ? 'No graded calls yet' : 'Per graded recommendation'}
+              {gradedCount === 0 ? 'No graded calls yet' : 'Per graded recommendation'}
             </div>
           </div>
 
@@ -179,7 +160,9 @@ export const PerformanceStats = () => {
                         {rec.outcome === RecommendationOutcome.SUCCESS ||
                         rec.outcome === RecommendationOutcome.MISS ? (
                           <Term
-                            term={rec.outcome === RecommendationOutcome.SUCCESS ? 'Success' : 'Miss'}
+                            term={
+                              rec.outcome === RecommendationOutcome.SUCCESS ? 'Success' : 'Miss'
+                            }
                             explanation={getOutcomeExplanation(rec.status)}
                             hideIcon
                             className="no-underline"
@@ -189,9 +172,6 @@ export const PerformanceStats = () => {
                                 <CheckCircle size={18} className="text-success" />
                               ) : (
                                 <XCircle size={18} className="text-destructive" />
-                              )}
-                              {rec.status === StockRecommendation.HOLD && (
-                                <span className="text-xs text-muted-foreground">Not Counted</span>
                               )}
                             </div>
                           </Term>
